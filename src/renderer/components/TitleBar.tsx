@@ -16,7 +16,7 @@ export function TitleBar() {
       <div className="titlebar-no-drag flex items-center gap-2.5 px-4">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 flex items-center justify-center">
-            <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" />
+            <img src="./icon.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             Evrak Takip App

@@ -54,7 +54,7 @@ export function WelcomeScreen() {
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-4">
           <img 
-            src="/icon.png" 
+            src="./icon.png" 
             alt="Evrak Takip App Logo" 
             className="w-24 h-24 rounded-3xl object-cover"
             style={{ boxShadow: 'var(--shadow-glow)' }}
