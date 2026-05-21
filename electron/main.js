@@ -38,7 +38,7 @@ function createWindow() {
 
   let preloadPath = path.join(__dirname, 'preload.js');
   if (!fs.existsSync(preloadPath)) {
-    preloadPath = path.join(__dirname, '../preload/index.js');
+    preloadPath = path.join(__dirname, '../preload/preload.js');
   }
 
   mainWindow = new BrowserWindow({
