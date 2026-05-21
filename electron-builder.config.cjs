@@ -23,6 +23,7 @@ module.exports = {
   win: {
     icon: 'public/icon.ico',
     executableName: 'evraktron',
+    publisherName: 'İlyas Bozdemir',
     target: [
       {
         target: 'nsis',
