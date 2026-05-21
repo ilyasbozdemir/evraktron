@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog, shell, Menu } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { setupFileHandlers } from './handlers/fileHandler';
+import { setupFileHandlers, packEvrakFile } from './handlers/fileHandler';
 import { setupDbHandlers } from './handlers/dbHandler';
 import { setupExportHandlers } from './handlers/exportHandler';
 
@@ -100,6 +100,15 @@ function createWindow() {
 // ─── Cleanup on exit ─────────────────────────────────────────────────────────
 async function cleanup() {
   try {
+    // Çıkışta otomatik kaydetme (sadece diske daha önce kaydedilmiş dosyalar için)
+    if (currentFilePath && !isUnsaved && tempDir && fs.existsSync(tempDir)) {
+      try {
+        packEvrakFile(currentFilePath, tempDir, { currentFilePath, tempDir });
+      } catch (err) {
+        console.error('Auto-save error:', err);
+      }
+    }
+
     if (db) {
       db.close();
       db = null;
