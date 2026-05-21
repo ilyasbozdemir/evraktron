@@ -24,6 +24,7 @@ export interface Evrak {
   notlar: string;
   klasor?: string;
   raf_no?: string;
+  metadata?: string;
   created_at: string;
   updated_at: string;
 }

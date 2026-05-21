@@ -116,6 +116,7 @@ function ensureSchema(db) {
       notlar      TEXT,
       klasor      TEXT,
       raf_no      TEXT,
+      metadata    TEXT,
       created_at  TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -148,26 +149,26 @@ function ensureSchema(db) {
     );
 
     CREATE VIRTUAL TABLE IF NOT EXISTS evraklar_fts USING fts5(
-      no, aciklama, notlar, kurum,
+      no, aciklama, notlar, kurum, metadata,
       content='evraklar',
       content_rowid='id'
     );
 
     CREATE TRIGGER IF NOT EXISTS evraklar_ai AFTER INSERT ON evraklar BEGIN
-      INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum)
-      VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum);
+      INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
+      VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.metadata);
     END;
 
     CREATE TRIGGER IF NOT EXISTS evraklar_ad AFTER DELETE ON evraklar BEGIN
-      INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum)
-      VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum);
+      INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, metadata)
+      VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.metadata);
     END;
 
     CREATE TRIGGER IF NOT EXISTS evraklar_au AFTER UPDATE ON evraklar BEGIN
-      INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum)
-      VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum);
-      INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum)
-      VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum);
+      INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, metadata)
+      VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.metadata);
+      INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
+      VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.metadata);
     END;
   `);
 
@@ -176,8 +177,39 @@ function ensureSchema(db) {
     const columns = db.pragma('table_info(evraklar)');
     const hasKlasor = columns.some(c => c.name === 'klasor');
     const hasRafNo = columns.some(c => c.name === 'raf_no');
+    const hasMetadata = columns.some(c => c.name === 'metadata');
     if (!hasKlasor) db.exec('ALTER TABLE evraklar ADD COLUMN klasor TEXT');
     if (!hasRafNo) db.exec('ALTER TABLE evraklar ADD COLUMN raf_no TEXT');
+    if (!hasMetadata) {
+      db.exec('ALTER TABLE evraklar ADD COLUMN metadata TEXT');
+      // Rebuild FTS
+      db.exec(`
+        DROP TRIGGER IF EXISTS evraklar_ai;
+        DROP TRIGGER IF EXISTS evraklar_ad;
+        DROP TRIGGER IF EXISTS evraklar_au;
+        DROP TABLE IF EXISTS evraklar_fts;
+        CREATE VIRTUAL TABLE evraklar_fts USING fts5(
+          no, aciklama, notlar, kurum, metadata,
+          content='evraklar', content_rowid='id'
+        );
+        INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
+        SELECT id, no, aciklama, notlar, kurum, metadata FROM evraklar;
+        CREATE TRIGGER evraklar_ai AFTER INSERT ON evraklar BEGIN
+          INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
+          VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.metadata);
+        END;
+        CREATE TRIGGER evraklar_ad AFTER DELETE ON evraklar BEGIN
+          INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, metadata)
+          VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.metadata);
+        END;
+        CREATE TRIGGER evraklar_au AFTER UPDATE ON evraklar BEGIN
+          INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, metadata)
+          VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.metadata);
+          INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
+          VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.metadata);
+        END;
+      `);
+    }
   } catch (e) {
     console.error('Migration error:', e);
   }

@@ -27,6 +27,22 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
   const [form, setForm] = useState<Partial<Evrak>>({});
   const [isSaving, setIsSaving] = useState(false);
 
+  const metadata = React.useMemo(() => {
+    try { return form.metadata ? JSON.parse(form.metadata) : {}; }
+    catch { return {}; }
+  }, [form.metadata]);
+
+  const updateMetadata = (key: string, value: string) => {
+    const next = { ...metadata, [key]: value };
+    handleChange('metadata', JSON.stringify(next));
+  };
+  
+  const removeMetadata = (key: string) => {
+    const next = { ...metadata };
+    delete next[key];
+    handleChange('metadata', JSON.stringify(next));
+  };
+
   const loadEvrak = useCallback(async () => {
     const e = await window.evraktron.db.getEvrak(evrakId);
     if (e) { setEvrak(e); setForm(e); }
@@ -208,6 +224,50 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
                   onChange={e => handleChange('notlar', e.target.value)}
                   placeholder="İç notlar…"
                 />
+              </div>
+
+              {/* Custom Metadata */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="label mb-0">Özel Alanlar (Arama Kriterleri)</label>
+                  <button 
+                    onClick={() => {
+                      const key = prompt('Yeni alan adı (örn: Ada, Parsel, Ruhsat No):');
+                      if (key && !metadata[key]) updateMetadata(key, '');
+                    }}
+                    className="text-xs text-brand-500 hover:text-brand-400 font-medium px-2 py-1 bg-brand-500/10 rounded"
+                  >
+                    + Alan Ekle
+                  </button>
+                </div>
+                {Object.keys(metadata).length === 0 ? (
+                  <div className="text-xs text-surface-500 italic p-3 border border-dashed border-surface-700/50 rounded-lg text-center">
+                    Henüz özel alan eklenmemiş.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {Object.entries(metadata).map(([k, v]) => (
+                      <div key={k} className="flex gap-2 items-center">
+                        <div className="w-1/3 px-3 py-2 bg-surface-950/30 rounded-lg text-xs font-medium text-surface-400 border border-surface-700/50 truncate" title={k}>
+                          {k}
+                        </div>
+                        <input 
+                          className="input flex-1 !py-2" 
+                          value={v as string} 
+                          onChange={e => updateMetadata(k, e.target.value)} 
+                          placeholder={`${k} değeri...`}
+                        />
+                        <button 
+                          onClick={() => removeMetadata(k)}
+                          className="p-2 text-surface-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
+                          title="Sil"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Meta */}
