@@ -101,6 +101,7 @@ export const useAppStore = create<AppState>((set) => ({
   setFilters: (f) => set((s) => ({ filters: { ...s.filters, ...f } })),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setStats: (s) => set({ stats: s }),
+  setAyarlar: (a) => set({ ayarlar: a }),
 
   showToast: (message, type = 'info') => {
     const id = Date.now().toString();
