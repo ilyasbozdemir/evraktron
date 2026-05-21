@@ -28,6 +28,8 @@ interface AppState {
 
   // Actions
   setFileOpen: (open: boolean, filePath?: string) => void;
+  /** Yeni dosya ilk kez kaydedildiğinde gerçek path ile state güncellenir */
+  setFileSaved: (filePath: string) => void;
   setLastSaved: (t: string) => void;
   setDirty: (v: boolean) => void;
   setTheme: (t: 'dark' | 'light') => void;
@@ -61,15 +63,32 @@ export const useAppStore = create<AppState>((set) => ({
 
   setFileOpen: (open, filePath) => set({
     isFileOpen: open,
-    filePath: filePath || null,
-    fileName: filePath ? filePath.split(/[\\/]/).pop() || null : null,
+    // '__new__' → henüz kaydedilmemiş yeni dosya, filePath null tutulur
+    filePath: (filePath && filePath !== '__new__') ? filePath : null,
+    fileName: filePath === '__new__'
+      ? 'Yeni Dosya'
+      : (filePath ? filePath.split(/[\\/]/).pop() || null : null),
     activeView: open ? 'list' : 'welcome',
+  }),
+
+  setFileSaved: (filePath) => set({
+    filePath,
+    fileName: filePath.split(/[\\/]/).pop() || null,
+    lastSaved: new Date().toISOString(),
+    isDirty: false,
   }),
 
   setLastSaved: (t) => set({ lastSaved: t, isDirty: false }),
   setDirty: (v) => set({ isDirty: v }),
   setTheme: (t) => {
-    document.documentElement.classList.toggle('dark', t === 'dark');
+    const html = document.documentElement;
+    if (t === 'dark') {
+      html.classList.add('dark');
+      html.classList.remove('light');
+    } else {
+      html.classList.add('light');
+      html.classList.remove('dark');
+    }
     set({ theme: t });
   },
   setActiveView: (v) => set({ activeView: v }),

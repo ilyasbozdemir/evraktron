@@ -170,13 +170,16 @@ function packEvrakFile(filePath, tempDir, state) {
 
 function setupFileHandlers(ipcMain, state, setState) {
   // ── New file ──────────────────────────────────────────────────────────────
+  // Kaydetme dialogu açmadan direkt geçici konumda yeni dosya oluştur.
+  // İlk Ctrl+S'de save-as dialogu tetiklenir (isUnsaved flag).
   ipcMain.handle('file:new', async () => {
-    const { filePath: savePath, canceled } = await dialog.showSaveDialog({
-      title: 'Yeni Evraktron Dosyası',
-      defaultPath: 'yeni-dosya.evrak',
-      filters: [{ name: 'Evraktron Dosyası', extensions: ['evrak'] }],
-    });
-    if (canceled || !savePath) return { success: false };
+    // Eğer zaten açık/kaydedilmemiş dosya varsa önce kilidi bırak
+    if (state.currentFilePath && state.lockAcquired) {
+      releaseLock(state.currentFilePath);
+    }
+    if (state.db) {
+      try { state.db.close(); } catch (_) {}
+    }
 
     const tempDir = createTempDir();
     const attachmentsDir = path.join(tempDir, 'attachments');
@@ -184,30 +187,25 @@ function setupFileHandlers(ipcMain, state, setState) {
 
     const manifest = createManifest();
     fs.writeFileSync(path.join(tempDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
-    fs.writeFileSync(path.join(tempDir, '.lock'), '');
 
-    // Database already imported at top level
     const dbPath = path.join(tempDir, 'database.sqlite');
     const db = new Database(dbPath);
     db.pragma('journal_mode = WAL');
     db.pragma('foreign_keys = ON');
     ensureSchema(db);
 
-    // Pack immediately
-    packEvrakFile(savePath, tempDir, state);
-    const lockResult = acquireLock(savePath);
-    if (lockResult.locked) return { success: false, error: 'Dosya kilitlenemedi' };
+    // isUnsaved=true → henüz diske kaydedilmedi, Ctrl+S ilk kaydetmede dialog açar
+    setState({ currentFilePath: null, tempDir, db, lockAcquired: false, isUnsaved: true });
 
-    setState({ currentFilePath: savePath, tempDir, db, lockAcquired: true });
-
-    return { success: true, filePath: savePath, manifest };
+    // Renderer'a sanal bir yol döndür — kullanıcıya "Yeni Dosya" göstermek için
+    return { success: true, filePath: '__new__', manifest };
   });
 
   // ── Open dialog ───────────────────────────────────────────────────────────
   ipcMain.handle('file:open-dialog', async () => {
     const { filePaths, canceled } = await dialog.showOpenDialog({
-      title: 'Evraktron Dosyası Aç',
-      filters: [{ name: 'Evraktron Dosyası', extensions: ['evrak'] }],
+      title: 'Evrak Takip App Dosyası Aç',
+      filters: [{ name: 'Evrak Takip App Dosyası', extensions: ['etapp'] }],
       properties: ['openFile'],
     });
     if (canceled || !filePaths.length) return { success: false };
@@ -221,8 +219,27 @@ function setupFileHandlers(ipcMain, state, setState) {
   });
 
   // ── Save (repack) ─────────────────────────────────────────────────────────
+  // Eğer dosya henüz kaydedilmemişse (yeni dosya) → save-as dialogunu aç
   ipcMain.handle('file:save', async () => {
-    if (!state.currentFilePath || !state.tempDir) return { success: false, error: 'Açık dosya yok' };
+    if (!state.tempDir) return { success: false, error: 'Açık dosya yok' };
+
+    if (state.isUnsaved || !state.currentFilePath) {
+      // İlk kaydetme — dosya adını kullanıcıdan al
+      const { filePath: savePath, canceled } = await dialog.showSaveDialog({
+        title: 'Dosyayı Kaydet',
+        defaultPath: 'yeni-dosya.etapp',
+        filters: [{ name: 'Evrak Takip App Dosyası', extensions: ['etapp'] }],
+      });
+      if (canceled || !savePath) return { success: false };
+
+      const lockResult = acquireLock(savePath);
+      if (lockResult.locked) return { success: false, error: 'Hedef dosya kilitli' };
+
+      packEvrakFile(savePath, state.tempDir, state);
+      setState({ currentFilePath: savePath, lockAcquired: true, isUnsaved: false });
+      return { success: true, filePath: savePath, savedAt: new Date().toISOString() };
+    }
+
     try {
       packEvrakFile(state.currentFilePath, state.tempDir, state);
       return { success: true, savedAt: new Date().toISOString() };
@@ -236,8 +253,8 @@ function setupFileHandlers(ipcMain, state, setState) {
     if (!state.tempDir) return { success: false, error: 'Açık dosya yok' };
     const { filePath: savePath, canceled } = await dialog.showSaveDialog({
       title: 'Farklı Kaydet',
-      defaultPath: 'dosya.evrak',
-      filters: [{ name: 'Evraktron Dosyası', extensions: ['evrak'] }],
+      defaultPath: 'dosya.etapp',
+      filters: [{ name: 'Evrak Takip App Dosyası', extensions: ['etapp'] }],
     });
     if (canceled || !savePath) return { success: false };
 

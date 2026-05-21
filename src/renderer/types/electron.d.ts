@@ -85,7 +85,7 @@ export interface ElectronAPI {
     new: () => Promise<{ success: boolean; filePath?: string; manifest?: Manifest; error?: string }>;
     open: (filePath: string) => Promise<{ success: boolean; filePath?: string; manifest?: Manifest; error?: string }>;
     openDialog: () => Promise<{ success: boolean; filePath?: string; manifest?: Manifest; error?: string }>;
-    save: () => Promise<{ success: boolean; savedAt?: string; error?: string }>;
+    save: () => Promise<{ success: boolean; savedAt?: string; filePath?: string; error?: string }>;
     saveAs: () => Promise<{ success: boolean; filePath?: string; error?: string }>;
     getInfo: () => Promise<FileInfo | null>;
     onOpenRequest: (cb: (filePath: string) => void) => void;

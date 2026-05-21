@@ -2,13 +2,13 @@
 module.exports = {
   appId: 'com.ilyasbozdemir.evraktron',
   npmRebuild: true,
-  productName: 'Evraktron',
+  productName: 'Evrak Takip App',
   directories: {
     output: 'dist-electron'
   },
   files: [
-    'dist/**/*',
-    'electron/**/*',
+    'out/**/*',
+    'public/**/*',
     'node_modules/**/*',
     '!node_modules/.cache',
     '!node_modules/.vite'
@@ -21,9 +21,13 @@ module.exports = {
     '**/node_modules/prebuild-install/**'
   ],
   win: {
-    icon: 'public/icon.png',
+    icon: 'public/icon.ico',
     executableName: 'evraktron',
     target: [
+      {
+        target: 'nsis',
+        arch: ['x64']
+      },
       {
         target: 'portable',
         arch: ['x64']
@@ -31,15 +35,24 @@ module.exports = {
     ],
     fileAssociations: [
       {
-        ext: 'evrak',
-        name: 'Evraktron Dosyası',
-        description: 'Evraktron evrak dosyası',
-        icon: 'public/icon.png',
+        ext: 'etapp',
+        name: 'Evrak Takip App Dosyası',
+        description: 'Evrak Takip App ETAPP dosyası',
+        icon: 'public/icon.ico',
         role: 'Editor'
       }
     ]
   },
+  nsis: {
+    oneClick: false,
+    perMachine: false,
+    allowToChangeInstallationDirectory: true,
+    createDesktopShortcut: true,
+    createStartMenuShortcut: true,
+    shortcutName: 'Evrak Takip App',
+    include: 'build/installer.nsh'
+  },
   portable: {
-    artifactName: 'Evraktron-Portable-${version}.exe'
+    artifactName: 'EvrakTakipApp-Portable-${version}.exe'
   }
 };

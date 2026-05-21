@@ -16,7 +16,7 @@ type SideTab = 'evraklar' | 'istatistikler';
 export function MainLayout() {
   const {
     setEvraklar, setLoadingEvraklar, setStats, setSelectedEvrakId, selectedEvrakId,
-    searchQuery, setSearchQuery, setDirty, showToast, setLastSaved, closeFile,
+    searchQuery, setSearchQuery, setDirty, showToast, setLastSaved, setFileSaved, closeFile,
   } = useAppStore();
 
   const [sideTab, setSideTab] = useState<SideTab>('evraklar');
@@ -77,13 +77,19 @@ export function MainLayout() {
 
   const handleSave = useCallback(async () => {
     const result = await window.evraktron.file.save();
-    if (result.success && result.savedAt) {
-      setLastSaved(result.savedAt);
-      showToast('Dosya kaydedildi', 'success');
+    if (result.success) {
+      // Yeni dosya ilk kez kaydedildi — gerçek filePath ile store'u güncelle
+      if (result.filePath) {
+        setFileSaved(result.filePath);
+        showToast('Dosya kaydedildi', 'success');
+      } else if (result.savedAt) {
+        setLastSaved(result.savedAt);
+        showToast('Dosya kaydedildi', 'success');
+      }
     } else {
       showToast(result.error || 'Kaydetme hatası', 'error');
     }
-  }, [setLastSaved, showToast]);
+  }, [setLastSaved, setFileSaved, showToast]);
 
   const handleCloseFile = useCallback(async () => {
     await handleSave();
@@ -92,11 +98,23 @@ export function MainLayout() {
 
   return (
     <Tooltip.Provider delayDuration={400}>
-      <div className="flex flex-1 overflow-hidden bg-surface-900">
+      <div
+        className="flex flex-1 overflow-hidden"
+        style={{ background: 'var(--bg-base)' }}
+      >
         {/* ── Sidebar ──────────────────────────────────────── */}
-        <aside className="w-56 flex flex-col bg-surface-950/60 border-r border-surface-700/30 shrink-0">
+        <aside
+          className="w-56 flex flex-col shrink-0"
+          style={{
+            background: 'var(--bg-overlay)',
+            borderRight: '1px solid var(--border-subtle)',
+          }}
+        >
           {/* Actions */}
-          <div className="p-3 space-y-1 border-b border-surface-700/30">
+          <div
+            className="p-3 space-y-1"
+            style={{ borderBottom: '1px solid var(--border-subtle)' }}
+          >
             <button id="btn-new-evrak" onClick={handleNewEvrak} className="btn-primary w-full justify-center">
               <Plus className="w-4 h-4" />
               Yeni Evrak
@@ -106,12 +124,17 @@ export function MainLayout() {
           {/* Nav */}
           <ScrollArea.Root className="flex-1">
             <ScrollArea.Viewport className="p-2">
-              <p className="text-xs text-surface-600 font-semibold uppercase tracking-wider px-2 py-2">Görünüm</p>
+              <p
+                className="text-xs font-semibold uppercase tracking-wider px-2 py-2"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Görünüm
+              </p>
               <nav className="space-y-0.5">
                 {[
                   { id: 'evraklar', label: 'Evrak Listesi', icon: LayoutList },
                   { id: 'istatistikler', label: 'İstatistikler', icon: BarChart2 },
-                ] .map(({ id, label, icon: Icon }) => (
+                ].map(({ id, label, icon: Icon }) => (
                   <button
                     key={id}
                     onClick={() => setSideTab(id as SideTab)}
@@ -123,7 +146,12 @@ export function MainLayout() {
                 ))}
               </nav>
 
-              <p className="text-xs text-surface-600 font-semibold uppercase tracking-wider px-2 pt-4 pb-2">Dosya</p>
+              <p
+                className="text-xs font-semibold uppercase tracking-wider px-2 pt-4 pb-2"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Dosya
+              </p>
               <nav className="space-y-0.5">
                 <button onClick={handleSave} className="sidebar-item w-full">
                   <Save className="w-4 h-4" /> Kaydet
@@ -131,7 +159,19 @@ export function MainLayout() {
                 <button onClick={() => setShowExport(true)} className="sidebar-item w-full">
                   <Download className="w-4 h-4" /> Dışa Aktar
                 </button>
-                <button onClick={handleCloseFile} className="sidebar-item w-full text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10">
+                <button
+                  onClick={handleCloseFile}
+                  className="sidebar-item w-full"
+                  style={{ color: 'rgba(244,63,94,0.7)' }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.color = '#f43f5e';
+                    (e.currentTarget as HTMLElement).style.background = 'rgba(244,63,94,0.08)';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.color = 'rgba(244,63,94,0.7)';
+                    (e.currentTarget as HTMLElement).style.background = '';
+                  }}
+                >
                   <X className="w-4 h-4" /> Dosyayı Kapat
                 </button>
               </nav>
@@ -143,9 +183,18 @@ export function MainLayout() {
         </aside>
 
         {/* ── Main area ────────────────────────────────────── */}
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main
+          className="flex-1 flex flex-col overflow-hidden"
+          style={{ background: 'var(--bg-base)' }}
+        >
           {/* Toolbar */}
-          <div className="h-12 border-b border-surface-700/30 bg-surface-900/80 flex items-center gap-3 px-4 shrink-0">
+          <div
+            className="h-12 flex items-center gap-3 px-4 shrink-0"
+            style={{
+              borderBottom: '1px solid var(--border-subtle)',
+              background: 'var(--bg-base)',
+            }}
+          >
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-surface-500" />
               <input
@@ -157,9 +206,15 @@ export function MainLayout() {
                 className="input pl-9 h-8 text-xs"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-surface-500 hover:text-surface-200">
-                  <X className="w-3 h-3" />
-                </button>
+                <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: 'var(--text-muted)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+              >
+                <X className="w-3 h-3" />
+              </button>
               )}
             </div>
           </div>
@@ -176,7 +231,13 @@ export function MainLayout() {
             </div>
 
             {selectedEvrakId && (
-              <div className="w-[480px] border-l border-surface-700/30 bg-surface-900 flex flex-col shrink-0">
+              <div
+                className="w-[480px] flex flex-col shrink-0"
+                style={{
+                  borderLeft: '1px solid var(--border-subtle)',
+                  background: 'var(--bg-base)',
+                }}
+              >
                 <EvrakDetail
                   evrakId={selectedEvrakId}
                   onClose={() => setSelectedEvrakId(null)}
@@ -195,7 +256,7 @@ export function MainLayout() {
 
 function StatsPanel() {
   const { stats } = useAppStore();
-  if (!stats) return <div className="p-6 text-surface-500 text-sm">Yükleniyor…</div>;
+  if (!stats) return <div className="p-6 text-sm" style={{ color: 'var(--text-muted)' }}>Yükleniyor…</div>;
 
   const durumRenkler: Record<string, string> = {
     beklemede: 'bg-amber-500', islemde: 'bg-brand-500',
@@ -215,7 +276,7 @@ function StatsPanel() {
             { label: 'Bu Hafta', value: stats.lastWeek, color: 'text-emerald-400' },
           ].map(({ label, value, color }) => (
             <div key={label} className="card p-4">
-              <p className="text-xs text-surface-500">{label}</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{label}</p>
               <p className={cn('text-3xl font-bold mt-1', color)}>{value}</p>
             </div>
           ))}
@@ -223,14 +284,14 @@ function StatsPanel() {
 
         {/* Durum chart */}
         <div className="card p-4 space-y-3">
-          <p className="text-sm font-semibold text-surface-300">Duruma Göre</p>
+          <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Duruma Göre</p>
           {stats.byDurum.map(({ durum, count }) => (
             <div key={durum}>
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-surface-400 capitalize">{durum}</span>
-                <span className="text-surface-300 font-mono">{count}</span>
+                <span className="capitalize" style={{ color: 'var(--text-muted)' }}>{durum}</span>
+                <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>{count}</span>
               </div>
-              <div className="h-1.5 bg-surface-700 rounded-full overflow-hidden">
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-hover)' }}>
                 <div
                   className={cn('h-full rounded-full', durumRenkler[durum] || 'bg-surface-500')}
                   style={{ width: `${stats.total ? (count / stats.total) * 100 : 0}%` }}
@@ -242,14 +303,14 @@ function StatsPanel() {
 
         {/* Tip chart */}
         <div className="card p-4 space-y-3">
-          <p className="text-sm font-semibold text-surface-300">Tipe Göre</p>
+          <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Tipe Göre</p>
           {stats.byTip.map(({ tip, count }) => (
             <div key={tip}>
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-surface-400 capitalize">{tip}</span>
-                <span className="text-surface-300 font-mono">{count}</span>
+                <span className="capitalize" style={{ color: 'var(--text-muted)' }}>{tip}</span>
+                <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>{count}</span>
               </div>
-              <div className="h-1.5 bg-surface-700 rounded-full overflow-hidden">
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-hover)' }}>
                 <div
                   className={cn('h-full rounded-full', tipRenkler[tip] || 'bg-surface-500')}
                   style={{ width: `${stats.total ? (count / stats.total) * 100 : 0}%` }}

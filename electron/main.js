@@ -21,11 +21,12 @@ let currentFilePath = null;
 let tempDir = null;
 let db = null;
 let lockAcquired = false;
+let isUnsaved = false;
 
 // ─── File association: argv ───────────────────────────────────────────────────
 function getOpenFilePath() {
   const args = process.argv.slice(isDev ? 2 : 1);
-  const evrakArg = args.find(a => a.endsWith('.evrak') && fs.existsSync(a));
+  const evrakArg = args.find(a => a.endsWith('.etapp') && fs.existsSync(a));
   return evrakArg || null;
 }
 
@@ -121,12 +122,13 @@ async function cleanup() {
 app.whenReady().then(() => {
   createWindow();
 
-  const state = { mainWindow, currentFilePath, tempDir, db, lockAcquired };
+  const state = { mainWindow, currentFilePath, tempDir, db, lockAcquired, isUnsaved };
   const setState = (updates) => {
     if ('currentFilePath' in updates) currentFilePath = updates.currentFilePath;
     if ('tempDir' in updates) tempDir = updates.tempDir;
     if ('db' in updates) db = updates.db;
     if ('lockAcquired' in updates) lockAcquired = updates.lockAcquired;
+    if ('isUnsaved' in updates) isUnsaved = updates.isUnsaved;
     Object.assign(state, updates);
   };
 
@@ -136,7 +138,7 @@ app.whenReady().then(() => {
 
   // Second instance / file open on Windows
   app.on('second-instance', (_event, argv) => {
-    const filePath = argv.find(a => a.endsWith('.evrak') && fs.existsSync(a));
+    const filePath = argv.find(a => a.endsWith('.etapp') && fs.existsSync(a));
     if (filePath && mainWindow) {
       mainWindow.focus();
       mainWindow.webContents.send('file:open-request', filePath);

@@ -26,77 +26,142 @@ export function WelcomeScreen() {
   }, [setFileOpen, showToast]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-surface-900 relative overflow-hidden">
+    <div
+      className="flex-1 flex flex-col items-center justify-center relative overflow-hidden animate-fade-in"
+      style={{ background: 'var(--bg-base)' }}
+    >
       {/* Background grid */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0"
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          opacity: 0.03,
+          backgroundImage:
+            'linear-gradient(var(--text-primary) 1px, transparent 1px), linear-gradient(90deg, var(--text-primary) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
         }}
       />
       {/* Glow orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-600/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-violet-600/5 rounded-full blur-3xl" />
+      <div
+        className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl"
+        style={{ background: 'var(--brand-bg)', opacity: 0.05 }}
+      />
+      <div
+        className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl"
+        style={{ background: '#8b5cf6', opacity: 0.05 }}
+      />
 
-      <div className="relative z-10 flex flex-col items-center max-w-2xl w-full px-8 animate-fade-in">
+      <div className="relative z-10 flex flex-col items-center max-w-2xl w-full px-8">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-glow">
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, var(--brand-bg), #1d4ed8)',
+              boxShadow: 'var(--shadow-glow)',
+            }}
+          >
             <Archive className="w-10 h-10 text-white" />
           </div>
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white tracking-tight">Evraktron</h1>
-            <p className="mt-2 text-surface-400 text-lg">Portable Evrak Yönetim Sistemi</p>
+            <h1
+              className="text-4xl font-bold tracking-tight"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Evrak Takip App
+            </h1>
+            <p className="mt-2 text-lg" style={{ color: 'var(--text-secondary)' }}>
+              Portable Evrak Yönetim Sistemi
+            </p>
           </div>
         </div>
 
         {/* Action cards */}
         <div className="grid grid-cols-2 gap-4 w-full mb-10">
+          {/* Yeni Dosya */}
           <button
             id="btn-new-file"
             onClick={handleNew}
-            className="group card-hover p-6 flex flex-col items-start gap-3 text-left"
+            className="card-hover p-6 flex flex-col items-start gap-3 text-left group"
           >
-            <div className="w-10 h-10 rounded-lg bg-brand-600/20 border border-brand-500/30 flex items-center justify-center group-hover:bg-brand-600/30 transition-colors">
-              <FileText className="w-5 h-5 text-brand-400" />
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200"
+              style={{
+                background: 'var(--brand-bg-subtle)',
+                border: '1px solid var(--brand-border)',
+              }}
+            >
+              <FileText className="w-5 h-5" style={{ color: 'var(--brand-text)' }} />
             </div>
             <div>
-              <p className="font-semibold text-surface-100">Yeni Dosya</p>
-              <p className="text-sm text-surface-500 mt-0.5">Boş .evrak dosyası oluştur</p>
+              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Yeni Dosya
+              </p>
+              <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Boş .etapp dosyası oluştur
+              </p>
             </div>
-            <kbd className="text-xs text-surface-600 font-mono">Ctrl+N</kbd>
+            <kbd
+              className="text-xs font-mono"
+              style={{ color: 'var(--text-disabled)' }}
+            >
+              Ctrl+N
+            </kbd>
           </button>
 
+          {/* Dosya Aç */}
           <button
             id="btn-open-file"
             onClick={handleOpen}
-            className="group card-hover p-6 flex flex-col items-start gap-3 text-left"
+            className="card-hover p-6 flex flex-col items-start gap-3 text-left group"
           >
-            <div className="w-10 h-10 rounded-lg bg-violet-600/20 border border-violet-500/30 flex items-center justify-center group-hover:bg-violet-600/30 transition-colors">
-              <FolderOpen className="w-5 h-5 text-violet-400" />
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200"
+              style={{
+                background: 'rgba(139,92,246,0.12)',
+                border: '1px solid rgba(139,92,246,0.25)',
+              }}
+            >
+              <FolderOpen className="w-5 h-5 text-violet-500" />
             </div>
             <div>
-              <p className="font-semibold text-surface-100">Dosya Aç</p>
-              <p className="text-sm text-surface-500 mt-0.5">Mevcut .evrak dosyasını aç</p>
+              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Dosya Aç
+              </p>
+              <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Mevcut .etapp dosyasını aç
+              </p>
             </div>
-            <kbd className="text-xs text-surface-600 font-mono">Ctrl+O</kbd>
+            <kbd
+              className="text-xs font-mono"
+              style={{ color: 'var(--text-disabled)' }}
+            >
+              Ctrl+O
+            </kbd>
           </button>
         </div>
 
         {/* Features */}
-        <div className="w-full glass rounded-xl p-5">
-          <p className="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-4">Özellikler</p>
+        <div className="glass w-full rounded-xl p-5">
+          <p
+            className="text-xs font-semibold uppercase tracking-wider mb-4"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            Özellikler
+          </p>
           <div className="grid grid-cols-3 gap-3">
             {[
               { icon: Database, label: 'SQLite + FTS5', desc: 'Hızlı tam metin arama' },
-              { icon: Shield, label: 'Dosya Kilidi', desc: 'Eş zamanlı erişim koruması' },
-              { icon: Zap, label: 'Portable', desc: 'Kurulum gerektirmez' },
+              { icon: Shield,   label: 'Dosya Kilidi', desc: 'Eş zamanlı erişim koruması' },
+              { icon: Zap,      label: 'Portable',     desc: 'Kurulum gerektirmez' },
             ].map(({ icon: Icon, label, desc }) => (
               <div key={label} className="flex flex-col gap-1.5">
-                <Icon className="w-4 h-4 text-brand-400" />
-                <p className="text-sm font-medium text-surface-300">{label}</p>
-                <p className="text-xs text-surface-500">{desc}</p>
+                <Icon className="w-4 h-4" style={{ color: 'var(--brand-text)' }} />
+                <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  {label}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {desc}
+                </p>
               </div>
             ))}
           </div>

@@ -10,10 +10,19 @@ export default function App() {
   const { isFileOpen, setFileOpen, showToast, toast, theme } = useAppStore();
 
   useEffect(() => {
-    // Set initial class list theme
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    // Apply initial theme classes correctly
+    const html = document.documentElement;
+    if (theme === 'dark') {
+      html.classList.add('dark');
+      html.classList.remove('light');
+    } else {
+      html.classList.add('light');
+      html.classList.remove('dark');
+    }
+  }, [theme]);
 
-    // Setup file open request handler (when double clicked .evrak file)
+  useEffect(() => {
+    // Setup file open request handler (when double clicked .etapp file)
     window.evraktron.file.onOpenRequest(async (filePath) => {
       const result = await window.evraktron.file.open(filePath);
       if (result.success && result.filePath) {
@@ -23,7 +32,7 @@ export default function App() {
         showToast(result.error, 'error');
       }
     });
-  }, [setFileOpen, showToast, theme]);
+  }, [setFileOpen, showToast]);
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-surface-900 text-surface-100 select-none">

@@ -8,10 +8,10 @@
   "license": "MIT",
   "scripts": {
     "dev": "electron-vite",
-    "build": "electron-vite build && electron-builder",
-    "build:win": "electron-vite build && electron-builder --win portable",
-    "build:linux": "electron-vite build && electron-builder --linux AppImage",
-    "build:mac": "electron-vite build && electron-builder --mac dmg",
+    "build": "electron-vite build && electron-builder --config electron-builder.config.cjs",
+    "build:win": "electron-vite build && electron-builder --win portable --config electron-builder.config.cjs",
+    "build:linux": "electron-vite build && electron-builder --linux AppImage --config electron-builder.config.cjs",
+    "build:mac": "electron-vite build && electron-builder --mac dmg --config electron-builder.config.cjs",
     "preview": "electron-vite preview"
   },
   "dependencies": {
@@ -57,61 +57,6 @@
     "typescript": "^5.4.5",
     "vite": "^5.2.0",
     "wait-on": "^7.2.0"
-  },
-  "build": {
-    "appId": "com.ilyasbozdemir.evraktron",
-    "productName": "Evraktron",
-    "directories": {
-      "output": "dist-electron"
-    },
-    "files": [
-      "dist/**/*",
-      "electron/**/*",
-      "node_modules/**/*",
-      "!node_modules/.cache"
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "public/icon.png",
-      "fileAssociations": [
-        {
-          "ext": "evrak",
-          "name": "Evraktron Dosyası",
-          "description": "Evraktron evrak dosyası",
-          "icon": "public/icon.png",
-          "role": "Editor"
-        }
-      ]
-    },
-    "linux": {
-      "target": "AppImage",
-      "fileAssociations": [
-        {
-          "ext": "evrak",
-          "name": "Evraktron Dosyası"
-        }
-      ]
-    },
-    "mac": {
-      "target": "dmg",
-      "fileAssociations": [
-        {
-          "ext": "evrak",
-          "name": "Evraktron Dosyası",
-          "role": "Editor"
-        }
-      ]
-    },
-    "portable": {
-      "artifactName": "Evraktron-Portable-${version}.exe"
-    }
   },
   "pnpm": {
     "onlyBuiltDependencies": [

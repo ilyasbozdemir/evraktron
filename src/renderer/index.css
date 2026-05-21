@@ -4,10 +4,72 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── CSS Variables ───────────────────────────────────────────────────────── */
-:root {
-  --radius: 0.5rem;
-  --titlebar-height: 38px;
+/* ════════════════════════════════════════════════════════════════════════════
+   CSS CUSTOM PROPERTIES — THEME SYSTEM
+   Dark mode: html.dark  |  Light mode: html (default / html.light)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Dark (default) ─────────────────────────────────────────────────────── */
+:root,
+html.dark {
+  --bg-base:        #0f172a;   /* surface-900 */
+  --bg-elevated:    #1e293b;   /* surface-800 */
+  --bg-overlay:     #020617;   /* surface-950 */
+  --bg-hover:       #334155;   /* surface-700 */
+  --bg-muted:       rgba(30,41,59,0.6);
+
+  --border-default: rgba(51,65,85,0.5);    /* surface-700/50 */
+  --border-subtle:  rgba(51,65,85,0.3);
+  --border-strong:  rgba(71,85,105,0.4);
+
+  --text-primary:   #f1f5f9;   /* surface-100 */
+  --text-secondary: #94a3b8;   /* surface-400 */
+  --text-muted:     #475569;   /* surface-600 */
+  --text-disabled:  #334155;   /* surface-700 */
+
+  --brand-bg:       #2563eb;
+  --brand-bg-hover: #3b82f6;
+  --brand-bg-subtle:rgba(37,99,235,0.15);
+  --brand-border:   rgba(59,130,246,0.3);
+  --brand-text:     #60a5fa;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-glass: 0 4px 24px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+  --shadow-glow:  0 0 20px rgba(59,130,246,0.4);
+  --shadow-glow-sm: 0 0 10px rgba(59,130,246,0.25);
+
+  color-scheme: dark;
+}
+
+/* ── Light ──────────────────────────────────────────────────────────────── */
+html.light {
+  --bg-base:        #f8fafc;   /* slate-50 */
+  --bg-elevated:    #ffffff;
+  --bg-overlay:     #f1f5f9;   /* slate-100 */
+  --bg-hover:       #e2e8f0;   /* slate-200 */
+  --bg-muted:       rgba(241,245,249,0.8);
+
+  --border-default: rgba(203,213,225,0.8);  /* slate-300 */
+  --border-subtle:  rgba(226,232,240,0.9);
+  --border-strong:  rgba(148,163,184,0.5);
+
+  --text-primary:   #0f172a;   /* slate-900 */
+  --text-secondary: #475569;   /* slate-600 */
+  --text-muted:     #94a3b8;   /* slate-400 */
+  --text-disabled:  #cbd5e1;   /* slate-300 */
+
+  --brand-bg:       #2563eb;
+  --brand-bg-hover: #1d4ed8;
+  --brand-bg-subtle:rgba(37,99,235,0.08);
+  --brand-border:   rgba(37,99,235,0.25);
+  --brand-text:     #2563eb;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-glass: 0 4px 24px 0 rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  --shadow-glow:  0 0 20px rgba(37,99,235,0.2);
+  --shadow-glow-sm: 0 0 10px rgba(37,99,235,0.12);
+
+  color-scheme: light;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */
@@ -19,116 +81,222 @@ html, body, #root {
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-/* Scrollbar */
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.4); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.7); }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* ── Drag region for frameless window ───────────────────────────────────── */
 .titlebar-drag { -webkit-app-region: drag; }
 .titlebar-no-drag { -webkit-app-region: no-drag; }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   SEMANTIC OVERRIDE CLASSES
+   Bu class'lar Tailwind'in surface-* hard-coded sınıflarını geçersiz kılar
+   ve CSS değişkenleriyle çalışır.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* App root container */
+.bg-surface-900  { background-color: var(--bg-base) !important; }
+.bg-surface-800  { background-color: var(--bg-elevated) !important; }
+.bg-surface-950  { background-color: var(--bg-overlay) !important; }
+.bg-surface-700  { background-color: var(--bg-hover) !important; }
+
+.text-surface-100 { color: var(--text-primary) !important; }
+.text-surface-200 { color: var(--text-primary) !important; }
+.text-surface-300 { color: var(--text-secondary) !important; }
+.text-surface-400 { color: var(--text-secondary) !important; }
+.text-surface-500 { color: var(--text-muted) !important; }
+.text-surface-600 { color: var(--text-muted) !important; }
+
+.border-surface-700\/50 { border-color: var(--border-default) !important; }
+.border-surface-700\/30 { border-color: var(--border-subtle) !important; }
+.border-surface-700\/40 { border-color: var(--border-strong) !important; }
+.border-surface-600\/50 { border-color: var(--border-default) !important; }
+
 /* ── Glass morphism ──────────────────────────────────────────────────────── */
 @layer components {
   .glass {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
+    background: var(--bg-muted);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-default);
   }
   .glass-dark {
-    @apply bg-surface-900/80 backdrop-blur-xl border border-white/5;
+    background: var(--bg-muted);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
   }
   .card {
-    @apply rounded-xl border border-surface-700/50 bg-surface-800/60 backdrop-blur-sm shadow-card;
+    @apply rounded-xl;
+    border: 1px solid var(--border-default);
+    background: var(--bg-muted);
+    backdrop-filter: blur(4px);
+    box-shadow: var(--shadow-card);
   }
   .card-hover {
-    @apply card transition-all duration-200 hover:border-brand-500/40 hover:bg-surface-800/80 hover:shadow-glow-sm;
+    @apply card transition-all duration-200;
+  }
+  .card-hover:hover {
+    border-color: var(--brand-border);
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-glow-sm);
   }
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg
            text-white text-sm font-medium transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-brand-500/50
+           focus:outline-none focus:ring-2
            active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--brand-bg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   }
+  .btn-primary:hover { background: var(--brand-bg-hover); }
+  .btn-primary:focus { --tw-ring-color: var(--brand-border); }
+
   .btn-secondary {
-    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-700 hover:bg-surface-600
-           text-surface-200 text-sm font-medium transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-surface-500/50
-           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg
+           text-sm font-medium transition-all duration-200
+           focus:outline-none active:scale-95
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
   }
+  .btn-secondary:hover { background: var(--bg-elevated); }
+
   .btn-ghost {
-    @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg text-surface-400 hover:text-surface-200
-           hover:bg-surface-700/50 text-sm font-medium transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-surface-500/50;
+    @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg
+           text-sm font-medium transition-all duration-200
+           focus:outline-none;
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
   }
   .btn-danger {
-    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-600/20 hover:bg-rose-600/30
-           text-rose-400 hover:text-rose-300 border border-rose-500/30 text-sm font-medium
-           transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rose-500/50 active:scale-95;
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+           transition-all duration-200 focus:outline-none active:scale-95;
+    background: rgba(244,63,94,0.1);
+    color: #f43f5e;
+    border: 1px solid rgba(244,63,94,0.3);
   }
+  .btn-danger:hover { background: rgba(244,63,94,0.2); }
+
   .input {
-    @apply w-full px-3 py-2 rounded-lg bg-surface-800 border border-surface-600/50
-           text-surface-100 placeholder-surface-500 text-sm
-           focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50
+    @apply w-full px-3 py-2 rounded-lg text-sm
+           focus:outline-none focus:ring-2
            transition-all duration-200;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
   }
+  .input::placeholder { color: var(--text-muted); }
+  .input:focus { border-color: var(--brand-bg); }
+  .input:focus { --tw-ring-color: var(--brand-border); }
+
   .label {
-    @apply text-xs font-medium text-surface-400 uppercase tracking-wide mb-1 block;
+    @apply text-xs font-medium uppercase tracking-wide mb-1 block;
+    color: var(--text-secondary);
   }
   .badge {
     @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
   }
   .sidebar-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-surface-400
-           hover:text-surface-100 hover:bg-surface-700/40 transition-all duration-150 cursor-pointer;
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+           transition-all duration-150 cursor-pointer;
+    color: var(--text-secondary);
+  }
+  .sidebar-item:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
   }
   .sidebar-item-active {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white
-           bg-brand-600/20 border border-brand-500/30 cursor-pointer;
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium cursor-pointer;
+    color: var(--brand-text);
+    background: var(--brand-bg-subtle);
+    border: 1px solid var(--brand-border);
   }
 }
 
 /* ── Animations ──────────────────────────────────────────────────────────── */
-.animate-enter { animation: slideUp 0.2s ease-out; }
-.animate-exit  { animation: slideDown 0.15s ease-in; }
+@keyframes fadeIn     { from { opacity: 0; }                          to { opacity: 1; } }
+@keyframes slideUp    { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideDown  { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn    { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulseSoft  { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+.animate-fade-in  { animation: fadeIn 0.2s ease-out; }
+.animate-slide-up { animation: slideUp 0.25s ease-out; }
+.animate-enter    { animation: slideUp 0.2s ease-out; }
+.animate-exit     { animation: slideDown 0.15s ease-in; }
 
 /* ── Status badges ───────────────────────────────────────────────────────── */
-.status-beklemede { @apply badge bg-amber-500/15 text-amber-400 border border-amber-500/30; }
-.status-islemde   { @apply badge bg-brand-500/15 text-brand-400 border border-brand-500/30; }
-.status-tamamlandi{ @apply badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/30; }
-.status-iptal     { @apply badge bg-rose-500/15 text-rose-400 border border-rose-500/30; }
+.status-beklemede  { @apply badge bg-amber-500/15 text-amber-500 border border-amber-500/30; }
+.status-islemde    { @apply badge bg-blue-500/15 text-blue-500 border border-blue-500/30; }
+.status-tamamlandi { @apply badge bg-emerald-500/15 text-emerald-500 border border-emerald-500/30; }
+.status-iptal      { @apply badge bg-rose-500/15 text-rose-500 border border-rose-500/30; }
 
-.tip-gelen  { @apply badge bg-cyan-500/15 text-cyan-400 border border-cyan-500/30; }
-.tip-giden  { @apply badge bg-violet-500/15 text-violet-400 border border-violet-500/30; }
-.tip-ic     { @apply badge bg-surface-500/15 text-surface-300 border border-surface-500/30; }
-.tip-diger  { @apply badge bg-amber-500/15 text-amber-400 border border-amber-500/30; }
+.tip-gelen  { @apply badge bg-cyan-500/15 text-cyan-500 border border-cyan-500/30; }
+.tip-giden  { @apply badge bg-violet-500/15 text-violet-500 border border-violet-500/30; }
+.tip-ic     { @apply badge; background: var(--bg-hover); color: var(--text-secondary); border: 1px solid var(--border-default); }
+.tip-diger  { @apply badge bg-amber-500/15 text-amber-500 border border-amber-500/30; }
 
 /* ── Table ───────────────────────────────────────────────────────────────── */
 .data-table { @apply w-full text-sm; }
 .data-table th {
-  @apply px-3 py-3 text-left text-xs font-semibold text-surface-400 uppercase tracking-wider
-         border-b border-surface-700/50 bg-surface-900/40;
+  @apply px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-overlay);
 }
 .data-table td {
-  @apply px-3 py-3 border-b border-surface-700/30 text-surface-200;
+  @apply px-3 py-3;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
 }
-.data-table tbody tr {
-  @apply transition-colors duration-100 hover:bg-surface-700/20 cursor-pointer;
-}
+.data-table tbody tr { @apply transition-colors duration-100 cursor-pointer; }
+.data-table tbody tr:hover { background: var(--bg-hover); }
 .data-table tbody tr.selected {
-  @apply bg-brand-600/10 border-l-2 border-l-brand-500;
+  background: var(--brand-bg-subtle);
+  border-left: 2px solid var(--brand-bg);
 }
 
 /* ── Drag & Drop ─────────────────────────────────────────────────────────── */
 .dropzone {
-  @apply border-2 border-dashed border-surface-600 rounded-xl p-8
-         flex flex-col items-center justify-center gap-3 text-surface-400
-         transition-all duration-200 hover:border-brand-500/50 hover:bg-brand-500/5;
+  @apply rounded-xl p-8 flex flex-col items-center justify-center gap-3
+         transition-all duration-200;
+  border: 2px dashed var(--border-default);
+  color: var(--text-secondary);
 }
+.dropzone:hover { border-color: var(--brand-border); background: var(--brand-bg-subtle); }
 .dropzone.drag-over {
-  @apply border-brand-500 bg-brand-500/10 text-brand-400;
+  border-color: var(--brand-bg);
+  background: var(--brand-bg-subtle);
+  color: var(--brand-text);
 }
 
 /* ── Radix UI overrides ──────────────────────────────────────────────────── */
 [data-radix-scroll-area-viewport] { scroll-behavior: smooth; }
+
+/* ── TitleBar ────────────────────────────────────────────────────────────── */
+.titlebar-base {
+  background: var(--bg-overlay);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+/* ── Light mode special tweaks ───────────────────────────────────────────── */
+html.light .shadow-glass { box-shadow: var(--shadow-glass) !important; }
+html.light .shadow-card  { box-shadow: var(--shadow-card) !important; }
+html.light .shadow-glow  { box-shadow: var(--shadow-glow) !important; }
+
+/* WelcomeScreen glow orbs light'ta daha yumuşak */
+html.light .blur-3xl { opacity: 0.4; }
