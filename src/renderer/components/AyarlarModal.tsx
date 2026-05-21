@@ -11,12 +11,16 @@ interface AyarlarModalProps {
 export function AyarlarModal({ onClose, onRefresh }: AyarlarModalProps) {
   const { ayarlar } = useAppStore();
   const [kurumAdi, setKurumAdi] = useState(ayarlar.kurum_adi || '');
+  const [klasor, setKlasor] = useState(ayarlar.varsayilan_klasor || '');
+  const [metaKeys, setMetaKeys] = useState(ayarlar.varsayilan_meta_keys || '');
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await window.evraktron.db.setAyar('kurum_adi', kurumAdi);
+      await window.evraktron.db.setAyar('varsayilan_klasor', klasor);
+      await window.evraktron.db.setAyar('varsayilan_meta_keys', metaKeys);
       onRefresh();
       onClose();
     } finally {
@@ -33,25 +37,47 @@ export function AyarlarModal({ onClose, onRefresh }: AyarlarModalProps) {
           <div className="flex items-center justify-between px-5 py-4 border-b border-surface-800">
             <Dialog.Title className="text-base font-semibold text-surface-50 flex items-center gap-2">
               <Settings className="w-5 h-5 text-brand-400" />
-              Proje Ayarları
+              Proje (Dosya) Ayarları
             </Dialog.Title>
             <Dialog.Close className="p-1.5 text-surface-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-lg transition-colors">
               <X className="w-5 h-5" />
             </Dialog.Close>
           </div>
 
-          <div className="p-5 space-y-4 flex-1 overflow-y-auto">
+          <div className="p-5 space-y-5 flex-1 overflow-y-auto">
             <div>
               <label className="label">Varsayılan Kurum Adı</label>
               <input
                 className="input"
                 value={kurumAdi}
                 onChange={e => setKurumAdi(e.target.value)}
-                placeholder="Bu projenin/dosyanın ait olduğu kurum..."
-                title="Yeni evrak oluştururken bu kurum adı otomatik gelir."
+                placeholder="Örn: Yapı Denetim A.Ş."
+              />
+            </div>
+
+            <div>
+              <label className="label">Varsayılan Klasör / Dosya Tipi</label>
+              <input
+                className="input"
+                value={klasor}
+                onChange={e => setKlasor(e.target.value)}
+                placeholder="Örn: Yapı Ruhsatı Dosyaları"
               />
               <p className="text-xs text-surface-400 mt-1.5">
-                Yeni evrak oluşturduğunuzda "Kurum" alanı otomatik olarak bu değerle doldurulur.
+                Yeni evrak oluşturduğunuzda bu klasör otomatik tanımlanır.
+              </p>
+            </div>
+
+            <div>
+              <label className="label">Özel Alan (Metadata) Şablonu</label>
+              <input
+                className="input"
+                value={metaKeys}
+                onChange={e => setMetaKeys(e.target.value)}
+                placeholder="Örn: Ada, Parsel, Ruhsat No, Veriliş Tarihi"
+              />
+              <p className="text-xs text-surface-400 mt-1.5 leading-relaxed">
+                Yeni evrak oluşturduğunuzda bu alanlar boş kutucuklar olarak <b>hazır gelir</b>, böylece neyin doldurulması gerektiğini unutmazsınız. <b>Virgül</b> ile ayırarak yazın.
               </p>
             </div>
           </div>

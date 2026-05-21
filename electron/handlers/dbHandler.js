@@ -41,11 +41,16 @@ function setupDbHandlers(ipcMain, state, setState) {
 
   ipcMain.handle('db:evraklar:search', (_e, query) => {
     if (!state.db || !query?.trim()) return [];
+    
+    // FTS5 multiple terms processing (e.g. "Ruhsat 2020" -> '"Ruhsat" "2020"*')
+    const terms = query.trim().split(/\s+/);
+    const ftsQuery = terms.map((t, i) => i === terms.length - 1 ? `"${t}"*` : `"${t}"`).join(' AND ');
+
     return state.db.prepare(`
       SELECT e.* FROM evraklar_fts
       JOIN evraklar e ON e.id = evraklar_fts.rowid
       WHERE evraklar_fts MATCH ? ORDER BY rank
-    `).all(`${query}*`);
+    `).all(ftsQuery);
   });
 
   ipcMain.handle('db:evraklar:create', (_e, data) => {

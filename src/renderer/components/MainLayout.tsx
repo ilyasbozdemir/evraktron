@@ -74,11 +74,22 @@ export function MainLayout() {
 
   const handleNewEvrak = useCallback(async () => {
     const { ayarlar } = useAppStore.getState();
+    
+    // Create initial metadata object from template keys
+    const metaObj: Record<string, string> = {};
+    if (ayarlar.varsayilan_meta_keys) {
+      ayarlar.varsayilan_meta_keys.split(',').map(k => k.trim()).filter(Boolean).forEach(k => {
+        metaObj[k] = '';
+      });
+    }
+
     const evrak = await window.evraktron.db.createEvrak({
       no: `EVR-${Date.now()}`,
       tip: 'gelen',
       durum: 'beklemede',
       kurum: ayarlar.kurum_adi || '',
+      klasor: ayarlar.varsayilan_klasor || '',
+      metadata: Object.keys(metaObj).length > 0 ? JSON.stringify(metaObj) : '',
     });
     await loadEvraklar(searchQuery || undefined);
     await loadStats();
