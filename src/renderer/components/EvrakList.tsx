@@ -90,6 +90,7 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
               <ColHeader col="raf_no" label="Raf No" />
               <ColHeader col="tarih" label="Tarih" />
               <ColHeader col="durum" label="Durum" />
+              <th>Özel Alanlar</th>
               <th>Açıklama</th>
               <th className="w-10" />
             </tr>
@@ -110,13 +111,26 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
                     {TIP_LABELS[evrak.tip] || evrak.tip}
                   </span>
                 </td>
-                <td className="max-w-[160px] truncate text-surface-300">{evrak.kurum || '—'}</td>
+                <td className="max-w-[160px] truncate">
+                  <div className="text-surface-300">{evrak.kurum || '—'}</div>
+                  {evrak.birim && <div className="text-surface-500 text-[10px] uppercase tracking-wider">{evrak.birim}</div>}
+                </td>
                 <td className="text-surface-400 text-xs font-mono">{evrak.raf_no || '—'}</td>
                 <td className="text-surface-400 text-xs font-mono">{formatDate(evrak.tarih)}</td>
                 <td>
                   <span className={DURUM_COLORS[evrak.durum] || 'badge'}>
                     {DURUM_LABELS[evrak.durum] || evrak.durum}
                   </span>
+                </td>
+                <td className="max-w-[200px] truncate text-surface-300 text-xs" title={evrak.metadata || ''}>
+                  {(() => {
+                    if (!evrak.metadata) return '—';
+                    try {
+                      const meta = JSON.parse(evrak.metadata);
+                      const parts = Object.entries(meta).filter(([_, v]) => v).map(([k, v]) => `${k}: ${v}`);
+                      return parts.length > 0 ? parts.join(' • ') : '—';
+                    } catch { return '—'; }
+                  })()}
                 </td>
                 <td className="max-w-[200px] truncate text-surface-400 text-xs">
                   {evrak.aciklama || '—'}

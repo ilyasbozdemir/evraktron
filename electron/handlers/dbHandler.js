@@ -56,9 +56,9 @@ function setupDbHandlers(ipcMain, state, setState) {
   ipcMain.handle('db:evraklar:create', (_e, data) => {
     if (!state.db) return null;
     const res = state.db.prepare(`
-      INSERT INTO evraklar (no, tip, kurum, tarih, durum, aciklama, notlar, klasor, raf_no, metadata)
-      VALUES (@no, @tip, @kurum, @tarih, @durum, @aciklama, @notlar, @klasor, @raf_no, @metadata)
-    `).run({ no:'', tip:'gelen', kurum:'', tarih: new Date().toISOString().split('T')[0],
+      INSERT INTO evraklar (no, tip, kurum, birim, tarih, durum, aciklama, notlar, klasor, raf_no, metadata)
+      VALUES (@no, @tip, @kurum, @birim, @tarih, @durum, @aciklama, @notlar, @klasor, @raf_no, @metadata)
+    `).run({ no:'', tip:'gelen', kurum:'', birim:'', tarih: new Date().toISOString().split('T')[0],
               durum:'beklemede', aciklama:'', notlar:'', klasor: '', raf_no: '', metadata: '', ...data });
     state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (?, 'olusturuldu', 'Kullanıcı', 'Evrak oluşturuldu')`).run(res.lastInsertRowid);
     return state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(res.lastInsertRowid);
@@ -66,7 +66,7 @@ function setupDbHandlers(ipcMain, state, setState) {
 
   ipcMain.handle('db:evraklar:update', (_e, id, data) => {
     if (!state.db) return null;
-    const allowed = ['no','tip','kurum','tarih','durum','aciklama','notlar','klasor','raf_no','metadata'];
+    const allowed = ['no','tip','kurum','birim','tarih','durum','aciklama','notlar','klasor','raf_no','metadata'];
     const fields = Object.keys(data).filter(k => allowed.includes(k)).map(k => `${k} = @${k}`).join(', ');
     if (!fields) return null;
     state.db.prepare(`UPDATE evraklar SET ${fields}, updated_at = datetime('now') WHERE id = @id`).run({ ...data, id });

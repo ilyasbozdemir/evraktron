@@ -110,6 +110,7 @@ function ensureSchema(db) {
       no          TEXT NOT NULL,
       tip         TEXT NOT NULL DEFAULT 'gelen',
       kurum       TEXT,
+      birim       TEXT,
       tarih       TEXT,
       durum       TEXT NOT NULL DEFAULT 'beklemede',
       aciklama    TEXT,
@@ -154,26 +155,26 @@ function ensureSchema(db) {
     );
 
     CREATE VIRTUAL TABLE IF NOT EXISTS evraklar_fts USING fts5(
-      no, aciklama, notlar, kurum, metadata,
+      no, aciklama, notlar, kurum, birim, metadata,
       content='evraklar',
       content_rowid='id'
     );
 
     CREATE TRIGGER IF NOT EXISTS evraklar_ai AFTER INSERT ON evraklar BEGIN
-      INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
-      VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.metadata);
+      INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, birim, metadata)
+      VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.birim, new.metadata);
     END;
 
     CREATE TRIGGER IF NOT EXISTS evraklar_ad AFTER DELETE ON evraklar BEGIN
-      INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, metadata)
-      VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.metadata);
+      INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, birim, metadata)
+      VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.birim, old.metadata);
     END;
 
     CREATE TRIGGER IF NOT EXISTS evraklar_au AFTER UPDATE ON evraklar BEGIN
-      INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, metadata)
-      VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.metadata);
-      INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
-      VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.metadata);
+      INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, birim, metadata)
+      VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.birim, old.metadata);
+      INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, birim, metadata)
+      VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.birim, new.metadata);
     END;
   `);
 
@@ -183,35 +184,38 @@ function ensureSchema(db) {
     const hasKlasor = columns.some(c => c.name === 'klasor');
     const hasRafNo = columns.some(c => c.name === 'raf_no');
     const hasMetadata = columns.some(c => c.name === 'metadata');
+    const hasBirim = columns.some(c => c.name === 'birim');
     if (!hasKlasor) db.exec('ALTER TABLE evraklar ADD COLUMN klasor TEXT');
     if (!hasRafNo) db.exec('ALTER TABLE evraklar ADD COLUMN raf_no TEXT');
-    if (!hasMetadata) {
-      db.exec('ALTER TABLE evraklar ADD COLUMN metadata TEXT');
-      // Rebuild FTS
+    if (!hasMetadata) db.exec('ALTER TABLE evraklar ADD COLUMN metadata TEXT');
+    if (!hasBirim) db.exec('ALTER TABLE evraklar ADD COLUMN birim TEXT');
+    
+    // Rebuild FTS if any column was missing
+    if (!hasMetadata || !hasBirim) {
       db.exec(`
         DROP TRIGGER IF EXISTS evraklar_ai;
         DROP TRIGGER IF EXISTS evraklar_ad;
         DROP TRIGGER IF EXISTS evraklar_au;
         DROP TABLE IF EXISTS evraklar_fts;
         CREATE VIRTUAL TABLE evraklar_fts USING fts5(
-          no, aciklama, notlar, kurum, metadata,
+          no, aciklama, notlar, kurum, birim, metadata,
           content='evraklar', content_rowid='id'
         );
-        INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
-        SELECT id, no, aciklama, notlar, kurum, metadata FROM evraklar;
+        INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, birim, metadata)
+        SELECT id, no, aciklama, notlar, kurum, birim, metadata FROM evraklar;
         CREATE TRIGGER evraklar_ai AFTER INSERT ON evraklar BEGIN
-          INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
-          VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.metadata);
+          INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, birim, metadata)
+          VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.birim, new.metadata);
         END;
         CREATE TRIGGER evraklar_ad AFTER DELETE ON evraklar BEGIN
-          INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, metadata)
-          VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.metadata);
+          INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, birim, metadata)
+          VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.birim, old.metadata);
         END;
         CREATE TRIGGER evraklar_au AFTER UPDATE ON evraklar BEGIN
-          INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, metadata)
-          VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.metadata);
-          INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, metadata)
-          VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.metadata);
+          INSERT INTO evraklar_fts(evraklar_fts, rowid, no, aciklama, notlar, kurum, birim, metadata)
+          VALUES ('delete', old.id, old.no, old.aciklama, old.notlar, old.kurum, old.birim, old.metadata);
+          INSERT INTO evraklar_fts(rowid, no, aciklama, notlar, kurum, birim, metadata)
+          VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum, new.birim, new.metadata);
         END;
       `);
     }

@@ -18,6 +18,7 @@ export interface Evrak {
   no: string;
   tip: EvrakTip;
   kurum: string;
+  birim?: string;
   tarih: string;
   durum: EvrakDurum;
   aciklama: string;

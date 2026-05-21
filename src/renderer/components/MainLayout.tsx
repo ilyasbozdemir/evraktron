@@ -73,7 +73,7 @@ export function MainLayout() {
   }, []);
 
   const handleNewEvrak = useCallback(async () => {
-    const { ayarlar } = useAppStore.getState();
+    const { ayarlar, evraklar } = useAppStore.getState();
     
     // Create initial metadata object from template keys
     const metaObj: Record<string, string> = {};
@@ -83,8 +83,11 @@ export function MainLayout() {
       });
     }
 
+    // Compute next sequential number based on total count
+    const nextNo = evraklar.length + 1;
+
     const evrak = await window.evraktron.db.createEvrak({
-      no: `EVR-${Date.now()}`,
+      no: String(nextNo),
       tip: 'gelen',
       durum: 'beklemede',
       kurum: ayarlar.kurum_adi || '',

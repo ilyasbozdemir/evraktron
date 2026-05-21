@@ -124,9 +124,9 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
         </Tabs.List>
 
         {/* Form tab */}
-        <Tabs.Content value="form" className="flex-1 overflow-hidden">
-          <ScrollArea.Root className="h-full">
-            <ScrollArea.Viewport className="p-4 pb-12 space-y-4">
+        <Tabs.Content value="form" className="flex-1 overflow-hidden flex flex-col focus:outline-none">
+          <ScrollArea.Root className="flex-1 h-full w-full">
+            <ScrollArea.Viewport className="h-full w-full [&>div]:!block p-4 pb-12 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label">Evrak No</label>
