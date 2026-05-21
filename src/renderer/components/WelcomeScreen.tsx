@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { FileText, FolderOpen, Zap, Shield, Database, Archive } from 'lucide-react';
+import { FileText, FilePlus, FolderOpen, Zap, Shield, Database, Archive } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 
 export function WelcomeScreen() {
@@ -82,8 +82,7 @@ export function WelcomeScreen() {
         <div className="grid grid-cols-2 gap-4 w-full max-w-lg mt-8">
           {/* Yeni Proje */}
           <button
-            onClick={handleNewFile}
-            disabled={isOpening}
+            onClick={handleNew}
             className="card p-6 flex flex-col items-center gap-4 hover:border-brand-500/50 hover:bg-surface-800/80 transition-all text-center group cursor-pointer"
           >
             <div className="w-12 h-12 rounded-full bg-brand-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -108,7 +107,6 @@ export function WelcomeScreen() {
           {/* Proje Aç */}
           <button
             onClick={handleOpen}
-            disabled={isOpening}
             className="card p-6 flex flex-col items-center gap-4 hover:border-violet-500/50 hover:bg-surface-800/80 transition-all text-center group cursor-pointer"
           >
             <div
