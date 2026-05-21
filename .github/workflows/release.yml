@@ -38,7 +38,7 @@ jobs:
             dist-electron/*.exe
           draft: false
           prerelease: false
-          name: "Evraktron v${{ github.ref_name }}"
+          name: "Evraktron ${{ github.ref_name }}"
           body: "Evraktron - Modern, offline ve şablon tabanlı evrak yönetim sistemi sürümü."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
