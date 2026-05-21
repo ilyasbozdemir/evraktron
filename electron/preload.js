@@ -47,6 +47,10 @@ contextBridge.exposeInMainWorld('evraktron', {
     addEtiket: (data) => ipcRenderer.invoke('db:etiketler:add', data),
     removeEtiket: (id) => ipcRenderer.invoke('db:etiketler:remove', id),
 
+    // Ayarlar
+    getAyarlar: () => ipcRenderer.invoke('db:ayarlar:get'),
+    setAyar: (key, value) => ipcRenderer.invoke('db:ayarlar:set', key, value),
+
     // Stats
     getStats: () => ipcRenderer.invoke('db:stats'),
   },

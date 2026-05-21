@@ -168,6 +168,19 @@ function setupDbHandlers(ipcMain, state, setState) {
       lastWeek: state.db.prepare(`SELECT COUNT(*) as c FROM evraklar WHERE created_at >= datetime('now','-7 days')`).get().c,
     };
   });
+
+  // ── AYARLAR ───────────────────────────────────────────────────────────────
+  ipcMain.handle('db:ayarlar:get', (_e) => {
+    if (!state.db) return {};
+    const rows = state.db.prepare('SELECT key, value FROM ayarlar').all();
+    return rows.reduce((acc, row) => ({ ...acc, [row.key]: row.value }), {});
+  });
+
+  ipcMain.handle('db:ayarlar:set', (_e, key, value) => {
+    if (!state.db) return false;
+    state.db.prepare('INSERT INTO ayarlar (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(key, value);
+    return true;
+  });
 }
 
 export { setupDbHandlers };

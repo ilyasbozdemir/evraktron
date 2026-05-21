@@ -110,6 +110,8 @@ export interface ElectronAPI {
     getEtiketler: (evrakId: number) => Promise<Etiket[]>;
     addEtiket: (data: Partial<Etiket>) => Promise<Etiket>;
     removeEtiket: (id: number) => Promise<boolean>;
+    getAyarlar: () => Promise<Record<string, string>>;
+    setAyar: (key: string, value: string) => Promise<boolean>;
     getStats: () => Promise<DbStats>;
   };
   export: {

@@ -148,6 +148,11 @@ function ensureSchema(db) {
       oncelik   INTEGER DEFAULT 0
     );
 
+    CREATE TABLE IF NOT EXISTS ayarlar (
+      key   TEXT PRIMARY KEY,
+      value TEXT
+    );
+
     CREATE VIRTUAL TABLE IF NOT EXISTS evraklar_fts USING fts5(
       no, aciklama, notlar, kurum, metadata,
       content='evraklar',

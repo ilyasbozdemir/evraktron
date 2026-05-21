@@ -9,6 +9,7 @@ import { useAppStore } from '../store/appStore';
 import { EvrakList } from './EvrakList';
 import { EvrakDetail } from './EvrakDetail';
 import { ExportModal } from './ExportModal';
+import { AyarlarModal } from './AyarlarModal';
 import { cn } from '../lib/utils';
 
 type SideTab = 'evraklar' | 'istatistikler';
@@ -17,10 +18,12 @@ export function MainLayout() {
   const {
     setEvraklar, setLoadingEvraklar, setStats, setSelectedEvrakId, selectedEvrakId,
     searchQuery, setSearchQuery, setDirty, showToast, setLastSaved, setFileSaved, closeFile,
+    ayarlar, setAyarlar
   } = useAppStore();
 
   const [sideTab, setSideTab] = useState<SideTab>('evraklar');
   const [showExport, setShowExport] = useState(false);
+  const [showAyarlar, setShowAyarlar] = useState(false);
 
   const loadEvraklar = useCallback(async (query?: string) => {
     setLoadingEvraklar(true);
@@ -39,10 +42,16 @@ export function MainLayout() {
     setStats(s);
   }, [setStats]);
 
+  const loadAyarlar = useCallback(async () => {
+    const a = await window.evraktron.db.getAyarlar();
+    setAyarlar(a);
+  }, [setAyarlar]);
+
   useEffect(() => {
     loadEvraklar();
     loadStats();
-  }, [loadEvraklar, loadStats]);
+    loadAyarlar();
+  }, [loadEvraklar, loadStats, loadAyarlar]);
 
   // Search debounce
   useEffect(() => {
@@ -64,10 +73,12 @@ export function MainLayout() {
   }, []);
 
   const handleNewEvrak = useCallback(async () => {
+    const { ayarlar } = useAppStore.getState();
     const evrak = await window.evraktron.db.createEvrak({
       no: `EVR-${Date.now()}`,
       tip: 'gelen',
       durum: 'beklemede',
+      kurum: ayarlar.kurum_adi || '',
     });
     await loadEvraklar(searchQuery || undefined);
     await loadStats();
@@ -153,6 +164,9 @@ export function MainLayout() {
                 Dosya
               </p>
               <nav className="space-y-0.5">
+                <button onClick={() => setShowAyarlar(true)} className="sidebar-item w-full text-brand-500 font-medium">
+                  <Settings className="w-4 h-4" /> Proje Ayarları
+                </button>
                 <button onClick={handleSave} className="sidebar-item w-full">
                   <Save className="w-4 h-4" /> Kaydet
                 </button>

@@ -40,6 +40,8 @@ interface AppState {
   setFilters: (f: Partial<EvrakFilters>) => void;
   setSearchQuery: (q: string) => void;
   setStats: (s: DbStats) => void;
+  ayarlar: Record<string, string>;
+  setAyarlar: (a: Record<string, string>) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   clearToast: () => void;
   closeFile: () => void;
@@ -60,6 +62,7 @@ export const useAppStore = create<AppState>((set) => ({
   searchQuery: '',
   stats: null,
   toast: null,
+  ayarlar: {},
 
   setFileOpen: (open, filePath) => set({
     isFileOpen: open,
