@@ -72,32 +72,29 @@ export function WelcomeScreen() {
             <p className="mt-2 text-lg" style={{ color: 'var(--text-secondary)' }}>
               Portable Evrak Yönetim Sistemi
             </p>
+            <p className="mt-4 text-sm max-w-md mx-auto" style={{ color: 'var(--text-muted)' }}>
+              Evraklarınızı projelere ayırarak gruplayın. Örneğin; "Ruhsatlar" için bir proje, "İhaleler" için ayrı bir proje dosyası oluşturabilirsiniz.
+            </p>
           </div>
         </div>
 
         {/* Action cards */}
-        <div className="grid grid-cols-2 gap-4 w-full mb-10">
-          {/* Yeni Dosya */}
+        <div className="grid grid-cols-2 gap-4 w-full max-w-lg mt-8">
+          {/* Yeni Proje */}
           <button
-            id="btn-new-file"
-            onClick={handleNew}
-            className="card-hover p-6 flex flex-col items-start gap-3 text-left group"
+            onClick={handleNewFile}
+            disabled={isOpening}
+            className="card p-6 flex flex-col items-center gap-4 hover:border-brand-500/50 hover:bg-surface-800/80 transition-all text-center group cursor-pointer"
           >
-            <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200"
-              style={{
-                background: 'var(--brand-bg-subtle)',
-                border: '1px solid var(--brand-border)',
-              }}
-            >
-              <FileText className="w-5 h-5" style={{ color: 'var(--brand-text)' }} />
+            <div className="w-12 h-12 rounded-full bg-brand-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <FilePlus className="w-6 h-6 text-brand-400" />
             </div>
             <div>
-              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Yeni Dosya
+              <p className="font-medium text-base" style={{ color: 'var(--text-primary)' }}>
+                Yeni Proje
               </p>
               <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Boş .etapp dosyası oluştur
+                Boş .etapp projesi oluştur
               </p>
             </div>
             <kbd
@@ -108,27 +105,27 @@ export function WelcomeScreen() {
             </kbd>
           </button>
 
-          {/* Dosya Aç */}
+          {/* Proje Aç */}
           <button
-            id="btn-open-file"
             onClick={handleOpen}
-            className="card-hover p-6 flex flex-col items-start gap-3 text-left group"
+            disabled={isOpening}
+            className="card p-6 flex flex-col items-center gap-4 hover:border-violet-500/50 hover:bg-surface-800/80 transition-all text-center group cursor-pointer"
           >
             <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200"
+              className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110"
               style={{
                 background: 'rgba(139,92,246,0.12)',
                 border: '1px solid rgba(139,92,246,0.25)',
               }}
             >
-              <FolderOpen className="w-5 h-5 text-violet-500" />
+              <FolderOpen className="w-6 h-6 text-violet-500" />
             </div>
             <div>
-              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Dosya Aç
+              <p className="font-medium text-base" style={{ color: 'var(--text-primary)' }}>
+                Proje Aç
               </p>
               <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Mevcut .etapp dosyasını aç
+                Mevcut .etapp projesini aç
               </p>
             </div>
             <kbd

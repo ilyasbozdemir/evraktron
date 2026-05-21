@@ -86,7 +86,14 @@ function openEvrakFile(filePath, state, setState) {
   db.pragma('foreign_keys = ON');
   ensureSchema(db);
 
-  setState({ currentFilePath: filePath, tempDir, db, lockAcquired: true });
+  if (state.currentFilePath && state.lockAcquired) {
+    releaseLock(state.currentFilePath);
+  }
+  if (state.db) {
+    try { state.db.close(); } catch (_) {}
+  }
+
+  setState({ currentFilePath: filePath, tempDir, db, lockAcquired: true, isUnsaved: false });
 
   return {
     success: true,
