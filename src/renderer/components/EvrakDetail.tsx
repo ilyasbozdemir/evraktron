@@ -26,6 +26,8 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
   const uniqueKlasorler = React.useMemo(() => Array.from(new Set(evraklar.map(e => e.klasor).filter(Boolean))), [evraklar]);
   const [form, setForm] = useState<Partial<Evrak>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isAddingField, setIsAddingField] = useState(false);
+  const [newFieldKey, setNewFieldKey] = useState('');
 
   const metadata = React.useMemo(() => {
     try { return form.metadata ? JSON.parse(form.metadata) : {}; }
@@ -124,7 +126,7 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
         {/* Form tab */}
         <Tabs.Content value="form" className="flex-1 overflow-hidden">
           <ScrollArea.Root className="h-full">
-            <ScrollArea.Viewport className="p-4 space-y-4">
+            <ScrollArea.Viewport className="p-4 pb-12 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label">Evrak No</label>
@@ -230,15 +232,45 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="label mb-0">Özel Alanlar (Arama Kriterleri)</label>
-                  <button 
-                    onClick={() => {
-                      const key = prompt('Yeni alan adı (örn: Ada, Parsel, Ruhsat No):');
-                      if (key && !metadata[key]) updateMetadata(key, '');
-                    }}
-                    className="text-xs text-brand-500 hover:text-brand-400 font-medium px-2 py-1 bg-brand-500/10 rounded"
-                  >
-                    + Alan Ekle
-                  </button>
+                  {!isAddingField ? (
+                    <button 
+                      onClick={() => setIsAddingField(true)}
+                      className="text-xs text-brand-500 hover:text-brand-400 font-medium px-2 py-1 bg-brand-500/10 rounded transition-colors"
+                    >
+                      + Alan Ekle
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <input 
+                        autoFocus
+                        className="input h-7 !py-1 text-xs w-32" 
+                        placeholder="Alan adı..." 
+                        value={newFieldKey}
+                        onChange={e => setNewFieldKey(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && newFieldKey.trim()) {
+                            if (!metadata[newFieldKey.trim()]) updateMetadata(newFieldKey.trim(), '');
+                            setNewFieldKey('');
+                            setIsAddingField(false);
+                          }
+                          if (e.key === 'Escape') setIsAddingField(false);
+                        }}
+                      />
+                      <button 
+                        onClick={() => {
+                          if (newFieldKey.trim() && !metadata[newFieldKey.trim()]) updateMetadata(newFieldKey.trim(), '');
+                          setNewFieldKey('');
+                          setIsAddingField(false);
+                        }}
+                        className="btn-primary h-7 px-2 py-1 text-xs"
+                      >
+                        Ekle
+                      </button>
+                      <button onClick={() => setIsAddingField(false)} className="btn-ghost h-7 w-7 p-0 flex items-center justify-center text-surface-500 hover:text-surface-300">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {Object.keys(metadata).length === 0 ? (
                   <div className="text-xs text-surface-500 italic p-3 border border-dashed border-surface-700/50 rounded-lg text-center">

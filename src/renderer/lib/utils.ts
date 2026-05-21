@@ -42,7 +42,7 @@ export const DURUM_LABELS: Record<string, string> = {
 };
 
 export const TIP_LABELS: Record<string, string> = {
-  gelen: 'Gelen', giden: 'Giden', ic: 'İç', diger: 'Diğer',
+  gelen: 'Gelen', giden: 'Giden', ic: 'Kurum İçi', diger: 'Diğer',
 };
 
 export const DURUM_COLORS: Record<string, string> = {

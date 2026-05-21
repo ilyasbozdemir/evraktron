@@ -275,6 +275,7 @@ export function MainLayout() {
       </div>
 
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}
+      {showAyarlar && <AyarlarModal onClose={() => setShowAyarlar(false)} onRefresh={loadAyarlar} />}
     </Tooltip.Provider>
   );
 }
