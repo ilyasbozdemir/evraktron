@@ -52,10 +52,24 @@ function openEvrakFile(filePath, state, setState) {
     return { success: false, error: `Dosya başka bir süreç tarafından kilitlendi (PID: ${lockResult.by})` };
   }
 
-  // Extract ZIP to temp
   const tempDir = createTempDir();
-  const zip = new AdmZip(filePath);
-  zip.extractAllTo(tempDir, true);
+  
+  const stat = fs.statSync(filePath);
+  if (stat.size === 0) {
+    // ShellNew ile oluşturulmuş boş dosya, ilk kurulumu yap
+    const attachmentsDir = path.join(tempDir, 'attachments');
+    fs.mkdirSync(attachmentsDir, { recursive: true });
+    const manifest = createManifest();
+    fs.writeFileSync(path.join(tempDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  } else {
+    try {
+      const zip = new AdmZip(filePath);
+      zip.extractAllTo(tempDir, true);
+    } catch (err) {
+      if (state.lockAcquired) releaseLock(filePath);
+      return { success: false, error: 'Dosya formatı okunamadı veya bozuk' };
+    }
+  }
 
   // Read manifest
   const manifestPath = path.join(tempDir, 'manifest.json');
