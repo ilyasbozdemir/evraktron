@@ -37,7 +37,7 @@ module.exports = {
       {
         ext: 'etapp',
         name: 'Evrak Takip App Dosyası',
-        description: 'Evrak Takip App ETAPP dosyası',
+        description: 'Evrak Takip App (ETAPP) dosyası',
         icon: 'public/icon.ico',
         role: 'Editor'
       }
