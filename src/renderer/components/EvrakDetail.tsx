@@ -19,8 +19,11 @@ const DURUMLAR = ['beklemede', 'islemde', 'tamamlandi', 'iptal'] as const;
 const TIPLER   = ['gelen', 'giden', 'ic', 'diger'] as const;
 
 export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
-  const { showToast, setDirty } = useAppStore();
+  const { showToast, setDirty, evraklar } = useAppStore();
   const [evrak, setEvrak] = useState<Evrak | null>(null);
+
+  const uniqueKurumlar = React.useMemo(() => Array.from(new Set(evraklar.map(e => e.kurum).filter(Boolean))), [evraklar]);
+  const uniqueKlasorler = React.useMemo(() => Array.from(new Set(evraklar.map(e => e.klasor).filter(Boolean))), [evraklar]);
   const [form, setForm] = useState<Partial<Evrak>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -119,13 +122,19 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
 
               <div>
                 <label className="label">Kurum</label>
-                <input className="input" value={form.kurum || ''} onChange={e => handleChange('kurum', e.target.value)} placeholder="Kurum adı…" />
+                <input list="kurum-list" className="input" value={form.kurum || ''} onChange={e => handleChange('kurum', e.target.value)} placeholder="Kurum adı…" />
+                <datalist id="kurum-list">
+                  {uniqueKurumlar.map(k => <option key={k} value={k} />)}
+                </datalist>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label">Klasör</label>
-                  <input className="input" value={form.klasor || ''} onChange={e => handleChange('klasor', e.target.value)} placeholder="Proje klasörü…" />
+                  <input list="klasor-list" className="input" value={form.klasor || ''} onChange={e => handleChange('klasor', e.target.value)} placeholder="Proje klasörü…" />
+                  <datalist id="klasor-list">
+                    {uniqueKlasorler.map(k => <option key={k} value={k} />)}
+                  </datalist>
                 </div>
                 <div>
                   <label className="label">Raf No</label>

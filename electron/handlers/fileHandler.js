@@ -170,6 +170,17 @@ function ensureSchema(db) {
       VALUES (new.id, new.no, new.aciklama, new.notlar, new.kurum);
     END;
   `);
+
+  // Migrations for existing databases
+  try {
+    const columns = db.pragma('table_info(evraklar)');
+    const hasKlasor = columns.some(c => c.name === 'klasor');
+    const hasRafNo = columns.some(c => c.name === 'raf_no');
+    if (!hasKlasor) db.exec('ALTER TABLE evraklar ADD COLUMN klasor TEXT');
+    if (!hasRafNo) db.exec('ALTER TABLE evraklar ADD COLUMN raf_no TEXT');
+  } catch (e) {
+    console.error('Migration error:', e);
+  }
 }
 
 function packEvrakFile(filePath, tempDir, state) {

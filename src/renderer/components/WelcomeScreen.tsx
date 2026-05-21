@@ -76,82 +76,64 @@ export function WelcomeScreen() {
         </div>
 
         {/* Action cards */}
-        <div className="grid grid-cols-2 gap-4 w-full max-w-lg mt-8">
+        <div className="grid grid-cols-2 gap-6 w-full max-w-lg mt-6">
           {/* Yeni Proje */}
           <button
             onClick={handleNew}
-            className="card p-6 flex flex-col items-center gap-4 hover:border-brand-500/50 hover:bg-surface-800/80 transition-all text-center group cursor-pointer"
+            className="relative group p-6 rounded-2xl flex flex-col items-center gap-4 border border-brand-500/20 bg-surface-800/40 hover:bg-surface-800/80 transition-all cursor-pointer overflow-hidden"
           >
-            <div className="w-12 h-12 rounded-full bg-brand-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <FilePlus className="w-6 h-6 text-brand-400" />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+              <FilePlus className="w-7 h-7 text-brand-400 drop-shadow-sm" />
             </div>
-            <div>
-              <p className="font-medium text-base" style={{ color: 'var(--text-primary)' }}>
-                Yeni Proje
-              </p>
-              <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Boş .etapp projesi oluştur
-              </p>
+            <div className="relative z-10">
+              <p className="font-semibold text-lg text-surface-100">Yeni Proje</p>
+              <p className="text-sm text-surface-400 mt-1">Boş .etapp projesi oluştur</p>
             </div>
-            <kbd
-              className="text-xs font-mono"
-              style={{ color: 'var(--text-disabled)' }}
-            >
-              Ctrl+N
-            </kbd>
+            <kbd className="relative z-10 mt-auto text-[11px] font-mono text-surface-500 bg-surface-900/60 px-2 py-1 rounded border border-surface-700/50">Ctrl+N</kbd>
           </button>
 
           {/* Proje Aç */}
           <button
             onClick={handleOpen}
-            className="card p-6 flex flex-col items-center gap-4 hover:border-violet-500/50 hover:bg-surface-800/80 transition-all text-center group cursor-pointer"
+            className="relative group p-6 rounded-2xl flex flex-col items-center gap-4 border border-violet-500/20 bg-surface-800/40 hover:bg-surface-800/80 transition-all cursor-pointer overflow-hidden"
           >
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110"
-              style={{
-                background: 'rgba(139,92,246,0.12)',
-                border: '1px solid rgba(139,92,246,0.25)',
-              }}
-            >
-              <FolderOpen className="w-6 h-6 text-violet-500" />
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(139,92,246,0.15)]">
+              <FolderOpen className="w-7 h-7 text-violet-400 drop-shadow-sm" />
             </div>
-            <div>
-              <p className="font-medium text-base" style={{ color: 'var(--text-primary)' }}>
-                Proje Aç
-              </p>
-              <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Mevcut .etapp projesini aç
-              </p>
+            <div className="relative z-10">
+              <p className="font-semibold text-lg text-surface-100">Proje Aç</p>
+              <p className="text-sm text-surface-400 mt-1">Mevcut .etapp projesini aç</p>
             </div>
-            <kbd
-              className="text-xs font-mono"
-              style={{ color: 'var(--text-disabled)' }}
-            >
-              Ctrl+O
-            </kbd>
+            <kbd className="relative z-10 mt-auto text-[11px] font-mono text-surface-500 bg-surface-900/60 px-2 py-1 rounded border border-surface-700/50">Ctrl+O</kbd>
           </button>
         </div>
 
         {/* Features */}
-        <div className="glass w-full rounded-xl p-5">
-          <p
-            className="text-xs font-semibold uppercase tracking-wider mb-4"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            Özellikler
-          </p>
-          <div className="grid grid-cols-3 gap-3">
+        <div className="w-full max-w-lg mt-10 mb-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-px bg-gradient-to-r from-transparent to-surface-700 flex-1" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-surface-400">
+              Sistem Özellikleri
+            </p>
+            <div className="h-px bg-gradient-to-l from-transparent to-surface-700 flex-1" />
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
             {[
-              { icon: Database, label: 'SQLite + FTS5', desc: 'Hızlı tam metin arama' },
-              { icon: Shield,   label: 'Dosya Kilidi', desc: 'Eş zamanlı erişim koruması' },
-              { icon: Zap,      label: 'Portable',     desc: 'Kurulum gerektirmez' },
-            ].map(({ icon: Icon, label, desc }) => (
-              <div key={label} className="flex flex-col gap-1.5">
-                <Icon className="w-4 h-4" style={{ color: 'var(--brand-text)' }} />
-                <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+              { icon: Database, label: 'SQLite + FTS5', desc: 'Hızlı tam metin arama', color: 'text-blue-400', bg: 'bg-blue-500/10 border border-blue-500/20', hover: 'hover:border-blue-500/40' },
+              { icon: Shield,   label: 'Dosya Kilidi', desc: 'Eş zamanlı erişim koruması', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border border-emerald-500/20', hover: 'hover:border-emerald-500/40' },
+              { icon: Zap,      label: 'Windows Uyumlu', desc: 'Sağ tık ve Birlikte Aç desteği', color: 'text-amber-400', bg: 'bg-amber-500/10 border border-amber-500/20', hover: 'hover:border-amber-500/40' },
+            ].map(({ icon: Icon, label, desc, color, bg, hover }) => (
+              <div key={label} className={`p-4 rounded-xl bg-surface-800/30 flex flex-col items-center text-center gap-2 transition-all duration-300 hover:-translate-y-1 ${hover}`}>
+                <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mb-1 transition-colors duration-300`}>
+                  <Icon className={`w-5 h-5 ${color}`} />
+                </div>
+                <p className="text-sm font-semibold text-surface-200">
                   {label}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-[11px] text-surface-400 leading-tight px-1">
                   {desc}
                 </p>
               </div>

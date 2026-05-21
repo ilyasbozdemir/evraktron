@@ -54,9 +54,9 @@ html.light {
   --border-strong:  rgba(148,163,184,0.5);
 
   --text-primary:   #0f172a;   /* slate-900 */
-  --text-secondary: #475569;   /* slate-600 */
-  --text-muted:     #94a3b8;   /* slate-400 */
-  --text-disabled:  #cbd5e1;   /* slate-300 */
+  --text-secondary: #334155;   /* slate-700 */
+  --text-muted:     #64748b;   /* slate-500 */
+  --text-disabled:  #94a3b8;   /* slate-400 */
 
   --brand-bg:       #2563eb;
   --brand-bg-hover: #1d4ed8;
@@ -240,15 +240,15 @@ html, body, #root {
 .animate-exit     { animation: slideDown 0.15s ease-in; }
 
 /* ── Status badges ───────────────────────────────────────────────────────── */
-.status-beklemede  { @apply badge bg-amber-500/15 text-amber-500 border border-amber-500/30; }
-.status-islemde    { @apply badge bg-blue-500/15 text-blue-500 border border-blue-500/30; }
-.status-tamamlandi { @apply badge bg-emerald-500/15 text-emerald-500 border border-emerald-500/30; }
-.status-iptal      { @apply badge bg-rose-500/15 text-rose-500 border border-rose-500/30; }
+.status-beklemede  { @apply badge bg-amber-500/15 text-amber-600 dark:text-amber-500 border border-amber-500/30; }
+.status-islemde    { @apply badge bg-blue-500/15 text-blue-600 dark:text-blue-500 border border-blue-500/30; }
+.status-tamamlandi { @apply badge bg-emerald-500/15 text-emerald-600 dark:text-emerald-500 border border-emerald-500/30; }
+.status-iptal      { @apply badge bg-rose-500/15 text-rose-600 dark:text-rose-500 border border-rose-500/30; }
 
-.tip-gelen  { @apply badge bg-cyan-500/15 text-cyan-500 border border-cyan-500/30; }
-.tip-giden  { @apply badge bg-violet-500/15 text-violet-500 border border-violet-500/30; }
+.tip-gelen  { @apply badge bg-cyan-500/15 text-cyan-600 dark:text-cyan-500 border border-cyan-500/30; }
+.tip-giden  { @apply badge bg-violet-500/15 text-violet-600 dark:text-violet-500 border border-violet-500/30; }
 .tip-ic     { @apply badge; background: var(--bg-hover); color: var(--text-secondary); border: 1px solid var(--border-default); }
-.tip-diger  { @apply badge bg-amber-500/15 text-amber-500 border border-amber-500/30; }
+.tip-diger  { @apply badge bg-amber-500/15 text-amber-600 dark:text-amber-500 border border-amber-500/30; }
 
 /* ── Table ───────────────────────────────────────────────────────────────── */
 .data-table { @apply w-full text-sm; }
