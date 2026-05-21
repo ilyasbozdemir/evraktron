@@ -13,7 +13,7 @@ interface EvrakListProps {
   onRefresh: () => void;
 }
 
-type SortKey = 'no' | 'tip' | 'kurum' | 'tarih' | 'durum' | 'created_at';
+type SortKey = 'no' | 'tip' | 'kurum' | 'tarih' | 'durum' | 'created_at' | 'klasor' | 'raf_no';
 
 export function EvrakList({ onRefresh }: EvrakListProps) {
   const { evraklar, isLoadingEvraklar, selectedEvrakId, setSelectedEvrakId, showToast, setDirty } = useAppStore();
@@ -84,8 +84,10 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
           <thead>
             <tr>
               <ColHeader col="no" label="No" />
+              <ColHeader col="klasor" label="Klasör" />
               <ColHeader col="tip" label="Tip" />
               <ColHeader col="kurum" label="Kurum" />
+              <ColHeader col="raf_no" label="Raf No" />
               <ColHeader col="tarih" label="Tarih" />
               <ColHeader col="durum" label="Durum" />
               <th>Açıklama</th>
@@ -102,12 +104,14 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
                 <td>
                   <span className="font-mono text-xs text-brand-400">{evrak.no}</span>
                 </td>
+                <td className="max-w-[120px] truncate text-surface-200">{evrak.klasor || '—'}</td>
                 <td>
                   <span className={TIP_COLORS[evrak.tip] || 'badge'}>
                     {TIP_LABELS[evrak.tip] || evrak.tip}
                   </span>
                 </td>
                 <td className="max-w-[160px] truncate text-surface-300">{evrak.kurum || '—'}</td>
+                <td className="text-surface-400 text-xs font-mono">{evrak.raf_no || '—'}</td>
                 <td className="text-surface-400 text-xs font-mono">{formatDate(evrak.tarih)}</td>
                 <td>
                   <span className={DURUM_COLORS[evrak.durum] || 'badge'}>

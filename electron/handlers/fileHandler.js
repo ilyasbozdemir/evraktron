@@ -114,6 +114,8 @@ function ensureSchema(db) {
       durum       TEXT NOT NULL DEFAULT 'beklemede',
       aciklama    TEXT,
       notlar      TEXT,
+      klasor      TEXT,
+      raf_no      TEXT,
       created_at  TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
     );

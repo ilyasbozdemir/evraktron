@@ -22,6 +22,8 @@ export interface Evrak {
   durum: EvrakDurum;
   aciklama: string;
   notlar: string;
+  klasor?: string;
+  raf_no?: string;
   created_at: string;
   updated_at: string;
 }

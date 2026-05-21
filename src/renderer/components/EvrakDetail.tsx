@@ -123,6 +123,17 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">Klasör</label>
+                  <input className="input" value={form.klasor || ''} onChange={e => handleChange('klasor', e.target.value)} placeholder="Proje klasörü…" />
+                </div>
+                <div>
+                  <label className="label">Raf No</label>
+                  <input className="input" value={form.raf_no || ''} onChange={e => handleChange('raf_no', e.target.value)} placeholder="Fiziksel raf / dolap…" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 {/* Tip Select */}
                 <div>
                   <label className="label">Tip</label>
