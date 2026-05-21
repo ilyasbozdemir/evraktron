@@ -26,6 +26,7 @@ export default defineConfig({
       }
     },
     plugins: [react()],
-    root: 'src/renderer'
+    root: 'src/renderer',
+    publicDir: resolve(__dirname, 'public')
   }
 });

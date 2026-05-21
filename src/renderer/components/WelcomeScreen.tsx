@@ -53,15 +53,12 @@ export function WelcomeScreen() {
       <div className="relative z-10 flex flex-col items-center max-w-2xl w-full px-8">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-4">
-          <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center p-2"
-            style={{
-              background: 'linear-gradient(135deg, var(--brand-bg), #1d4ed8)',
-              boxShadow: 'var(--shadow-glow)',
-            }}
-          >
-            <img src="./icon.png" alt="Evrak Takip App" className="w-full h-full object-contain drop-shadow-md" />
-          </div>
+          <img 
+            src="/icon.png" 
+            alt="Evrak Takip App Logo" 
+            className="w-24 h-24 rounded-3xl object-cover"
+            style={{ boxShadow: 'var(--shadow-glow)' }}
+          />
           <div className="text-center">
             <h1
               className="text-4xl font-bold tracking-tight"
