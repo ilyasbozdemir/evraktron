@@ -55,7 +55,7 @@ function setupDbHandlers(ipcMain, state, setState) {
       VALUES (@no, @tip, @kurum, @tarih, @durum, @aciklama, @notlar)
     `).run({ no:'', tip:'gelen', kurum:'', tarih: new Date().toISOString().split('T')[0],
               durum:'beklemede', aciklama:'', notlar:'', ...data });
-    state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, not) VALUES (?, 'olusturuldu', 'Kullanıcı', 'Evrak oluşturuldu')`).run(res.lastInsertRowid);
+    state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (?, 'olusturuldu', 'Kullanıcı', 'Evrak oluşturuldu')`).run(res.lastInsertRowid);
     return state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(res.lastInsertRowid);
   });
 
@@ -65,7 +65,7 @@ function setupDbHandlers(ipcMain, state, setState) {
     const fields = Object.keys(data).filter(k => allowed.includes(k)).map(k => `${k} = @${k}`).join(', ');
     if (!fields) return null;
     state.db.prepare(`UPDATE evraklar SET ${fields}, updated_at = datetime('now') WHERE id = @id`).run({ ...data, id });
-    state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, not) VALUES (?, 'guncellendi', 'Kullanıcı', 'Evrak güncellendi')`).run(id);
+    state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (?, 'guncellendi', 'Kullanıcı', 'Evrak güncellendi')`).run(id);
     return state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(id);
   });
 
@@ -83,7 +83,7 @@ function setupDbHandlers(ipcMain, state, setState) {
 
   ipcMain.handle('db:hareketler:add', (_e, data) => {
     if (!state.db) return null;
-    const res = state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, not) VALUES (@evrak_id, @islem_tipi, @kullanici, @not)`).run(data);
+    const res = state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (@evrak_id, @islem_tipi, @kullanici, @not)`).run(data);
     return state.db.prepare('SELECT * FROM hareketler WHERE id = ?').get(res.lastInsertRowid);
   });
 
@@ -106,7 +106,7 @@ function setupDbHandlers(ipcMain, state, setState) {
       INSERT INTO ekler (evrak_id, dosya_yolu, orijinal_ad, boyut, mime_type, hash)
       VALUES (?, ?, ?, ?, ?, ?)
     `).run(evrakId, `attachments/${fileName}`, path.basename(srcPath), stat.size, getMimeType(srcPath), hash);
-    state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, not) VALUES (?, 'ek_eklendi', 'Kullanıcı', ?)`).run(evrakId, `"${path.basename(srcPath)}" eklendi`);
+    state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (?, 'ek_eklendi', 'Kullanıcı', ?)`).run(evrakId, `"${path.basename(srcPath)}" eklendi`);
     return state.db.prepare('SELECT * FROM ekler WHERE id = ?').get(res.lastInsertRowid);
   });
 

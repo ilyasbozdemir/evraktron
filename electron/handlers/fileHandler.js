@@ -103,7 +103,7 @@ function ensureSchema(db) {
       tarih       TEXT NOT NULL DEFAULT (datetime('now')),
       islem_tipi  TEXT NOT NULL,
       kullanici   TEXT DEFAULT 'Sistem',
-      not         TEXT
+      "not"       TEXT
     );
 
     CREATE TABLE IF NOT EXISTS ekler (
