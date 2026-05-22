@@ -49,8 +49,8 @@ function seedDefaultTemplates(db) {
       // Basvuru
       { key: 'ruhsat_sahibi',  label: 'Ruhsat Sahibi',      type: 'text',     required: true, width: 'lg' },
       { key: 'ruhsat_turu',    label: 'Ruhsat Turu',        type: 'select',   required: true,
-      { key: 'cinsi',    label: 'Cinsi',        type: 'text',   required: true,
-        options: ['Isyeri Acma', 'Yapi Ruhsati', 'Iskan', 'Tadilat', 'Ruhsat Yenileme', 'Diger'],                  width: 'md' },
+        options: ['Isyeri Acma', 'Yapi Ruhsati', 'Iskan', 'Tadilat', 'Ruhsat Yenileme', 'Diger'], width: 'md' },
+      { key: 'cinsi',          label: 'Cinsi',              type: 'text',     required: true,   width: 'md' },
       // Tapu/Konum
       { key: 'parsel_no',      label: 'Parsel No',          type: 'text',     required: false,                           width: 'sm' },
       { key: 'ada_no',         label: 'Ada No',             type: 'text',     required: false,                           width: 'sm' },
