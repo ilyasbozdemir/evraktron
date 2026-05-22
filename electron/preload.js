@@ -55,6 +55,21 @@ contextBridge.exposeInMainWorld('evraktron', {
     getStats: () => ipcRenderer.invoke('db:stats'),
   },
 
+  // Templates
+  template: {
+    list: () => ipcRenderer.invoke('template:list'),
+    get: (id) => ipcRenderer.invoke('template:get', id),
+    save: (template) => ipcRenderer.invoke('template:save', template),
+    delete: (id) => ipcRenderer.invoke('template:delete', id),
+    nextNo: (templateId, year) => ipcRenderer.invoke('template:next-no', templateId, year),
+    importJson: () => ipcRenderer.invoke('template:import-json'),
+    exportJson: (ids) => ipcRenderer.invoke('template:export-json', ids),
+    importExcelDefinition: () => ipcRenderer.invoke('template:import-excel-definition'),
+    bulkImportExcel: (templateId) => ipcRenderer.invoke('template:bulk-import-excel', templateId),
+    bulkImportJson: (templateId) => ipcRenderer.invoke('template:bulk-import-json', templateId),
+    exportBlankExcel: (templateId) => ipcRenderer.invoke('template:export-blank-excel', templateId),
+  },
+
   // Export
   export: {
     toExcel: (filters) => ipcRenderer.invoke('export:excel', filters),
@@ -68,3 +83,4 @@ contextBridge.exposeInMainWorld('evraktron', {
     showInFolder: (filePath) => ipcRenderer.invoke('shell:show-in-folder', filePath),
   },
 });
+

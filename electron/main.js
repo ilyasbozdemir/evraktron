@@ -5,6 +5,7 @@ import os from 'os';
 import { setupFileHandlers, packEvrakFile } from './handlers/fileHandler';
 import { setupDbHandlers } from './handlers/dbHandler';
 import { setupExportHandlers } from './handlers/exportHandler';
+import { setupTemplateHandlers } from './handlers/templateHandler';
 
 // ─── Portable mode: config next to .exe ──────────────────────────────────────
 const isPortable = process.env.PORTABLE_EXECUTABLE_DIR != null;
@@ -26,7 +27,7 @@ let isUnsaved = false;
 // ─── File association: argv ───────────────────────────────────────────────────
 function getOpenFilePath() {
   const args = process.argv.slice(isDev ? 2 : 1);
-  const evrakArg = args.find(a => a.endsWith('.etapp') && fs.existsSync(a));
+  const evrakArg = args.find(a => (a.endsWith('.etap') || a.endsWith('.etapp')) && fs.existsSync(a));
   return evrakArg || null;
 }
 
@@ -144,10 +145,11 @@ app.whenReady().then(() => {
   setupFileHandlers(ipcMain, state, setState);
   setupDbHandlers(ipcMain, state, setState);
   setupExportHandlers(ipcMain, state, setState);
+  setupTemplateHandlers(ipcMain, state);
 
   // Second instance / file open on Windows
   app.on('second-instance', (_event, argv) => {
-    const filePath = argv.find(a => a.endsWith('.etapp') && fs.existsSync(a));
+    const filePath = argv.find(a => (a.endsWith('.etap') || a.endsWith('.etapp')) && fs.existsSync(a));
     if (filePath && mainWindow) {
       mainWindow.focus();
       mainWindow.webContents.send('file:open-request', filePath);

@@ -10,6 +10,8 @@ import { EvrakList } from './EvrakList';
 import { EvrakDetail } from './EvrakDetail';
 import { ExportModal } from './ExportModal';
 import { AyarlarModal } from './AyarlarModal';
+import { NewEvrakModal } from './NewEvrakModal';
+import { TemplateManager } from './TemplateManager';
 import { cn } from '../lib/utils';
 
 type SideTab = 'evraklar' | 'istatistikler';
@@ -24,6 +26,8 @@ export function MainLayout() {
   const [sideTab, setSideTab] = useState<SideTab>('evraklar');
   const [showExport, setShowExport] = useState(false);
   const [showAyarlar, setShowAyarlar] = useState(false);
+  const [showNewEvrak, setShowNewEvrak] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const loadEvraklar = useCallback(async (query?: string) => {
     setLoadingEvraklar(true);
@@ -72,31 +76,14 @@ export function MainLayout() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const handleNewEvrak = useCallback(async () => {
-    const { ayarlar, evraklar } = useAppStore.getState();
-    
-    // Create initial metadata object from template keys
-    const metaObj: Record<string, string> = {};
-    if (ayarlar.varsayilan_meta_keys) {
-      ayarlar.varsayilan_meta_keys.split(',').map(k => k.trim()).filter(Boolean).forEach(k => {
-        metaObj[k] = '';
-      });
-    }
+  const handleNewEvrak = useCallback(() => {
+    setShowNewEvrak(true);
+  }, []);
 
-    // Compute next sequential number based on total count
-    const nextNo = evraklar.length + 1;
-
-    const evrak = await window.evraktron.db.createEvrak({
-      no: String(nextNo),
-      tip: 'gelen',
-      durum: 'beklemede',
-      kurum: ayarlar.kurum_adi || '',
-      klasor: ayarlar.varsayilan_klasor || '',
-      metadata: Object.keys(metaObj).length > 0 ? JSON.stringify(metaObj) : '',
-    });
+  const handleEvrakCreated = useCallback(async (evrakId: number) => {
     await loadEvraklar(searchQuery || undefined);
     await loadStats();
-    setSelectedEvrakId(evrak.id);
+    setSelectedEvrakId(evrakId);
     setDirty(true);
   }, [loadEvraklar, loadStats, searchQuery, setSelectedEvrakId, setDirty]);
 
@@ -178,6 +165,9 @@ export function MainLayout() {
                 Dosya
               </p>
               <nav className="space-y-0.5">
+                <button onClick={() => setShowTemplates(true)} className="sidebar-item w-full">
+                  <Tag className="w-4 h-4" /> Şablonlar
+                </button>
                 <button onClick={() => setShowAyarlar(true)} className="sidebar-item w-full text-brand-500 font-medium">
                   <Settings className="w-4 h-4" /> Proje Ayarları
                 </button>
@@ -279,6 +269,13 @@ export function MainLayout() {
 
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}
       {showAyarlar && <AyarlarModal onClose={() => setShowAyarlar(false)} onRefresh={loadAyarlar} />}
+      {showNewEvrak && (
+        <NewEvrakModal
+          onClose={() => setShowNewEvrak(false)}
+          onCreated={handleEvrakCreated}
+        />
+      )}
+      {showTemplates && <TemplateManager onClose={() => setShowTemplates(false)} />}
     </Tooltip.Provider>
   );
 }

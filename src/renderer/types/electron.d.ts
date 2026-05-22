@@ -78,6 +78,58 @@ export interface EvrakFilters {
   limit?: number;
 }
 
+// ── Template types ─────────────────────────────────────────────────────────────
+
+export interface TemplateField {
+  key: string;
+  label: string;
+  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox';
+  required?: boolean;
+  default?: string;
+  autoIncrement?: boolean;
+  options?: string[];
+  width?: 'sm' | 'md' | 'lg' | 'full';
+}
+
+export interface TemplateNumbering {
+  pattern?: string;
+  autoIncrement?: boolean;
+  resetPerYear?: boolean;
+  yearField?: string;
+  seqField?: string;
+}
+
+export interface EvrakTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  fields: TemplateField[];
+  numbering?: TemplateNumbering;
+  defaultTip?: string;
+  defaultDurum?: string;
+  statusFlow?: string[];
+}
+
+export interface BulkImportResult {
+  success: boolean;
+  totalImported: number;
+  totalErrors: number;
+  sheetResults?: { sheet: string; imported: number; errors: number }[];
+  error?: string;
+}
+
+export interface TemplateImportResult {
+  success: boolean;
+  imported?: string[];
+  errors?: string[];
+  fields?: TemplateField[];
+  error?: string;
+}
+
+// ── ElectronAPI ────────────────────────────────────────────────────────────────
+
 export interface ElectronAPI {
   window: {
     minimize: () => void;
@@ -114,6 +166,19 @@ export interface ElectronAPI {
     getAyarlar: () => Promise<Record<string, string>>;
     setAyar: (key: string, value: string) => Promise<boolean>;
     getStats: () => Promise<DbStats>;
+  };
+  template: {
+    list: () => Promise<EvrakTemplate[]>;
+    get: (id: string) => Promise<EvrakTemplate | null>;
+    save: (template: Partial<EvrakTemplate>) => Promise<{ success: boolean; id: string }>;
+    delete: (id: string) => Promise<{ success: boolean }>;
+    nextNo: (templateId: string, year?: number) => Promise<{ no: string; seq: number }>;
+    importJson: () => Promise<TemplateImportResult>;
+    exportJson: (ids?: string[]) => Promise<{ success: boolean; filePath?: string; count?: number }>;
+    importExcelDefinition: () => Promise<TemplateImportResult>;
+    bulkImportExcel: (templateId: string) => Promise<BulkImportResult>;
+    bulkImportJson: (templateId: string) => Promise<BulkImportResult>;
+    exportBlankExcel: (templateId: string) => Promise<{ success: boolean; filePath?: string }>;
   };
   export: {
     toExcel: (filters?: EvrakFilters) => Promise<{ success: boolean; filePath?: string; error?: string }>;

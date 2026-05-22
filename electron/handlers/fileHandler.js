@@ -37,6 +37,7 @@ function acquireLock(filePath) {
     }
   }
   fs.writeFileSync(lockPath, JSON.stringify({ pid: process.pid, at: new Date().toISOString() }));
+  
   return { locked: false };
 }
 
