@@ -48,11 +48,20 @@ export function MainLayout() {
 
   const addRecentSearch = (query: string) => {
     if (!query || !query.trim()) return;
+    const q = query.trim().toLocaleLowerCase('tr-TR');
+    
     setRecentSearches(prev => {
-      const next = [query.trim(), ...prev.filter(q => q !== query.trim())].slice(0, 5);
+      const next = [q, ...prev.filter(x => x !== q)].slice(0, 5);
       localStorage.setItem('evraktron_recent_searches', JSON.stringify(next));
       return next;
     });
+
+    try {
+      const counts = JSON.parse(localStorage.getItem('evraktron_search_counts') || '{}');
+      counts[q] = (counts[q] || 0) + 1;
+      localStorage.setItem('evraktron_search_counts', JSON.stringify(counts));
+      window.dispatchEvent(new Event('evraktron_search_stats_updated'));
+    } catch {}
   };
 
   useEffect(() => {
@@ -508,6 +517,25 @@ export function MainLayout() {
 
 function StatsPanel() {
   const { stats } = useAppStore();
+  const [topSearches, setTopSearches] = useState<{query: string, count: number}[]>([]);
+
+  const loadSearchStats = () => {
+    try {
+      const counts = JSON.parse(localStorage.getItem('evraktron_search_counts') || '{}');
+      const sorted = Object.entries(counts)
+        .map(([query, count]) => ({ query, count: count as number }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+      setTopSearches(sorted);
+    } catch {}
+  };
+
+  useEffect(() => {
+    loadSearchStats();
+    window.addEventListener('evraktron_search_stats_updated', loadSearchStats);
+    return () => window.removeEventListener('evraktron_search_stats_updated', loadSearchStats);
+  }, []);
+
   if (!stats) return <div className="p-6 text-sm" style={{ color: 'var(--text-muted)' }}>Yükleniyor…</div>;
 
   const durumRenkler: Record<string, string> = {
@@ -570,6 +598,29 @@ function StatsPanel() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Top Searches */}
+        <div className="card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>En Çok Aranan Kelimeler</p>
+            <Search className="w-3.5 h-3.5 text-brand-400 opacity-70" />
+          </div>
+          {topSearches.length > 0 ? (
+            <div className="space-y-2">
+              {topSearches.map((s, i) => (
+                <div key={s.query} className="flex items-center justify-between text-xs bg-surface-800/50 p-2 rounded-lg border border-surface-700/50">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <span className="text-[10px] font-bold text-surface-500 w-4">{i + 1}.</span>
+                    <span className="text-surface-200 font-medium truncate">{s.query}</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-brand-400 bg-brand-500/10 px-1.5 py-0.5 rounded">{s.count} kez</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-surface-500 italic pt-2">Henüz arama verisi yok.</p>
+          )}
         </div>
       </ScrollArea.Viewport>
     </ScrollArea.Root>
