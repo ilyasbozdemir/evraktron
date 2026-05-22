@@ -46,16 +46,7 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
       else defaults[field.key] = '';
     }
 
-    // Get next sequence number
-    if (t.numbering?.autoIncrement) {
-      try {
-        const { no, seq } = await window.evraktron.template.nextNo(t.id, year);
-        defaults['__doc_no'] = no;
-        if (t.numbering.seqField) defaults[t.numbering.seqField] = String(seq);
-        if (t.numbering.yearField) defaults[t.numbering.yearField] = String(year);
-      } catch {}
-    }
-
+    // Get next sequence number logic removed by user request
     setFormData(defaults);
     setStep('fill');
   };
@@ -82,20 +73,13 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
         meta[field.key] = formData[field.key] || '';
       }
 
-      let docNo = formData['__doc_no'] || '';
-      if (!docNo) {
-        if (selected.numbering?.pattern) {
-          docNo = selected.numbering.pattern.replace(/\{([^}:]+)(?::([^}]+))?\}/g, (_, key, fmt) => {
-            const val = meta[key] ?? meta[key.toLowerCase()] ?? meta[key.toUpperCase()] ?? '';
-            if (fmt && fmt.startsWith('0')) {
-              return String(val).padStart(parseInt(fmt, 10), '0');
-            }
-            return String(val);
-          });
-        } else {
-          docNo = formData[selected.numbering?.seqField || 'sira_no'] || '';
-        }
+      const siraNo = formData['yil_sira_no'] || formData['sira_no'];
+      if (!siraNo) {
+        useAppStore.getState().showToast('Lütfen Dosya / Sıra Numarasını giriniz!', 'error');
+        setLoading(false);
+        return;
       }
+      const docNo = siraNo;
 
       const ayarlar = useAppStore.getState().ayarlar;
 
@@ -114,6 +98,13 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
 
       onCreated(evrak.id);
       onClose();
+    } catch (err: any) {
+      const msg = err.message || '';
+      if (msg.includes('UNIQUE constraint failed')) {
+        useAppStore.getState().showToast('Bu dosya numarası zaten kullanımda! Başka bir numara girin.', 'error');
+      } else {
+        useAppStore.getState().showToast('Evrak oluşturulurken hata oluştu.', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -284,22 +275,7 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
                 ))}
               </div>
 
-              {/* Doc number preview / edit */}
-              {formData['__doc_no'] !== undefined && (
-                <div className="mt-4 p-4 rounded-lg bg-brand-500/10 border border-brand-500/30">
-                  <label className="block text-xs font-medium text-brand-400 mb-1.5">Evrak Numarası (Düzenlenebilir)</label>
-                  <input
-                    type="text"
-                    value={formData['__doc_no']}
-                    onChange={e => handleFieldChange('__doc_no', e.target.value)}
-                    className="input w-full h-10 text-lg font-mono font-bold text-brand-400 bg-surface-900/50 border-brand-500/40 focus:border-brand-400"
-                    placeholder="Evrak numarasını girin..."
-                  />
-                  <p className="text-[10px] text-brand-400/70 mt-1.5">
-                    * Sistem sıradaki numarayı otomatik getirdi. İsterseniz elle değiştirebilirsiniz.
-                  </p>
-                </div>
-              )}
+
             </div>
 
             <div className="p-4 border-t border-surface-700 flex justify-end gap-2">

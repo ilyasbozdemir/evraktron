@@ -38,13 +38,7 @@ function seedDefaultTemplates(db) {
     description: 'Belediye ruhsat işlemleri için evrak takip şablonu',
     icon: '🏛️',
     color: '#3b82f6',
-    numbering: {
-      pattern: '{YIL}-R-{YIL_SIRA_NO:04d}',
-      autoIncrement: true,
-      resetPerYear: true,
-      yearField: 'yil',
-      seqField: 'yil_sira_no',
-    },
+
     fields: [
       // Basvuru
       { key: 'ruhsat_sahibi',  label: 'Ruhsat Sahibi',      type: 'text',     required: true, width: 'lg' },
@@ -56,8 +50,8 @@ function seedDefaultTemplates(db) {
       { key: 'ada_no',         label: 'Ada No',             type: 'text',     required: false,                           width: 'sm' },
       { key: 'adres',          label: 'Adres',              type: 'textarea', required: false,                           width: 'full' },
       // Fiziksel Dosya Bilgileri
-      { key: 'yil',            label: 'Yıl',                 type: 'number',   required: false, width: 'sm' },
-      { key: 'yil_sira_no',    label: 'Yıl Sıra No (Dosya No)', type: 'number', required: false, width: 'sm' },
+      { key: 'yil',            label: 'Yıl',                 type: 'number',   required: false, width: 'sm', hint: 'Örn: 2026' },
+      { key: 'yil_sira_no',    label: 'Yıl Sıra No (Dosya No)', type: 'text', required: true, width: 'sm', hint: 'Örn: 2026/1 veya 5' },
       { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
     ],
     defaultTip: 'gelen',
@@ -71,13 +65,7 @@ function seedDefaultTemplates(db) {
     description: 'Resmi yazışma ve iç yazışma takip şablonu',
     icon: '✉️',
     color: '#8b5cf6',
-    numbering: {
-      pattern: '{YIL}-Y-{SIRA_NO:04d}',
-      autoIncrement: true,
-      resetPerYear: true,
-      yearField: 'yil',
-      seqField: 'sira_no',
-    },
+
     fields: [
       { key: 'konu',      label: 'Konu',             type: 'text',   required: true,                           width: 'lg' },
       { key: 'gonderen',  label: 'Gönderen',         type: 'text',   required: true,                           width: 'md' },
@@ -86,8 +74,8 @@ function seedDefaultTemplates(db) {
       { key: 'gizlilik', label: 'Gizlilik Derecesi', type: 'select',
         options: ['Normal', 'Gizli', 'Çok Gizli'],                                                               width: 'sm' },
       // Fiziksel Dosya Bilgileri
-      { key: 'yil',            label: 'Yıl',                 type: 'number',   required: false, width: 'sm' },
-      { key: 'sira_no',        label: 'Sıra No (Dosya No)', type: 'number', required: false, width: 'sm' },
+      { key: 'yil',            label: 'Yıl',                 type: 'number',   required: false, width: 'sm', hint: 'Örn: 2026' },
+      { key: 'sira_no',        label: 'Sıra No (Dosya No)', type: 'text', required: true, width: 'sm', hint: 'Örn: 2026/1 veya 5' },
       { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
     ],
     defaultTip: 'gelen',
