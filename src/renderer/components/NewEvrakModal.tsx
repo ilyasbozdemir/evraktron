@@ -21,6 +21,7 @@ interface TemplateField {
   required?: boolean;
   default?: string;
   autoIncrement?: boolean;
+  hint?: string;
   options?: string[];
   width?: 'sm' | 'md' | 'lg' | 'full';
 }
@@ -265,7 +266,11 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
                         onChange={e => handleFieldChange(field.key, e.target.value)}
                         className="input h-8 text-xs w-full"
                         readOnly={field.autoIncrement}
+                        placeholder={field.hint || ''}
                       />
+                    )}
+                    {field.hint && (
+                      <p className="text-[10px] text-surface-600 mt-1 leading-tight">{field.hint}</p>
                     )}
                   </div>
                 ))}

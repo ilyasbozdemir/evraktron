@@ -48,15 +48,21 @@ function seedDefaultTemplates(db) {
       seqField: 'yil_sira_no',
     },
     fields: [
-      { key: 'yil',          label: 'Yıl',              type: 'number', required: true, default: '$CURRENT_YEAR', width: 'sm' },
-      { key: 'yil_sira_no',  label: 'Yıldaki Sıra No',  type: 'number', required: true, autoIncrement: true,      width: 'sm' },
-      { key: 'genel_dosya_no', label: 'Genel Dosya No', type: 'text',   required: true,                           width: 'md' },
-      { key: 'basvuran',     label: 'Başvuran Ad/Ünvan', type: 'text',   required: true,                           width: 'lg' },
-      { key: 'ruhsat_turu',  label: 'Ruhsat Türü',       type: 'select', required: true,
-        options: ['İşyeri Açma', 'Yapı Ruhsatı', 'İskân', 'Tadilat', 'Diğer'],                                    width: 'md' },
-      { key: 'parsel_no',    label: 'Parsel No',          type: 'text',                                             width: 'sm' },
-      { key: 'ada_no',       label: 'Ada No',             type: 'text',                                             width: 'sm' },
-      { key: 'adres',        label: 'Adres',              type: 'textarea',                                          width: 'full' },
+      // Numaralandirma
+      { key: 'yil',            label: 'Yil',                type: 'number',   required: true,  default: '$CURRENT_YEAR', width: 'sm' },
+      { key: 'yil_sira_no',   label: 'Yildaki Sira No',    type: 'number',   required: true,  autoIncrement: true,      width: 'sm' },
+      { key: 'genel_dosya_no', label: 'Genel Dosya No',     type: 'text',     required: true,                            width: 'md' },
+      // Kurum/Fiziksel - opsiyonel
+      { key: 'kurum_dosya_no', label: 'Kurum Dosya No',     type: 'text',     required: false, hint: 'Kurumun kendi dosya numarasi (bos birakilabilir)', width: 'md' },
+      { key: 'raf_no',         label: 'Raf No',             type: 'text',     required: false, hint: 'Fiziksel raf numarasi - bos birakilabilir',         width: 'sm' },
+      // Basvuru
+      { key: 'basvuran',       label: 'Basvuran Ad/Unvan',  type: 'text',     required: true,                            width: 'lg' },
+      { key: 'ruhsat_turu',    label: 'Ruhsat Turu',        type: 'select',   required: true,
+        options: ['Isyeri Acma', 'Yapi Ruhsati', 'Iskan', 'Tadilat', 'Ruhsat Yenileme', 'Diger'],                  width: 'md' },
+      // Tapu/Konum
+      { key: 'parsel_no',      label: 'Parsel No',          type: 'text',     required: false,                           width: 'sm' },
+      { key: 'ada_no',         label: 'Ada No',             type: 'text',     required: false,                           width: 'sm' },
+      { key: 'adres',          label: 'Adres',              type: 'textarea', required: false,                           width: 'full' },
     ],
     defaultTip: 'gelen',
     defaultDurum: 'beklemede',
@@ -92,7 +98,7 @@ function seedDefaultTemplates(db) {
   };
 
   const stmt = db.prepare(`
-    INSERT OR IGNORE INTO templates (id, name, description, icon, color, definition)
+    INSERT OR REPLACE INTO templates (id, name, description, icon, color, definition)
     VALUES (?, ?, ?, ?, ?, ?)
   `);
 
