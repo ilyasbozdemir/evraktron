@@ -64,29 +64,48 @@ function parseExcelBulkRows(worksheet, template) {
   const fieldKeys = template.fields.map(f => f.key);
 
   return rows.map((row, idx) => {
+    // Şablonun 2. satırındaki bilgilendirme (hint) satırını atla
+    if (Object.values(row).some(v => typeof v === 'string' && v.startsWith('[') && v.endsWith(']'))) return null;
+
     const meta = { __template_id: template.id };
     for (const key of fieldKeys) {
-      // Try exact key match, Turkish label match, or case-insensitive
       const field = template.fields.find(f => f.key === key);
       const label = field?.label || key;
-      const val = row[key] ?? row[label] ?? row[label.toLowerCase()] ?? '';
+      
+      // Try to find a matching header in the row (case-insensitive, exact key or label match)
+      const matchingKey = Object.keys(row).find(k => 
+        k === key || k === label || k.toLowerCase() === label.toLowerCase() || k.toLowerCase() === key.toLowerCase()
+      );
+      
+      const val = matchingKey ? row[matchingKey] : '';
       meta[key] = String(val).trim();
     }
 
+    const matchingNoKey = Object.keys(row).find(k => 
+      ['no', 'evrak no', 'dosya no', 'dosya_no', 'sira_no', 'kayit no', 'belge no'].includes(k.toLowerCase().trim())
+    );
+    const docNo = matchingNoKey ? row[matchingNoKey] : String(idx + 1);
+    
+    // Explicit mappings for static columns (with robust fallbacks)
+    const getVal = (possibleNames) => {
+      const match = Object.keys(row).find(k => possibleNames.includes(k.toLowerCase().trim()));
+      return match ? row[match] : '';
+    };
+
     return {
-      no: row['no'] || row['No'] || row['Evrak No'] || row['dosya_no'] || row['Dosya No'] || String(idx + 1),
-      tip: row['tip'] || row['Tip'] || template.defaultTip || 'ic',
-      kurum: row['kurum'] || row['Kurum'] || '',
-      birim: row['birim'] || row['Birim'] || '',
-      tarih: row['tarih'] || row['Tarih'] || new Date().toISOString().split('T')[0],
-      durum: row['durum'] || row['Durum'] || template.defaultDurum || 'beklemede',
-      aciklama: row['aciklama'] || row['Açıklama'] || row['acıklama'] || '',
-      notlar: row['notlar'] || row['Notlar'] || '',
-      klasor: row['klasor'] || row['Klasör'] || '',
-      raf_no: row['raf_no'] || row['Raf No'] || '',
+      no: String(docNo).trim(),
+      tip: getVal(['tip', 'evrak tipi']) || template.defaultTip || 'ic',
+      kurum: getVal(['kurum', 'gönderen kurum', 'geldiği kurum']) || '',
+      birim: getVal(['birim', 'alt birim', 'şube']) || '',
+      tarih: getVal(['tarih', 'evrak tarihi']) || new Date().toISOString().split('T')[0],
+      durum: getVal(['durum', 'evrak durumu']) || template.defaultDurum || 'beklemede',
+      aciklama: getVal(['açıklama', 'aciklama', 'konu']) || '',
+      notlar: getVal(['notlar', 'not']) || '',
+      klasor: getVal(['klasör', 'klasor']) || '',
+      raf_no: getVal(['raf no', 'raf_no', 'raf']) || '',
       metadata: JSON.stringify(meta),
     };
-  }).filter(r => r.no); // skip empty rows
+  }).filter(r => r && r.no); // filter out skipped hint rows or completely empty rows
 }
 
 // ── Handler setup ─────────────────────────────────────────────────────────────
@@ -224,16 +243,42 @@ export function setupTemplateHandlers(ipcMain, state) {
       const wb = xlsxRead(fs.readFileSync(filePaths[0]));
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = xlsxUtils.sheet_to_json(ws, { defval: '' });
+      if (!rows.length) return { success: false, error: 'Excel dosyası boş.' };
 
-      const fields = rows.map(row => ({
-        key: String(row['key'] || row['Anahtar'] || '').trim().replace(/\s+/g, '_'),
-        label: String(row['label'] || row['Etiket'] || row['Ad'] || '').trim(),
-        type: String(row['type'] || row['Tip'] || 'text').trim().toLowerCase(),
-        required: ['true', '1', 'evet', 'yes'].includes(String(row['required'] || row['Zorunlu'] || '').toLowerCase()),
-        default: String(row['default'] || row['Varsayılan'] || '').trim(),
-        options: String(row['options'] || row['Seçenekler'] || '').split(',').map(s => s.trim()).filter(Boolean),
-        width: String(row['width'] || row['Genişlik'] || 'md').trim(),
-      })).filter(f => f.key && f.label);
+      let fields = [];
+      const firstRow = rows[0];
+      
+      // Kontrol edelim: Gelişmiş tanım exceli mi, yoksa düz veri exceli mi?
+      const isDefinitionFile = ('key' in firstRow || 'Anahtar' in firstRow) && ('label' in firstRow || 'Etiket' in firstRow || 'Ad' in firstRow);
+
+      if (isDefinitionFile) {
+        fields = rows.map(row => ({
+          key: String(row['key'] || row['Anahtar'] || '').trim().replace(/\s+/g, '_'),
+          label: String(row['label'] || row['Etiket'] || row['Ad'] || '').trim(),
+          type: String(row['type'] || row['Tip'] || 'text').trim().toLowerCase(),
+          required: ['true', '1', 'evet', 'yes'].includes(String(row['required'] || row['Zorunlu'] || '').toLowerCase()),
+          default: String(row['default'] || row['Varsayılan'] || '').trim(),
+          options: String(row['options'] || row['Seçenekler'] || '').split(',').map(s => s.trim()).filter(Boolean),
+          width: String(row['width'] || row['Genişlik'] || 'md').trim(),
+        })).filter(f => f.key && f.label);
+      } else {
+        // Düz Veri Exceli: Doğrudan sütun başlıklarını okuyup bir şablona dönüştürelim!
+        const headers = Object.keys(firstRow);
+        fields = headers.map(h => {
+          const key = h.toLowerCase()
+            .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+            .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+            .replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+            
+          let type = 'text';
+          const lowerH = h.toLowerCase();
+          if (lowerH.includes('tarih')) type = 'date';
+          else if (lowerH.includes('sayı') || lowerH.includes('no') || lowerH.includes('adet')) type = 'number';
+          else if (lowerH.includes('açıklama') || lowerH.includes('adres')) type = 'textarea';
+          
+          return { key, label: h, type, required: false, width: 'md' };
+        }).filter(f => f.key && f.label);
+      }
 
       return { success: true, fields };
     } catch (e) {
