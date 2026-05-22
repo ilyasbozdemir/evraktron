@@ -286,16 +286,38 @@ export function setupTemplateHandlers(ipcMain, state) {
     }
   });
 
-  // ── Bulk Import: Excel rows → evraklar (using a template) ────────────────────
-  ipcMain.handle('template:bulk-import-excel', async (_e, templateId) => {
-    if (!state.db) return { success: false, error: 'Açık dosya yok' };
-
+  // ── Preview Bulk Import: Just read and return count ─────────────────────────
+  ipcMain.handle('template:preview-bulk-excel', async (_e, templateId) => {
     const { filePaths, canceled } = await dialog.showOpenDialog({
       title: 'Toplu Evrak Excel Dosyası Seç',
       filters: [{ name: 'Excel Dosyası', extensions: ['xlsx', 'xls'] }],
       properties: ['openFile'],
     });
-    if (canceled || !filePaths.length) return { success: false };
+    if (canceled || !filePaths.length) return { success: false, canceled: true };
+
+    const appDbInst = getAppDb();
+    const tmplRow = appDbInst.prepare('SELECT * FROM templates WHERE id = ?').get(templateId);
+    if (!tmplRow) return { success: false, error: 'Template bulunamadı' };
+    const template = JSON.parse(tmplRow.definition);
+
+    try {
+      const wb = xlsxRead(fs.readFileSync(filePaths[0]));
+      let totalRows = 0;
+      for (const sheetName of wb.SheetNames) {
+        const ws = wb.Sheets[sheetName];
+        const evrakRows = parseExcelBulkRows(ws, template);
+        totalRows += evrakRows.length;
+      }
+      return { success: true, filePath: filePaths[0], fileName: path.basename(filePaths[0]), totalRows };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  });
+
+  // ── Bulk Import: Excel rows → evraklar (execute) ────────────────────────────
+  ipcMain.handle('template:execute-bulk-excel', async (_e, templateId, filePath) => {
+    if (!state.db) return { success: false, error: 'Açık dosya yok' };
+    if (!filePath || !fs.existsSync(filePath)) return { success: false, error: 'Dosya bulunamadı' };
 
     // Load template
     const appDbInst = getAppDb();

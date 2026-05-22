@@ -20,6 +20,7 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [bulkMode, setBulkMode] = useState(false);
+  const [excelPreview, setExcelPreview] = useState<{filePath: string; fileName: string; totalRows: number} | null>(null);
   const [bulkResult, setBulkResult] = useState<{ totalImported: number; totalErrors: number; sheetResults?: { sheet: string; imported: number; errors: number }[] } | null>(null);
   const [bulkLoading, setBulkLoading] = useState(false);
 
@@ -137,15 +138,30 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
     }
   };
 
-  const handleBulkImportExcel = async () => {
+  const handlePreviewExcel = async () => {
     if (!selected) return;
     setBulkLoading(true);
     setBulkResult(null);
+    setExcelPreview(null);
     try {
-      const result = await window.evraktron.template.bulkImportExcel(selected.id);
+      const result = await window.evraktron.template.previewBulkExcel(selected.id);
+      if (result.success) {
+        setExcelPreview({ filePath: result.filePath!, fileName: result.fileName!, totalRows: result.totalRows! });
+      }
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleExecuteExcel = async () => {
+    if (!selected || !excelPreview) return;
+    setBulkLoading(true);
+    try {
+      const result = await window.evraktron.template.executeBulkExcel(selected.id, excelPreview.filePath);
       if (result.success) setBulkResult(result);
     } finally {
       setBulkLoading(false);
+      setExcelPreview(null); // Hide preview
     }
   };
 
@@ -373,28 +389,47 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
               </button>
             </div>
 
-            {/* Import buttons */}
-            <div className="p-4 rounded-xl border border-surface-700 bg-surface-800">
-              <p className="text-xs font-medium text-surface-300 mb-3">2. Dolu dosyayı yükle</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleBulkImportExcel}
-                  disabled={bulkLoading}
-                  className="btn-primary text-xs gap-1.5 flex-1 justify-center"
-                >
-                  {bulkLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                  Excel'den İçe Aktar
-                </button>
-                <button
-                  onClick={handleBulkImportJson}
-                  disabled={bulkLoading}
-                  className="btn-ghost text-xs gap-1.5 flex-1 justify-center"
-                >
-                  {bulkLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                  JSON'dan İçe Aktar
-                </button>
+            {/* Import buttons / Preview */}
+            {!excelPreview ? (
+              <div className="p-4 rounded-xl border border-surface-700 bg-surface-800">
+                <p className="text-xs font-medium text-surface-300 mb-3">2. Dolu dosyayı seç</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handlePreviewExcel}
+                    disabled={bulkLoading}
+                    className="btn-primary text-xs gap-1.5 flex-1 justify-center"
+                  >
+                    {bulkLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+                    Excel Seç...
+                  </button>
+                  <button
+                    onClick={handleBulkImportJson}
+                    disabled={bulkLoading}
+                    className="btn-ghost text-xs gap-1.5 flex-1 justify-center"
+                  >
+                    {bulkLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    JSON'dan İçe Aktar
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="p-4 rounded-xl border border-brand-500/30 bg-brand-500/10">
+                <p className="text-xs font-medium text-brand-300 mb-2 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" /> Excel Dosyası Hazır
+                </p>
+                <div className="bg-surface-900/50 rounded-lg p-3 mb-3 border border-surface-700/50">
+                  <p className="text-sm text-surface-200 font-medium truncate mb-1" title={excelPreview.filePath}>{excelPreview.fileName}</p>
+                  <p className="text-xs text-surface-400">Bu dosyadan <strong>{excelPreview.totalRows}</strong> adet evrak tespit edildi.</p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button onClick={() => setExcelPreview(null)} className="btn-ghost text-xs">Vazgeç</button>
+                  <button onClick={handleExecuteExcel} disabled={bulkLoading} className="btn-primary text-xs gap-1.5">
+                    {bulkLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    Sisteme Yükle
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Result */}
             {bulkResult && (

@@ -178,7 +178,8 @@ export interface ElectronAPI {
     importJson: () => Promise<TemplateImportResult>;
     exportJson: (ids?: string[]) => Promise<{ success: boolean; filePath?: string; count?: number }>;
     importExcelDefinition: () => Promise<TemplateImportResult>;
-    bulkImportExcel: (templateId: string) => Promise<BulkImportResult>;
+    previewBulkExcel: (templateId: string) => Promise<{ success: boolean; filePath?: string; fileName?: string; totalRows?: number; canceled?: boolean; error?: string }>;
+    executeBulkExcel: (templateId: string, filePath: string) => Promise<BulkImportResult>;
     bulkImportJson: (templateId: string) => Promise<BulkImportResult>;
     exportBlankExcel: (templateId: string) => Promise<{ success: boolean; filePath?: string }>;
   };
