@@ -3,7 +3,7 @@ import { X, Search, FileText, Upload, Download, Loader2, CheckCircle2, AlertCirc
 import { cn } from '../lib/utils';
 import { useAppStore } from '../store/appStore';
 
-import type { EvrakTemplate, TemplateField } from '../types/electron.d';
+import type { EvrakTemplate, TemplateField, EvrakTip, EvrakDurum } from '../types/electron.d';
 
 interface NewEvrakModalProps {
   onClose: () => void;
@@ -73,7 +73,7 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
         meta[field.key] = formData[field.key] || '';
       }
 
-      const siraNo = formData['yil_sira_no'] || formData['sira_no'];
+      const siraNo = formData['dosya_no'] || formData['yil_sira_no'] || formData['sira_no'];
       if (!siraNo) {
         useAppStore.getState().showToast('Lütfen Dosya / Sıra Numarasını giriniz!', 'error');
         setLoading(false);
@@ -85,11 +85,11 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
 
       const evrak = await window.evraktron.db.createEvrak({
         no: docNo,
-        tip: formData['tip'] || selected.defaultTip || 'gelen',
+        tip: (formData['tip'] || selected.defaultTip || 'ic') as EvrakTip,
         kurum: formData['kurum'] ?? ayarlar.kurum_adi ?? '',
         birim: formData['birim'] ?? ayarlar.varsayilan_birim ?? '',
         tarih: formData['tarih'] || new Date().toISOString().split('T')[0],
-        durum: formData['durum'] || selected.defaultDurum || 'beklemede',
+        durum: (formData['durum'] || selected.defaultDurum || 'beklemede') as EvrakDurum,
         aciklama: formData['aciklama'] || '',
         klasor: formData['klasor'] || '',
         raf_no: formData['raf_no'] || '',
