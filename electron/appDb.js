@@ -24,11 +24,9 @@ export function getAppDb() {
     );
   `);
 
-  // Seed default "Ruhsat" template if empty
-  const count = appDb.prepare('SELECT COUNT(*) as c FROM templates').get().c;
-  if (count === 0) {
-    seedDefaultTemplates(appDb);
-  }
+  // Seed or update default templates (Ruhsat, Yazışma)
+  // We use INSERT OR REPLACE inside, so it safely updates existing default templates with new fields
+  seedDefaultTemplates(appDb);
 
   return appDb;
 }
@@ -49,8 +47,8 @@ function seedDefaultTemplates(db) {
     },
     fields: [
       // Numaralandirma
-      { key: 'yil',            label: 'Yil',                type: 'number',   required: true,  default: '$CURRENT_YEAR', width: 'sm' },
-      { key: 'yil_sira_no',   label: 'Yildaki Sira No',    type: 'number',   required: true,  autoIncrement: true,      width: 'sm' },
+      { key: 'yil',            label: 'Yıl',                type: 'number',   required: false, default: '$CURRENT_YEAR', width: 'sm', hint: 'Eski ruhsatlar için boş bırakılabilir' },
+      { key: 'yil_sira_no',    label: 'Yılın Dosya Numarası',type: 'number',   required: false, autoIncrement: true,      width: 'sm', hint: 'Örn: 2026/5 için 5 rakamını ifade eder' },
       { key: 'genel_dosya_no', label: 'Genel Dosya No',     type: 'text',     required: true,                            width: 'md' },
       // Kurum/Fiziksel - opsiyonel
       { key: 'kurum_dosya_no', label: 'Kurum Dosya No',     type: 'text',     required: false, hint: 'Kurumun kendi dosya numarasi (bos birakilabilir)', width: 'md' },

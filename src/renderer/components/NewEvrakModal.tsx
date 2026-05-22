@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Search, FileText, Upload, Download, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useAppStore } from '../store/appStore';
 
 interface EvrakTemplate {
   id: string;
@@ -57,8 +58,12 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
     const year = new Date().getFullYear();
     const defaults: Record<string, string> = {};
 
+    const ayarlar = useAppStore.getState().ayarlar;
+
     for (const field of t.fields) {
       if (field.default === '$CURRENT_YEAR') defaults[field.key] = String(year);
+      else if (field.key === 'kurum' && ayarlar.kurum_adi) defaults[field.key] = ayarlar.kurum_adi;
+      else if (field.key === 'birim' && ayarlar.varsayilan_birim) defaults[field.key] = ayarlar.varsayilan_birim;
       else if (field.default) defaults[field.key] = field.default;
       else defaults[field.key] = '';
     }
@@ -91,11 +96,13 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
 
       const docNo = formData['__doc_no'] || formData[selected.numbering?.seqField || 'sira_no'] || '';
 
+      const ayarlar = useAppStore.getState().ayarlar;
+
       const evrak = await window.evraktron.db.createEvrak({
         no: docNo,
         tip: formData['tip'] || selected.defaultTip || 'gelen',
-        kurum: formData['kurum'] || '',
-        birim: formData['birim'] || '',
+        kurum: formData['kurum'] ?? ayarlar.kurum_adi ?? '',
+        birim: formData['birim'] ?? ayarlar.varsayilan_birim ?? '',
         tarih: formData['tarih'] || new Date().toISOString().split('T')[0],
         durum: formData['durum'] || selected.defaultDurum || 'beklemede',
         aciklama: formData['aciklama'] || '',
