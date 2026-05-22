@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import * as ScrollArea from '@radix-ui/react-scroll-area';
+import React, { useState, useRef } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import * as Tooltip from '@radix-ui/react-tooltip';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   ArrowUpDown, MoreHorizontal, Pencil, Trash2, ChevronUp, ChevronDown,
 } from 'lucide-react';
@@ -15,15 +14,27 @@ interface EvrakListProps {
 
 type SortKey = 'no' | 'tip' | 'kurum' | 'tarih' | 'durum' | 'created_at' | 'klasor' | 'raf_no';
 
+const ROW_HEIGHT = 44; // px — sabit satır yüksekliği
+
 export function EvrakList({ onRefresh }: EvrakListProps) {
   const { evraklar, isLoadingEvraklar, selectedEvrakId, setSelectedEvrakId, showToast, setDirty } = useAppStore();
   const [sortKey, setSortKey] = useState<SortKey>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
+  // Scroll container ref — virtualizer buna bağlanacak
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const sorted = [...evraklar].sort((a, b) => {
     const va = (a[sortKey] ?? '') as string;
     const vb = (b[sortKey] ?? '') as string;
     return sortDir === 'asc' ? va.localeCompare(vb, 'tr') : vb.localeCompare(va, 'tr');
+  });
+
+  const rowVirtualizer = useVirtualizer({
+    count: sorted.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 10, // ekranın dışında 10 satır daha render et (smooth scroll için)
   });
 
   const handleSort = (key: SortKey) => {
@@ -77,30 +88,53 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
     );
   }
 
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const totalHeight = rowVirtualizer.getTotalSize();
+
   return (
-    <ScrollArea.Root className="flex-1">
-      <ScrollArea.Viewport className="h-full">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <ColHeader col="no" label="No" />
-              <ColHeader col="klasor" label="Klasör" />
-              <ColHeader col="tip" label="Tip" />
-              <ColHeader col="kurum" label="Kurum" />
-              <ColHeader col="raf_no" label="Raf No" />
-              <ColHeader col="tarih" label="Tarih" />
-              <ColHeader col="durum" label="Durum" />
-              <th>Özel Alanlar</th>
-              <th>Açıklama</th>
-              <th className="w-10" />
+    /* Scroll container — overflow-y: auto ile native scroll */
+    <div
+      ref={scrollContainerRef}
+      className="flex-1 overflow-auto"
+      style={{ contain: 'strict' }}
+    >
+      <table className="data-table" style={{ tableLayout: 'fixed', width: '100%' }}>
+        {/* Thead — sticky kalacak, scroll edilmeyecek */}
+        <thead className="sticky top-0 z-10 bg-surface-900">
+          <tr>
+            <ColHeader col="no" label="No" />
+            <ColHeader col="klasor" label="Klasör" />
+            <ColHeader col="tip" label="Tip" />
+            <ColHeader col="kurum" label="Kurum" />
+            <ColHeader col="raf_no" label="Raf No" />
+            <ColHeader col="tarih" label="Tarih" />
+            <ColHeader col="durum" label="Durum" />
+            <th>Özel Alanlar</th>
+            <th>Açıklama</th>
+            <th className="w-10" />
+          </tr>
+        </thead>
+
+        <tbody style={{ position: 'relative', height: `${totalHeight}px`, display: 'block' }}>
+          {/* Virtualizer offset spacer */}
+          {virtualItems.length > 0 && virtualItems[0].start > 0 && (
+            <tr style={{ height: `${virtualItems[0].start}px`, display: 'table-row' }}>
+              <td colSpan={10} style={{ padding: 0, border: 'none' }} />
             </tr>
-          </thead>
-          <tbody>
-            {sorted.map((evrak) => (
+          )}
+
+          {virtualItems.map((virtualRow) => {
+            const evrak = sorted[virtualRow.index];
+            return (
               <tr
                 key={evrak.id}
+                data-index={virtualRow.index}
                 onClick={() => setSelectedEvrakId(selectedEvrakId === evrak.id ? null : evrak.id)}
                 className={cn(selectedEvrakId === evrak.id && 'selected')}
+                style={{
+                  height: `${ROW_HEIGHT}px`,
+                  display: 'table-row',
+                }}
               >
                 <td>
                   <span className="font-mono text-xs text-brand-400">{evrak.no}</span>
@@ -165,13 +199,21 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
                   </DropdownMenu.Root>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </ScrollArea.Viewport>
-      <ScrollArea.Scrollbar orientation="vertical" className="w-1.5 bg-transparent">
-        <ScrollArea.Thumb className="bg-surface-600/50 rounded-full" />
-      </ScrollArea.Scrollbar>
-    </ScrollArea.Root>
+            );
+          })}
+
+          {/* Bottom spacer */}
+          {virtualItems.length > 0 && (() => {
+            const lastItem = virtualItems[virtualItems.length - 1];
+            const bottomSpace = totalHeight - lastItem.end;
+            return bottomSpace > 0 ? (
+              <tr style={{ height: `${bottomSpace}px`, display: 'table-row' }}>
+                <td colSpan={10} style={{ padding: 0, border: 'none' }} />
+              </tr>
+            ) : null;
+          })()}
+        </tbody>
+      </table>
+    </div>
   );
 }

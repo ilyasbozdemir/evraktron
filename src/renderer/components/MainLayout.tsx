@@ -248,8 +248,8 @@ export function MainLayout() {
           </div>
 
           {/* Content split */}
-          <div className="flex flex-1 overflow-hidden">
-            <div className={cn('flex flex-col overflow-hidden', selectedEvrakId ? 'flex-1' : 'flex-1')}>
+          <div className="flex flex-1 overflow-hidden min-h-0">
+            <div className={cn('flex flex-col overflow-hidden min-h-0', selectedEvrakId ? 'flex-1' : 'flex-1')}>
               {sideTab === 'evraklar' && (
                 <EvrakList
                   onRefresh={() => { loadEvraklar(searchQuery || undefined); loadStats(); }}
