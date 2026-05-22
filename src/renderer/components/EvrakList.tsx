@@ -21,6 +21,7 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
   const [sortKey, setSortKey] = useState<SortKey>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [templates, setTemplates] = useState<any[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   React.useEffect(() => {
     window.evraktron.template.list().then(setTemplates);
@@ -64,6 +65,46 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
       : <ChevronDown className="w-3 h-3 text-brand-400" />;
   };
 
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(new Set(sorted.map(ev => ev.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectRow = (id: number) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  // Extract dynamic columns
+  const HIDDEN_META_KEYS = ['yil', 'yil_sira_no', 'sira_no', 'dosya_no', 'raf_no', '__template_id'];
+  const customCols = new Set<string>();
+  const customColLabels: Record<string, string> = {};
+
+  sorted.forEach(ev => {
+    try {
+      const meta = JSON.parse(ev.metadata || '{}');
+      const tId = meta.__template_id;
+      const template = templates.find(t => t.id === tId);
+
+      Object.entries(meta).forEach(([k, v]) => {
+        if (v && !HIDDEN_META_KEYS.includes(k) && !k.startsWith('__')) {
+          customCols.add(k);
+          if (!customColLabels[k]) {
+            const field = template?.fields?.find((f: any) => f.key === k);
+            customColLabels[k] = field ? field.label : k;
+          }
+        }
+      });
+    } catch {}
+  });
+
+  const dynamicCols = Array.from(customCols);
+
   const ColHeader = ({ col, label }: { col: SortKey; label: string }) => (
     <th onClick={() => handleSort(col)} className="cursor-pointer select-none group">
       <div className="flex items-center gap-1.5 hover:text-surface-200 transition-colors">
@@ -103,10 +144,18 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
       className="flex-1 overflow-auto"
       style={{ contain: 'strict' }}
     >
-      <table className="data-table" style={{ tableLayout: 'fixed', width: '100%' }}>
+      <table className="data-table" style={{ width: '100%' }}>
         {/* Thead — sticky kalacak, scroll edilmeyecek */}
-        <thead className="sticky top-0 z-10 bg-surface-900">
+        <thead className="sticky top-0 z-10 bg-surface-900 shadow-sm">
           <tr>
+            <th className="w-10 px-3 text-center">
+              <input 
+                type="checkbox" 
+                checked={sorted.length > 0 && selectedIds.size === sorted.length}
+                onChange={handleSelectAll}
+                className="w-4 h-4 rounded bg-surface-800 border-surface-600 checked:bg-brand-500 cursor-pointer"
+              />
+            </th>
             <ColHeader col="no" label="No" />
             <ColHeader col="klasor" label="Klasör" />
             <ColHeader col="raf_no" label="Raf No" />
@@ -114,17 +163,21 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
             <ColHeader col="kurum" label="Kurum" />
             <ColHeader col="tarih" label="Tarih" />
             <ColHeader col="durum" label="Durum" />
-            <th>Özel Alanlar</th>
-            <th>Açıklama</th>
+            {dynamicCols.map(k => (
+              <th key={k} className="text-left text-xs font-semibold text-surface-400 uppercase tracking-wider px-3 py-3 whitespace-nowrap">
+                {customColLabels[k]}
+              </th>
+            ))}
+            <th className="text-left text-xs font-semibold text-surface-400 uppercase tracking-wider px-3 py-3">Açıklama</th>
             <th className="w-10" />
           </tr>
         </thead>
 
-        <tbody style={{ position: 'relative', height: `${totalHeight}px`, display: 'block' }}>
+        <tbody style={{ position: 'relative' }}>
           {/* Virtualizer offset spacer */}
           {virtualItems.length > 0 && virtualItems[0].start > 0 && (
-            <tr style={{ height: `${virtualItems[0].start}px`, display: 'table-row' }}>
-              <td colSpan={11} style={{ padding: 0, border: 'none' }} />
+            <tr>
+              <td colSpan={10 + dynamicCols.length} style={{ height: `${virtualItems[0].start}px`, padding: 0, border: 'none' }} />
             </tr>
           )}
 
@@ -138,61 +191,49 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
                 className={cn(selectedEvrakId === evrak.id && 'selected')}
                 style={{
                   height: `${ROW_HEIGHT}px`,
-                  display: 'table-row',
                 }}
               >
-                <td>
+                <td className="w-10 px-3 text-center" onClick={e => e.stopPropagation()}>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.has(evrak.id)}
+                    onChange={() => handleSelectRow(evrak.id)}
+                    className="w-4 h-4 rounded bg-surface-800 border-surface-600 checked:bg-brand-500 cursor-pointer"
+                  />
+                </td>
+                <td className="px-3">
                   <span className="font-mono text-xs text-brand-400">{evrak.no}</span>
                 </td>
-                <td className="max-w-[120px] truncate text-surface-200">{evrak.klasor || '—'}</td>
-                <td className="max-w-[100px] truncate text-surface-300">{evrak.raf_no || '—'}</td>
-                <td>
+                <td className="max-w-[120px] truncate text-surface-200 px-3">{evrak.klasor || '—'}</td>
+                <td className="max-w-[100px] truncate text-surface-300 px-3">{evrak.raf_no || '—'}</td>
+                <td className="px-3">
                   <span className={TIP_COLORS[evrak.tip] || 'badge'}>
                     {TIP_LABELS[evrak.tip] || evrak.tip}
                   </span>
                 </td>
-                <td className="max-w-[160px] truncate">
+                <td className="max-w-[160px] truncate px-3">
                   <div className="text-surface-300">{evrak.kurum || '—'}</div>
                   {evrak.birim && <div className="text-surface-500 text-[10px] uppercase tracking-wider">{evrak.birim}</div>}
                 </td>
-                <td className="text-surface-400 text-xs font-mono">{formatDate(evrak.tarih)}</td>
-                <td>
+                <td className="text-surface-400 text-xs font-mono px-3">{formatDate(evrak.tarih)}</td>
+                <td className="px-3">
                   <span className={DURUM_COLORS[evrak.durum] || 'badge'}>
                     {DURUM_LABELS[evrak.durum] || evrak.durum}
                   </span>
                 </td>
-                <td className="max-w-[200px] truncate text-surface-300 text-xs" title={evrak.metadata || ''}>
-                  {(() => {
-                    if (!evrak.metadata) return '—';
-                    try {
-                      const meta = JSON.parse(evrak.metadata);
-                      const tId = meta.__template_id;
-                      const template = templates.find(t => t.id === tId);
-                      const HIDDEN_META_KEYS = ['yil', 'yil_sira_no', 'sira_no', 'dosya_no', 'raf_no', '__template_id'];
-                      
-                      const parts = Object.entries(meta)
-                        .filter(([k, v]) => v && !HIDDEN_META_KEYS.includes(k))
-                        .map(([k, v]) => {
-                          const field = template?.fields?.find((f: any) => f.key === k);
-                          const label = field ? field.label : k;
-                          return { label, value: v };
-                        });
-                      
-                      if (parts.length === 0) return '—';
-                      return (
-                        <div className="flex gap-1.5 items-center overflow-hidden whitespace-nowrap">
-                          {parts.map((p, i) => (
-                            <div key={i} className="inline-flex items-center bg-surface-800 border border-surface-700 rounded px-1.5 py-0.5 text-[10px] gap-1 shrink-0">
-                              <span className="text-surface-400 font-medium">{p.label}:</span>
-                              <span className="text-surface-200">{p.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    } catch { return '—'; }
-                  })()}
-                </td>
-                <td className="max-w-[200px] truncate text-surface-400 text-xs">
+                {dynamicCols.map(k => {
+                  let val = '—';
+                  try {
+                    const metaObj = JSON.parse(evrak.metadata || '{}');
+                    if (metaObj[k]) val = metaObj[k];
+                  } catch {}
+                  return (
+                    <td key={k} className="max-w-[150px] truncate text-surface-300 text-xs px-3" title={val}>
+                      {val}
+                    </td>
+                  );
+                })}
+                <td className="max-w-[200px] truncate text-surface-400 text-xs px-3">
                   {evrak.aciklama || '—'}
                 </td>
                 <td onClick={(e) => e.stopPropagation()}>
@@ -233,8 +274,8 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
             const lastItem = virtualItems[virtualItems.length - 1];
             const bottomSpace = totalHeight - lastItem.end;
             return bottomSpace > 0 ? (
-              <tr style={{ height: `${bottomSpace}px`, display: 'table-row' }}>
-                <td colSpan={11} style={{ padding: 0, border: 'none' }} />
+              <tr>
+                <td colSpan={10 + dynamicCols.length} style={{ height: `${bottomSpace}px`, padding: 0, border: 'none' }} />
               </tr>
             ) : null;
           })()}

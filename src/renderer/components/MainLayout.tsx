@@ -43,15 +43,27 @@ export function MainLayout() {
   const loadEvraklar = useCallback(async (query?: string, mf?: Record<string, string>) => {
     setLoadingEvraklar(true);
     try {
+      const filters: any = { orderBy: 'created_at', order: 'DESC' };
+      if (mf && Object.keys(mf).length > 0) {
+        filters.metadataFilters = mf;
+      }
+      const rows = await window.evraktron.db.getEvraklar(filters);
+      
       if (query && query.trim()) {
-        const rows = await window.evraktron.db.searchEvrak(query);
-        setEvraklar(rows);
+        // TR karakter duyarlı (case-insensitive) bellek içi arama
+        const toTrLower = (s: string) => (s || '').toLocaleLowerCase('tr-TR');
+        const terms = query.trim().split(/\s+/).map(toTrLower);
+        
+        const filtered = rows.filter((evrak: any) => {
+          const searchable = toTrLower([
+            evrak.no, evrak.kurum, evrak.birim, evrak.aciklama, evrak.metadata, evrak.tarih,
+            evrak.tip, evrak.durum, evrak.klasor, evrak.raf_no
+          ].map(v => v || '').join(' '));
+          
+          return terms.every(term => searchable.includes(term));
+        });
+        setEvraklar(filtered);
       } else {
-        const filters: any = { orderBy: 'created_at', order: 'DESC' };
-        if (mf && Object.keys(mf).length > 0) {
-          filters.metadataFilters = mf;
-        }
-        const rows = await window.evraktron.db.getEvraklar(filters);
         setEvraklar(rows);
       }
     } finally {
