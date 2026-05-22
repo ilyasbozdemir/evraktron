@@ -53,7 +53,7 @@ function seedDefaultTemplates(db) {
       { key: 'dosya_no',       label: 'Dosya No',            type: 'text',     required: true, width: 'sm', hint: 'Örn: 2026/5 veya 142' },
       { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
     ],
-    defaultTip: 'gelen',
+    defaultTip: 'ic',
     defaultDurum: 'beklemede',
     statusFlow: ['beklemede', 'islemde', 'onaylandi', 'reddedildi', 'tamamlandi'],
   };
