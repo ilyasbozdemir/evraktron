@@ -36,8 +36,15 @@ module.exports = {
     ],
     fileAssociations: [
       {
+        ext: 'etap',
+        name: 'Evrak Takip Program Dosyası',
+        description: 'Evrak Takip App (ETAP) dosyası',
+        icon: 'public/icon.ico',
+        role: 'Editor'
+      },
+      {
         ext: 'etapp',
-        name: 'Evrak Takip App Dosyası',
+        name: 'Evrak Takip Program Dosyası',
         description: 'Evrak Takip App (ETAPP) dosyası',
         icon: 'public/icon.ico',
         role: 'Editor'

@@ -40,6 +40,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@jimp/plugin-resize": "^1.6.1",
     "@types/adm-zip": "^0.5.5",
     "@types/better-sqlite3": "^7.6.8",
     "@types/node": "^20.12.7",
@@ -52,6 +53,8 @@
     "electron": "^29.1.4",
     "electron-builder": "^24.13.3",
     "electron-vite": "^5.0.0",
+    "jimp": "^1.6.1",
+    "png-to-ico": "^3.0.1",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5",
