@@ -168,9 +168,10 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
                       const meta = JSON.parse(evrak.metadata);
                       const tId = meta.__template_id;
                       const template = templates.find(t => t.id === tId);
+                      const HIDDEN_META_KEYS = ['yil', 'yil_sira_no', 'sira_no', 'dosya_no', 'raf_no', '__template_id'];
                       
                       const parts = Object.entries(meta)
-                        .filter(([k, v]) => v && !k.startsWith('__') && !['yil', 'yil_sira_no', 'sira_no', 'raf_no'].includes(k))
+                        .filter(([k, v]) => v && !HIDDEN_META_KEYS.includes(k))
                         .map(([k, v]) => {
                           const field = template?.fields?.find((f: any) => f.key === k);
                           const label = field ? field.label : k;

@@ -39,7 +39,7 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
     if (key === 'raf_no') {
       handleChange('raf_no', value);
     }
-    if (key === 'yil_sira_no' || key === 'sira_no') {
+    if (key === 'yil_sira_no' || key === 'sira_no' || key === 'dosya_no') {
       handleChange('no', value);
     }
   };

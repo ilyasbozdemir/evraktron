@@ -50,8 +50,7 @@ function seedDefaultTemplates(db) {
       { key: 'ada_no',         label: 'Ada No',             type: 'text',     required: false,                           width: 'sm' },
       { key: 'adres',          label: 'Adres',              type: 'textarea', required: false,                           width: 'full' },
       // Fiziksel Dosya Bilgileri
-      { key: 'yil',            label: 'Yıl',                 type: 'number',   required: false, width: 'sm', hint: 'Örn: 2026' },
-      { key: 'yil_sira_no',    label: 'Yıl Sıra No (Dosya No)', type: 'text', required: true, width: 'sm', hint: 'Örn: 2026/1 veya 5' },
+      { key: 'dosya_no',       label: 'Dosya No',            type: 'text',     required: true, width: 'sm', hint: 'Örn: 2026/5 veya 142' },
       { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
     ],
     defaultTip: 'gelen',
@@ -74,8 +73,7 @@ function seedDefaultTemplates(db) {
       { key: 'gizlilik', label: 'Gizlilik Derecesi', type: 'select',
         options: ['Normal', 'Gizli', 'Çok Gizli'],                                                               width: 'sm' },
       // Fiziksel Dosya Bilgileri
-      { key: 'yil',            label: 'Yıl',                 type: 'number',   required: false, width: 'sm', hint: 'Örn: 2026' },
-      { key: 'sira_no',        label: 'Sıra No (Dosya No)', type: 'text', required: true, width: 'sm', hint: 'Örn: 2026/1 veya 5' },
+      { key: 'dosya_no',       label: 'Dosya No',            type: 'text',     required: true, width: 'sm', hint: 'Örn: 2026/5 veya 142' },
       { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
     ],
     defaultTip: 'gelen',
