@@ -83,16 +83,18 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
       }
 
       let docNo = formData['__doc_no'] || '';
-      if (selected.numbering?.pattern) {
-        docNo = selected.numbering.pattern.replace(/\{([^}:]+)(?::([^}]+))?\}/g, (_, key, fmt) => {
-          const val = meta[key] ?? meta[key.toLowerCase()] ?? meta[key.toUpperCase()] ?? '';
-          if (fmt && fmt.startsWith('0')) {
-            return String(val).padStart(parseInt(fmt, 10), '0');
-          }
-          return String(val);
-        });
-      } else {
-        docNo = formData[selected.numbering?.seqField || 'sira_no'] || '';
+      if (!docNo) {
+        if (selected.numbering?.pattern) {
+          docNo = selected.numbering.pattern.replace(/\{([^}:]+)(?::([^}]+))?\}/g, (_, key, fmt) => {
+            const val = meta[key] ?? meta[key.toLowerCase()] ?? meta[key.toUpperCase()] ?? '';
+            if (fmt && fmt.startsWith('0')) {
+              return String(val).padStart(parseInt(fmt, 10), '0');
+            }
+            return String(val);
+          });
+        } else {
+          docNo = formData[selected.numbering?.seqField || 'sira_no'] || '';
+        }
       }
 
       const ayarlar = useAppStore.getState().ayarlar;
@@ -282,11 +284,20 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
                 ))}
               </div>
 
-              {/* Doc number preview */}
-              {formData['__doc_no'] && (
-                <div className="mt-4 p-3 rounded-lg bg-brand-500/10 border border-brand-500/30">
-                  <p className="text-xs text-surface-500">Evrak Numarası</p>
-                  <p className="text-lg font-mono font-bold text-brand-400 mt-0.5">{formData['__doc_no']}</p>
+              {/* Doc number preview / edit */}
+              {formData['__doc_no'] !== undefined && (
+                <div className="mt-4 p-4 rounded-lg bg-brand-500/10 border border-brand-500/30">
+                  <label className="block text-xs font-medium text-brand-400 mb-1.5">Evrak Numarası (Düzenlenebilir)</label>
+                  <input
+                    type="text"
+                    value={formData['__doc_no']}
+                    onChange={e => handleFieldChange('__doc_no', e.target.value)}
+                    className="input w-full h-10 text-lg font-mono font-bold text-brand-400 bg-surface-900/50 border-brand-500/40 focus:border-brand-400"
+                    placeholder="Evrak numarasını girin..."
+                  />
+                  <p className="text-[10px] text-brand-400/70 mt-1.5">
+                    * Sistem sıradaki numarayı otomatik getirdi. İsterseniz elle değiştirebilirsiniz.
+                  </p>
                 </div>
               )}
             </div>

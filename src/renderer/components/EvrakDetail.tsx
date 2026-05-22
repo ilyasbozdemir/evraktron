@@ -89,7 +89,13 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-surface-700/30 shrink-0">
         <div>
-          <p className="text-xs text-surface-500 font-mono">{evrak.no}</p>
+          <input
+            type="text"
+            className="input text-xs font-mono w-40 h-7 bg-transparent border-transparent hover:border-surface-600 focus:border-brand-500 px-1 -ml-1 transition-colors"
+            value={form.no || ''}
+            onChange={e => handleChange('no', e.target.value)}
+            placeholder="Evrak No"
+          />
           <p className="text-sm font-semibold text-surface-100 mt-0.5 truncate max-w-[300px]">
             {evrak.kurum || 'Kurum belirtilmemiş'}
           </p>
