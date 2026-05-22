@@ -15,6 +15,8 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
   const [selected, setSelected] = useState<EvrakTemplate | null>(null);
   const [step, setStep] = useState<'pick' | 'fill'>('pick');
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [lastEvrakNo, setLastEvrakNo] = useState<string | null>(null);
+  const [lastRafNo, setLastRafNo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [bulkMode, setBulkMode] = useState(false);
@@ -46,7 +48,32 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
       else defaults[field.key] = '';
     }
 
-    // Get next sequence number logic removed by user request
+    // Find the last used document number for this template
+    const evraklar = useAppStore.getState().evraklar;
+    const lastEvrak = evraklar.find(e => {
+      try {
+        const meta = JSON.parse(e.metadata || '{}');
+        return meta.__template_id === t.id;
+      } catch {
+        return false;
+      }
+    });
+
+    if (lastEvrak) {
+      try {
+        const meta = JSON.parse(lastEvrak.metadata || '{}');
+        const dNo = meta['dosya_no'] || meta['yil_sira_no'] || meta['sira_no'] || lastEvrak.no;
+        setLastEvrakNo(dNo);
+        setLastRafNo(meta['raf_no'] || lastEvrak.raf_no || null);
+      } catch {
+        setLastEvrakNo(lastEvrak.no);
+        setLastRafNo(lastEvrak.raf_no || null);
+      }
+    } else {
+      setLastEvrakNo(null);
+      setLastRafNo(null);
+    }
+
     setFormData(defaults);
     setStep('fill');
   };
@@ -233,6 +260,47 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
         {step === 'fill' && selected && !bulkMode && (
           <div className="flex flex-col flex-1 overflow-hidden">
             <div className="flex-1 overflow-y-auto p-6">
+              {lastEvrakNo && (
+                <div className="mb-5 p-3 bg-brand-500/10 border border-brand-500/20 rounded-xl flex items-start gap-2 animate-enter">
+                  <AlertCircle className="w-4 h-4 text-brand-400 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs text-brand-300 font-medium">Son Kayıt Bilgisi</p>
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      <p className="text-[11px] text-surface-300 flex items-center gap-1.5">
+                        Dosya No:
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const val = lastEvrakNo.replace(/\d+$/, m => String(parseInt(m, 10) + 1));
+                            setFormData(prev => ({ ...prev, dosya_no: val, sira_no: val, yil_sira_no: val, no: val }));
+                          }}
+                          className="text-brand-400 font-mono bg-brand-500/20 hover:bg-brand-500/30 px-1.5 py-0.5 rounded cursor-pointer transition-colors border border-brand-500/30 flex items-center group"
+                          title="Tıklayarak +1 arttırıp forma yazdır"
+                        >
+                          {lastEvrakNo} <span className="text-[9px] opacity-0 group-hover:opacity-100 bg-brand-500/40 px-1 rounded ml-1 transition-opacity">+1 Ekle</span>
+                        </button>
+                      </p>
+                      
+                      {lastRafNo && (
+                        <p className="text-[11px] text-surface-300 flex items-center gap-1.5 before:content-['•'] before:text-surface-600 before:mr-1">
+                          Raf No:
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              const val = lastRafNo.replace(/\d+$/, m => String(parseInt(m, 10) + 1));
+                              setFormData(prev => ({ ...prev, raf_no: val }));
+                            }}
+                            className="text-emerald-400 font-mono bg-emerald-500/20 hover:bg-emerald-500/30 px-1.5 py-0.5 rounded cursor-pointer transition-colors border border-emerald-500/30 flex items-center group"
+                            title="Tıklayarak +1 arttırıp forma yazdır"
+                          >
+                            {lastRafNo} <span className="text-[9px] opacity-0 group-hover:opacity-100 bg-emerald-500/40 px-1 rounded ml-1 transition-opacity">+1 Ekle</span>
+                          </button>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-4 gap-3">
                 {selected.fields.map(field => (
                   <div key={field.key} className={widthClass(field.width)}>
