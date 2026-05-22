@@ -40,6 +40,9 @@ function seedDefaultTemplates(db) {
     color: '#3b82f6',
 
     fields: [
+      // Fiziksel Dosya Bilgileri
+      { key: 'dosya_no',       label: 'Dosya No',            type: 'text',     required: true, width: 'sm', hint: 'Örn: 2026/5 veya 142' },
+      { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
       // Basvuru
       { key: 'ruhsat_sahibi',  label: 'Ruhsat Sahibi',      type: 'text',     required: true, width: 'lg' },
       { key: 'ruhsat_turu',    label: 'Ruhsat Turu',        type: 'select',   required: true,
@@ -49,9 +52,6 @@ function seedDefaultTemplates(db) {
       { key: 'parsel_no',      label: 'Parsel No',          type: 'text',     required: false,                           width: 'sm' },
       { key: 'ada_no',         label: 'Ada No',             type: 'text',     required: false,                           width: 'sm' },
       { key: 'adres',          label: 'Adres',              type: 'textarea', required: false,                           width: 'full' },
-      // Fiziksel Dosya Bilgileri
-      { key: 'dosya_no',       label: 'Dosya No',            type: 'text',     required: true, width: 'sm', hint: 'Örn: 2026/5 veya 142' },
-      { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
     ],
     defaultTip: 'ic',
     defaultDurum: 'beklemede',
@@ -66,15 +66,15 @@ function seedDefaultTemplates(db) {
     color: '#8b5cf6',
 
     fields: [
+      // Fiziksel Dosya Bilgileri
+      { key: 'dosya_no',       label: 'Dosya No',            type: 'text',     required: true, width: 'sm', hint: 'Örn: 2026/5 veya 142' },
+      { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
       { key: 'konu',      label: 'Konu',             type: 'text',   required: true,                           width: 'lg' },
       { key: 'gonderen',  label: 'Gönderen',         type: 'text',   required: true,                           width: 'md' },
       { key: 'alici',     label: 'Alıcı',            type: 'text',   required: true,                           width: 'md' },
       { key: 'evrak_tarihi', label: 'Evrak Tarihi',  type: 'date',   required: true,                           width: 'sm' },
       { key: 'gizlilik', label: 'Gizlilik Derecesi', type: 'select',
         options: ['Normal', 'Gizli', 'Çok Gizli'],                                                               width: 'sm' },
-      // Fiziksel Dosya Bilgileri
-      { key: 'dosya_no',       label: 'Dosya No',            type: 'text',     required: true, width: 'sm', hint: 'Örn: 2026/5 veya 142' },
-      { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
     ],
     defaultTip: 'gelen',
     defaultDurum: 'beklemede',

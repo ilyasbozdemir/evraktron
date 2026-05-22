@@ -74,8 +74,8 @@ function parseExcelBulkRows(worksheet, template) {
     }
 
     return {
-      no: row['no'] || row['No'] || row['Evrak No'] || String(idx + 1),
-      tip: row['tip'] || row['Tip'] || template.defaultTip || 'gelen',
+      no: row['no'] || row['No'] || row['Evrak No'] || row['dosya_no'] || row['Dosya No'] || String(idx + 1),
+      tip: row['tip'] || row['Tip'] || template.defaultTip || 'ic',
       kurum: row['kurum'] || row['Kurum'] || '',
       birim: row['birim'] || row['Birim'] || '',
       tarih: row['tarih'] || row['Tarih'] || new Date().toISOString().split('T')[0],
@@ -384,16 +384,19 @@ export function setupTemplateHandlers(ipcMain, state) {
     });
     if (canceled || !filePath) return { success: false };
 
-    // Build header row: standard fields + template custom fields
-    const standardHeaders = ['no', 'tip', 'kurum', 'birim', 'tarih', 'durum', 'aciklama', 'klasor', 'raf_no'];
+    // Build header row: Put template custom fields FIRST (so Dosya No and Raf No are columns A and B).
+    // Omit fields like 'tip', 'kurum', 'durum' because they are handled by the template defaults!
+    const standardHeaders = ['tarih', 'aciklama', 'notlar', 'klasor'];
     const templateHeaders = template.fields.map(f => f.key);
-    const allHeaders = [...standardHeaders, ...templateHeaders.filter(k => !standardHeaders.includes(k))];
+    
+    // Merge: Custom fields first, then standard fields
+    const allHeaders = [...templateHeaders, ...standardHeaders.filter(k => !templateHeaders.includes(k))];
 
     // Add a sample row with labels as hints
     const labelRow = {};
     for (const h of allHeaders) {
       const field = template.fields.find(f => f.key === h);
-      labelRow[h] = field ? `[${field.label}]` : `[${h}]`;
+      labelRow[h] = field ? `[${field.label}]` : `[${h.toUpperCase()}]`;
     }
 
     const ws = xlsxUtils.json_to_sheet([labelRow], { header: allHeaders });

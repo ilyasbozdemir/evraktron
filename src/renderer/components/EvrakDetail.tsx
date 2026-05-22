@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Select from '@radix-ui/react-select';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
-import { X, ChevronDown, Check, Save, Paperclip, Clock, Tag } from 'lucide-react';
+import { X, ChevronDown, Check, Save, Paperclip, Clock, Tag, Trash2 } from 'lucide-react';
 import type { Evrak, Hareket, Ek, Etiket, EvrakTemplate } from '../types/electron.d';
 import { useAppStore } from '../store/appStore';
 import { cn, formatDateTime, formatDate, formatBytes, DURUM_LABELS, TIP_LABELS } from '../lib/utils';
@@ -81,6 +81,17 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!evrak) return;
+    if (!window.confirm(`"${evrak.no}" numaralı evrakı kalıcı olarak silmek istediğinizden emin misiniz?`)) return;
+    
+    await window.evraktron.db.deleteEvrak(evrakId);
+    showToast('Evrak silindi', 'info');
+    setDirty(true);
+    onRefresh();
+    onClose();
+  };
+
   if (!evrak) return (
     <div className="flex-1 flex items-center justify-center">
       <div className="w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -104,6 +115,15 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button 
+            onClick={handleDelete} 
+            className="btn-ghost h-8 px-2.5 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 text-xs gap-1.5 transition-colors"
+            title="Evrakı Sil"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Sil</span>
+          </button>
+          <div className="w-px h-5 bg-surface-700/50" />
           <button onClick={handleSave} disabled={isSaving} className="btn-primary h-8 text-xs px-3">
             <Save className="w-3.5 h-3.5" />
             {isSaving ? 'Kaydediliyor…' : 'Kaydet'}
