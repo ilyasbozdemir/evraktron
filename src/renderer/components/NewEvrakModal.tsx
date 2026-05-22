@@ -158,7 +158,13 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
     setBulkLoading(true);
     try {
       const result = await window.evraktron.template.executeBulkExcel(selected.id, excelPreview.filePath);
-      if (result.success) setBulkResult(result);
+      if (result.success) {
+        setBulkResult(result);
+      } else {
+        useAppStore.getState().showToast(result.error || 'Yükleme sırasında hata oluştu', 'error');
+      }
+    } catch (err: any) {
+      useAppStore.getState().showToast(err.message || 'Bir hata oluştu', 'error');
     } finally {
       setBulkLoading(false);
       setExcelPreview(null); // Hide preview

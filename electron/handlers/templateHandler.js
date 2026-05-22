@@ -326,7 +326,7 @@ export function setupTemplateHandlers(ipcMain, state) {
     const template = JSON.parse(tmplRow.definition);
 
     try {
-      const wb = xlsxRead(fs.readFileSync(filePaths[0]));
+      const wb = xlsxRead(fs.readFileSync(filePath));
 
       let totalImported = 0;
       let totalErrors = 0;
