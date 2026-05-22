@@ -44,17 +44,39 @@ export function MainLayout() {
     setLoadingEvraklar(true);
     try {
       const filters: any = { orderBy: 'created_at', order: 'DESC' };
-      if (mf && Object.keys(mf).length > 0) {
-        filters.metadataFilters = mf;
-      }
       const rows = await window.evraktron.db.getEvraklar(filters);
       
+      const toTrLower = (s: string) => {
+        return (s || '')
+          .replace(/I/g, 'ı')
+          .replace(/İ/g, 'i')
+          .toLocaleLowerCase('tr-TR');
+      };
+      
+      let filtered = rows;
+
+      // 1. Detaylı Arama (metadata alanları bazında arama)
+      if (mf && Object.keys(mf).length > 0) {
+        filtered = filtered.filter((evrak: any) => {
+          try {
+            const metaObj = JSON.parse(evrak.metadata || '{}');
+            return Object.entries(mf).every(([k, v]) => {
+              if (!v || !v.trim()) return true;
+              const metaVal = toTrLower(String(metaObj[k] || ''));
+              const searchVal = toTrLower(v.trim());
+              return metaVal.includes(searchVal);
+            });
+          } catch {
+            return false;
+          }
+        });
+      }
+      
+      // 2. Genel Arama
       if (query && query.trim()) {
-        // TR karakter duyarlı (case-insensitive) bellek içi arama
-        const toTrLower = (s: string) => (s || '').toLocaleLowerCase('tr-TR');
         const terms = query.trim().split(/\s+/).map(toTrLower);
         
-        const filtered = rows.filter((evrak: any) => {
+        filtered = filtered.filter((evrak: any) => {
           const searchable = toTrLower([
             evrak.no, evrak.kurum, evrak.birim, evrak.aciklama, evrak.metadata, evrak.tarih,
             evrak.tip, evrak.durum, evrak.klasor, evrak.raf_no
@@ -62,10 +84,9 @@ export function MainLayout() {
           
           return terms.every(term => searchable.includes(term));
         });
-        setEvraklar(filtered);
-      } else {
-        setEvraklar(rows);
       }
+      
+      setEvraklar(filtered);
     } finally {
       setLoadingEvraklar(false);
     }

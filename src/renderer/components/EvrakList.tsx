@@ -58,6 +58,24 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
     showToast('Evrak silindi', 'info');
   };
 
+  const handleBulkDelete = async () => {
+    if (!confirm(`${selectedIds.size} adet evrak kalıcı olarak silinecek. Emin misiniz?`)) return;
+    
+    let successCount = 0;
+    for (const id of selectedIds) {
+      const res = await window.evraktron.db.deleteEvrak(id);
+      if (res) {
+        successCount++;
+        if (selectedEvrakId === id) setSelectedEvrakId(null);
+      }
+    }
+    
+    showToast(`${successCount} evrak silindi`, 'info');
+    setSelectedIds(new Set());
+    setDirty(true);
+    onRefresh();
+  };
+
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 opacity-30" />;
     return sortDir === 'asc'
@@ -138,13 +156,14 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
   const totalHeight = rowVirtualizer.getTotalSize();
 
   return (
-    /* Scroll container — overflow-y: auto ile native scroll */
-    <div
-      ref={scrollContainerRef}
-      className="flex-1 overflow-auto"
-      style={{ contain: 'strict' }}
-    >
-      <table className="data-table" style={{ width: '100%' }}>
+    <div className="flex-1 flex flex-col relative h-full">
+      {/* Scroll container — overflow-y: auto ile native scroll */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-auto"
+        style={{ contain: 'strict' }}
+      >
+        <table className="data-table" style={{ width: '100%' }}>
         {/* Thead — sticky kalacak, scroll edilmeyecek */}
         <thead className="sticky top-0 z-10 bg-surface-900 shadow-sm">
           <tr>
@@ -281,6 +300,30 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
           })()}
         </tbody>
       </table>
+      </div>
+
+      {/* Floating Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-surface-800 border border-surface-600 shadow-2xl rounded-full px-5 py-2.5 flex items-center gap-4 z-50 animate-slide-up">
+          <span className="text-sm font-medium text-surface-200">
+            <strong className="text-brand-400">{selectedIds.size}</strong> evrak seçili
+          </span>
+          <div className="w-px h-4 bg-surface-600" />
+          <button
+            onClick={handleBulkDelete}
+            className="text-xs text-rose-400 hover:text-rose-300 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded hover:bg-rose-500/10 transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Seçilenleri Sil
+          </button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="text-xs text-surface-400 hover:text-surface-200 font-medium px-2 py-1.5 transition-colors"
+          >
+            İptal
+          </button>
+        </div>
+      )}
     </div>
   );
 }
