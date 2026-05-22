@@ -20,6 +20,11 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
   const { evraklar, isLoadingEvraklar, selectedEvrakId, setSelectedEvrakId, showToast, setDirty } = useAppStore();
   const [sortKey, setSortKey] = useState<SortKey>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [templates, setTemplates] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    window.evraktron.template.list().then(setTemplates);
+  }, []);
 
   // Scroll container ref — virtualizer buna bağlanacak
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -104,6 +109,7 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
           <tr>
             <ColHeader col="no" label="No" />
             <ColHeader col="klasor" label="Klasör" />
+            <ColHeader col="raf_no" label="Raf No" />
             <ColHeader col="tip" label="Tip" />
             <ColHeader col="kurum" label="Kurum" />
             <ColHeader col="tarih" label="Tarih" />
@@ -118,7 +124,7 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
           {/* Virtualizer offset spacer */}
           {virtualItems.length > 0 && virtualItems[0].start > 0 && (
             <tr style={{ height: `${virtualItems[0].start}px`, display: 'table-row' }}>
-              <td colSpan={10} style={{ padding: 0, border: 'none' }} />
+              <td colSpan={11} style={{ padding: 0, border: 'none' }} />
             </tr>
           )}
 
@@ -139,6 +145,7 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
                   <span className="font-mono text-xs text-brand-400">{evrak.no}</span>
                 </td>
                 <td className="max-w-[120px] truncate text-surface-200">{evrak.klasor || '—'}</td>
+                <td className="max-w-[100px] truncate text-surface-300">{evrak.raf_no || '—'}</td>
                 <td>
                   <span className={TIP_COLORS[evrak.tip] || 'badge'}>
                     {TIP_LABELS[evrak.tip] || evrak.tip}
@@ -159,8 +166,28 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
                     if (!evrak.metadata) return '—';
                     try {
                       const meta = JSON.parse(evrak.metadata);
-                      const parts = Object.entries(meta).filter(([_, v]) => v).map(([k, v]) => `${k}: ${v}`);
-                      return parts.length > 0 ? parts.join(' • ') : '—';
+                      const tId = meta.__template_id;
+                      const template = templates.find(t => t.id === tId);
+                      
+                      const parts = Object.entries(meta)
+                        .filter(([k, v]) => v && !k.startsWith('__') && !['yil', 'yil_sira_no', 'sira_no', 'raf_no'].includes(k))
+                        .map(([k, v]) => {
+                          const field = template?.fields?.find((f: any) => f.key === k);
+                          const label = field ? field.label : k;
+                          return { label, value: v };
+                        });
+                      
+                      if (parts.length === 0) return '—';
+                      return (
+                        <div className="flex gap-1.5 items-center overflow-hidden whitespace-nowrap">
+                          {parts.map((p, i) => (
+                            <div key={i} className="inline-flex items-center bg-surface-800 border border-surface-700 rounded px-1.5 py-0.5 text-[10px] gap-1 shrink-0">
+                              <span className="text-surface-400 font-medium">{p.label}:</span>
+                              <span className="text-surface-200">{p.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      );
                     } catch { return '—'; }
                   })()}
                 </td>
@@ -206,7 +233,7 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
             const bottomSpace = totalHeight - lastItem.end;
             return bottomSpace > 0 ? (
               <tr style={{ height: `${bottomSpace}px`, display: 'table-row' }}>
-                <td colSpan={10} style={{ padding: 0, border: 'none' }} />
+                <td colSpan={11} style={{ padding: 0, border: 'none' }} />
               </tr>
             ) : null;
           })()}

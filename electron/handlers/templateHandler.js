@@ -49,7 +49,7 @@ function getNextSeqNo(db, templateId, year, seqField) {
 /** Format the document number from template pattern */
 function formatDocNo(pattern, meta) {
   return pattern.replace(/\{([^}:]+)(?::([^}]+))?\}/g, (_, key, fmt) => {
-    const val = meta[key] ?? '';
+    const val = meta[key] ?? meta[key.toLowerCase()] ?? meta[key.toUpperCase()] ?? '';
     if (fmt && fmt.startsWith('0')) {
       const width = parseInt(fmt, 10);
       return String(val).padStart(width, '0');

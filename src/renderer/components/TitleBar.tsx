@@ -19,7 +19,7 @@ export function TitleBar() {
             <img src="./icon.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Evrak Takip App
+            Evrak Takip Uygulaması
           </span>
         </div>
         {fileName && (

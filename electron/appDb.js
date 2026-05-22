@@ -47,13 +47,18 @@ function seedDefaultTemplates(db) {
     },
     fields: [
       // Basvuru
-      { key: 'basvuran',       label: 'Basvuran Ad/Unvan',  type: 'text',     required: true,                            width: 'lg' },
+      { key: 'ruhsat_sahibi',  label: 'Ruhsat Sahibi',      type: 'text',     required: true, width: 'lg' },
       { key: 'ruhsat_turu',    label: 'Ruhsat Turu',        type: 'select',   required: true,
+      { key: 'cinsi',    label: 'Cinsi',        type: 'text',   required: true,
         options: ['Isyeri Acma', 'Yapi Ruhsati', 'Iskan', 'Tadilat', 'Ruhsat Yenileme', 'Diger'],                  width: 'md' },
       // Tapu/Konum
       { key: 'parsel_no',      label: 'Parsel No',          type: 'text',     required: false,                           width: 'sm' },
       { key: 'ada_no',         label: 'Ada No',             type: 'text',     required: false,                           width: 'sm' },
       { key: 'adres',          label: 'Adres',              type: 'textarea', required: false,                           width: 'full' },
+      // Fiziksel Dosya Bilgileri
+      { key: 'yil',            label: 'Yıl',                 type: 'number',   required: false, width: 'sm' },
+      { key: 'yil_sira_no',    label: 'Yıl Sıra No (Dosya No)', type: 'number', required: false, width: 'sm' },
+      { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
     ],
     defaultTip: 'gelen',
     defaultDurum: 'beklemede',
@@ -80,6 +85,10 @@ function seedDefaultTemplates(db) {
       { key: 'evrak_tarihi', label: 'Evrak Tarihi',  type: 'date',   required: true,                           width: 'sm' },
       { key: 'gizlilik', label: 'Gizlilik Derecesi', type: 'select',
         options: ['Normal', 'Gizli', 'Çok Gizli'],                                                               width: 'sm' },
+      // Fiziksel Dosya Bilgileri
+      { key: 'yil',            label: 'Yıl',                 type: 'number',   required: false, width: 'sm' },
+      { key: 'sira_no',        label: 'Sıra No (Dosya No)', type: 'number', required: false, width: 'sm' },
+      { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
     ],
     defaultTip: 'gelen',
     defaultDurum: 'beklemede',

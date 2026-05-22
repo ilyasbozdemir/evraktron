@@ -11,10 +11,10 @@ geliştirilmiş, tamamen yerel (offline) çalışan, hızlı ve esnek bir evrak 
 uygulamasıdır.
 
 Tüm evrak kayıtlarınız, ayarlarınız, özel veri alanlarınız ve ekli dosyalarınız
-tek bir `.etapp` (Evrak Takip App) dosyası içerisinde şifrelenmiş (SQLite + Zip
-mimarisi) olarak saklanır. Bu sayede projenizi/veritabanınızı bir klasör gibi
-USB bellekte taşıyabilir, istediğiniz bilgisayarda çift tıklayarak anında
-çalıştırabilirsiniz.
+tek bir `.etapp` (Evrak Takip Uygulaması) dosyası içerisinde şifrelenmiş
+(SQLite + Zip mimarisi) olarak saklanır. Bu sayede projenizi/veritabanınızı bir
+klasör gibi USB bellekte taşıyabilir, istediğiniz bilgisayarda çift tıklayarak
+anında çalıştırabilirsiniz.
 
 ## ✨ Temel Özellikler
 
@@ -85,7 +85,8 @@ _Derlenen dosyalar `dist-electron/` klasörü içerisinde bulunacaktır._
 Evraktron'u kurduğunuzda Windows Kayıt Defteri (Registry) entegrasyonu otomatik
 olarak yapılır:
 
-- Masaüstünde Sağ Tık -> **Yeni -> Evrak Takip App Dosyası** kısayolu eklenir.
+- Masaüstünde Sağ Tık -> **Yeni -> Evrak Takip Uygulaması Dosyası** kısayolu
+  eklenir.
 - `.etapp` uzantılı dosyalara Evraktron logoları tanımlanır.
 - Dosyalara çift tıklandığında anında Evraktron uygulamasında açılır.
 

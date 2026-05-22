@@ -82,7 +82,18 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
         meta[field.key] = formData[field.key] || '';
       }
 
-      const docNo = formData['__doc_no'] || formData[selected.numbering?.seqField || 'sira_no'] || '';
+      let docNo = formData['__doc_no'] || '';
+      if (selected.numbering?.pattern) {
+        docNo = selected.numbering.pattern.replace(/\{([^}:]+)(?::([^}]+))?\}/g, (_, key, fmt) => {
+          const val = meta[key] ?? meta[key.toLowerCase()] ?? meta[key.toUpperCase()] ?? '';
+          if (fmt && fmt.startsWith('0')) {
+            return String(val).padStart(parseInt(fmt, 10), '0');
+          }
+          return String(val);
+        });
+      } else {
+        docNo = formData[selected.numbering?.seqField || 'sira_no'] || '';
+      }
 
       const ayarlar = useAppStore.getState().ayarlar;
 

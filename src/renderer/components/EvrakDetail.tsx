@@ -36,6 +36,9 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
   const updateMetadata = (key: string, value: string) => {
     const next = { ...metadata, [key]: value };
     handleChange('metadata', JSON.stringify(next));
+    if (key === 'raf_no') {
+      handleChange('raf_no', value);
+    }
   };
 
   const loadEvrak = useCallback(async () => {
