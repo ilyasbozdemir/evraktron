@@ -3,29 +3,7 @@ import { X, Search, FileText, Upload, Download, Loader2, CheckCircle2, AlertCirc
 import { cn } from '../lib/utils';
 import { useAppStore } from '../store/appStore';
 
-interface EvrakTemplate {
-  id: string;
-  name: string;
-  description?: string;
-  icon?: string;
-  color?: string;
-  fields: TemplateField[];
-  numbering?: { pattern: string; autoIncrement?: boolean; resetPerYear?: boolean; yearField?: string; seqField?: string };
-  defaultTip?: string;
-  defaultDurum?: string;
-}
-
-interface TemplateField {
-  key: string;
-  label: string;
-  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox';
-  required?: boolean;
-  default?: string;
-  autoIncrement?: boolean;
-  hint?: string;
-  options?: string[];
-  width?: 'sm' | 'md' | 'lg' | 'full';
-}
+import type { EvrakTemplate, TemplateField } from '../types/electron.d';
 
 interface NewEvrakModalProps {
   onClose: () => void;
@@ -74,6 +52,7 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
         const { no, seq } = await window.evraktron.template.nextNo(t.id, year);
         defaults['__doc_no'] = no;
         if (t.numbering.seqField) defaults[t.numbering.seqField] = String(seq);
+        if (t.numbering.yearField) defaults[t.numbering.yearField] = String(year);
       } catch {}
     }
 
@@ -90,6 +69,15 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
     setLoading(true);
     try {
       const meta: Record<string, string> = { __template_id: selected.id };
+      
+      // Always save numbering fields to metadata so sequence generator can find them later
+      if (selected.numbering?.yearField && formData[selected.numbering.yearField]) {
+        meta[selected.numbering.yearField] = formData[selected.numbering.yearField];
+      }
+      if (selected.numbering?.seqField && formData[selected.numbering.seqField]) {
+        meta[selected.numbering.seqField] = formData[selected.numbering.seqField];
+      }
+
       for (const field of selected.fields) {
         meta[field.key] = formData[field.key] || '';
       }

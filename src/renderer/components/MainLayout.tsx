@@ -3,8 +3,9 @@ import * as ScrollArea from '@radix-ui/react-scroll-area';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import {
   LayoutList, Plus, Search, Download, FileText, Settings,
-  BarChart2, FolderOpen, Save, Tag, X,
+  BarChart2, FolderOpen, Save, Tag, X, Filter, Zap
 } from 'lucide-react';
+import type { EvrakTemplate } from '../types/electron.d';
 import { useAppStore } from '../store/appStore';
 import { EvrakList } from './EvrakList';
 import { EvrakDetail } from './EvrakDetail';
@@ -28,14 +29,31 @@ export function MainLayout() {
   const [showAyarlar, setShowAyarlar] = useState(false);
   const [showNewEvrak, setShowNewEvrak] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  
+  // Advanced Search States
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [templates, setTemplates] = useState<EvrakTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [metadataFilters, setMetadataFilters] = useState<Record<string, string>>({});
 
-  const loadEvraklar = useCallback(async (query?: string) => {
+  useEffect(() => {
+    window.evraktron.template.list().then(setTemplates);
+  }, []);
+
+  const loadEvraklar = useCallback(async (query?: string, mf?: Record<string, string>) => {
     setLoadingEvraklar(true);
     try {
-      const rows = query
-        ? await window.evraktron.db.searchEvrak(query)
-        : await window.evraktron.db.getEvraklar({ orderBy: 'created_at', order: 'DESC' });
-      setEvraklar(rows);
+      if (query && query.trim()) {
+        const rows = await window.evraktron.db.searchEvrak(query);
+        setEvraklar(rows);
+      } else {
+        const filters: any = { orderBy: 'created_at', order: 'DESC' };
+        if (mf && Object.keys(mf).length > 0) {
+          filters.metadataFilters = mf;
+        }
+        const rows = await window.evraktron.db.getEvraklar(filters);
+        setEvraklar(rows);
+      }
     } finally {
       setLoadingEvraklar(false);
     }
@@ -59,9 +77,9 @@ export function MainLayout() {
 
   // Search debounce
   useEffect(() => {
-    const t = setTimeout(() => loadEvraklar(searchQuery || undefined), 250);
+    const t = setTimeout(() => loadEvraklar(searchQuery || undefined, metadataFilters), 250);
     return () => clearTimeout(t);
-  }, [searchQuery, loadEvraklar]);
+  }, [searchQuery, metadataFilters, loadEvraklar]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -213,29 +231,145 @@ export function MainLayout() {
               background: 'var(--bg-base)',
             }}
           >
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-surface-500" />
-              <input
-                id="search-input"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Ara… (Ctrl+F)"
-                className="input pl-9 h-8 text-xs"
-              />
-              {searchQuery && (
-                <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 transition-colors"
-                style={{ color: 'var(--text-muted)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-              >
-                <X className="w-3 h-3" />
-              </button>
-              )}
+            <div className="relative flex-1 max-w-md flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-surface-500" />
+                <input
+                  id="search-input"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Genel Ara… (Ctrl+F)"
+                  className="input pl-9 h-8 text-xs w-full"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 transition-colors text-surface-400 hover:text-surface-200"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <button 
+                    onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                    className={cn(
+                      "btn-ghost h-8 px-2.5", 
+                      showAdvancedSearch || Object.keys(metadataFilters).length > 0 ? "bg-brand-500/10 text-brand-400" : ""
+                    )}
+                  >
+                    <Filter className="w-3.5 h-3.5" />
+                    <span className="text-xs font-medium">Detaylı</span>
+                  </button>
+                </Tooltip.Trigger>
+                <Tooltip.Portal>
+                  <Tooltip.Content className="bg-surface-800 text-xs text-surface-200 px-2 py-1 rounded border border-surface-700 shadow-lg z-50">
+                    Şablona Göre Detaylı Arama
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              </Tooltip.Root>
             </div>
           </div>
+
+          {/* Advanced Search & Suggestions Area */}
+          {(showAdvancedSearch || Object.keys(metadataFilters).length > 0 || !searchQuery) && sideTab === 'evraklar' && (
+            <div className="bg-surface-900/50 border-b border-surface-700/30 px-4 py-2 flex flex-col gap-3 shrink-0">
+              {/* Quick Filter Suggestions */}
+              {!showAdvancedSearch && Object.keys(metadataFilters).length === 0 && (
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                  <div className="flex items-center gap-1.5 text-surface-500 mr-1">
+                    <Zap className="w-3 h-3 text-amber-500" />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider">Hızlı Öneriler:</span>
+                  </div>
+                  {[
+                    { label: 'Tümünü Gör', tId: '' },
+                    { label: 'Ruhsatlar', tId: 'ruhsat' },
+                    { label: 'Yazışmalar', tId: 'yazisma' },
+                    { label: 'Genel Evraklar', tId: 'genel' },
+                  ].map(q => (
+                    <button
+                      key={q.label}
+                      onClick={() => {
+                        setSelectedTemplateId(q.tId);
+                        setMetadataFilters({});
+                        setShowAdvancedSearch(true);
+                      }}
+                      className={cn(
+                        "px-2.5 py-1 text-xs font-medium rounded-full border transition-colors whitespace-nowrap",
+                        selectedTemplateId === q.tId && showAdvancedSearch
+                          ? "bg-brand-500/20 border-brand-500 text-brand-400"
+                          : "bg-surface-800 border-surface-700 text-surface-300 hover:text-brand-400 hover:border-brand-500/50"
+                      )}
+                    >
+                      {q.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Advanced Filter Panel */}
+              {(showAdvancedSearch || Object.keys(metadataFilters).length > 0) && (
+                <div className="animate-enter space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-surface-400">Şablon Seçimi:</span>
+                    <select
+                      className="input h-7 text-xs py-0 w-48"
+                      value={selectedTemplateId}
+                      onChange={e => {
+                        setSelectedTemplateId(e.target.value);
+                        setMetadataFilters({});
+                      }}
+                    >
+                      <option value="">-- Tüm Evraklar --</option>
+                      {templates.map(t => (
+                        <option key={t.id} value={t.id}>{t.icon} {t.name}</option>
+                      ))}
+                    </select>
+                    
+                    {Object.keys(metadataFilters).length > 0 && (
+                      <button 
+                        onClick={() => setMetadataFilters({})}
+                        className="text-[10px] text-rose-400 hover:text-rose-300 ml-auto flex items-center gap-1"
+                      >
+                        <X className="w-3 h-3" /> Filtreleri Temizle
+                      </button>
+                    )}
+                  </div>
+
+                  {selectedTemplateId && (
+                    <div className="p-3 bg-surface-950/30 rounded-lg border border-surface-700/50">
+                      <p className="text-[10px] font-semibold text-brand-500/80 uppercase tracking-widest mb-2">
+                        {templates.find(t => t.id === selectedTemplateId)?.name} Alanlarında Ara (VE bağlacı)
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        {templates.find(t => t.id === selectedTemplateId)?.fields.map(f => (
+                          <div key={f.key} className="flex-1 min-w-[140px] max-w-[200px]">
+                            <input
+                              type={f.type === 'number' ? 'number' : 'text'}
+                              className="input h-7 text-xs w-full bg-surface-900 border-surface-700 focus:border-brand-500"
+                              placeholder={`${f.label} ara...`}
+                              value={metadataFilters[f.key] || ''}
+                              onChange={e => {
+                                const val = e.target.value;
+                                setMetadataFilters(prev => {
+                                  const next = { ...prev };
+                                  if (val) next[f.key] = val;
+                                  else delete next[f.key];
+                                  return next;
+                                });
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Content split */}
           <div className="flex flex-1 overflow-hidden min-h-0">

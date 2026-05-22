@@ -3,7 +3,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import * as Select from '@radix-ui/react-select';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { X, ChevronDown, Check, Save, Paperclip, Clock, Tag } from 'lucide-react';
-import type { Evrak, Hareket, Ek, Etiket } from '../types/electron.d';
+import type { Evrak, Hareket, Ek, Etiket, EvrakTemplate } from '../types/electron.d';
 import { useAppStore } from '../store/appStore';
 import { cn, formatDateTime, formatDate, formatBytes, DURUM_LABELS, TIP_LABELS } from '../lib/utils';
 import { AttachmentsTab } from './AttachmentsTab';
@@ -26,8 +26,7 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
   const uniqueKlasorler = React.useMemo(() => Array.from(new Set(evraklar.map(e => e.klasor).filter(Boolean))), [evraklar]);
   const [form, setForm] = useState<Partial<Evrak>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [isAddingField, setIsAddingField] = useState(false);
-  const [newFieldKey, setNewFieldKey] = useState('');
+  const [template, setTemplate] = useState<EvrakTemplate | null>(null);
 
   const metadata = React.useMemo(() => {
     try { return form.metadata ? JSON.parse(form.metadata) : {}; }
@@ -38,16 +37,20 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
     const next = { ...metadata, [key]: value };
     handleChange('metadata', JSON.stringify(next));
   };
-  
-  const removeMetadata = (key: string) => {
-    const next = { ...metadata };
-    delete next[key];
-    handleChange('metadata', JSON.stringify(next));
-  };
 
   const loadEvrak = useCallback(async () => {
     const e = await window.evraktron.db.getEvrak(evrakId);
-    if (e) { setEvrak(e); setForm(e); }
+    if (e) { 
+      setEvrak(e); 
+      setForm(e); 
+      try {
+        const meta = JSON.parse(e.metadata || '{}');
+        if (meta.__template_id) {
+          const t = await window.evraktron.template.get(meta.__template_id);
+          setTemplate(t);
+        }
+      } catch {}
+    }
   }, [evrakId]);
 
   useEffect(() => { loadEvrak(); }, [loadEvrak]);
@@ -128,11 +131,7 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
           <ScrollArea.Root className="flex-1 h-full w-full">
             <ScrollArea.Viewport className="h-full w-full [&>div]:!block p-4 pb-12 space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label">Evrak No</label>
-                  <input className="input" value={form.no || ''} onChange={e => handleChange('no', e.target.value)} />
-                </div>
-                <div>
+                <div className="col-span-2">
                   <label className="label">Tarih</label>
                   <input type="date" className="input" value={form.tarih || ''} onChange={e => handleChange('tarih', e.target.value)} />
                 </div>
@@ -146,18 +145,12 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
                 </datalist>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label">Klasör</label>
-                  <input list="klasor-list" className="input" value={form.klasor || ''} onChange={e => handleChange('klasor', e.target.value)} placeholder="Proje klasörü…" />
-                  <datalist id="klasor-list">
-                    {uniqueKlasorler.map(k => <option key={k} value={k} />)}
-                  </datalist>
-                </div>
-                <div>
-                  <label className="label">Raf No</label>
-                  <input className="input" value={form.raf_no || ''} onChange={e => handleChange('raf_no', e.target.value)} placeholder="Fiziksel raf / dolap…" />
-                </div>
+              <div>
+                <label className="label">Klasör</label>
+                <input list="klasor-list" className="input" value={form.klasor || ''} onChange={e => handleChange('klasor', e.target.value)} placeholder="Proje klasörü…" />
+                <datalist id="klasor-list">
+                  {uniqueKlasorler.map(k => <option key={k} value={k} />)}
+                </datalist>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -228,79 +221,55 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
                 />
               </div>
 
-              {/* Custom Metadata */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="label mb-0">Özel Alanlar (Arama Kriterleri)</label>
-                  {!isAddingField ? (
-                    <button 
-                      onClick={() => setIsAddingField(true)}
-                      className="text-xs text-brand-500 hover:text-brand-400 font-medium px-2 py-1 bg-brand-500/10 rounded transition-colors"
-                    >
-                      + Alan Ekle
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <input 
-                        autoFocus
-                        className="input h-7 !py-1 text-xs w-32" 
-                        placeholder="Alan adı..." 
-                        value={newFieldKey}
-                        onChange={e => setNewFieldKey(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' && newFieldKey.trim()) {
-                            if (!metadata[newFieldKey.trim()]) updateMetadata(newFieldKey.trim(), '');
-                            setNewFieldKey('');
-                            setIsAddingField(false);
-                          }
-                          if (e.key === 'Escape') setIsAddingField(false);
-                        }}
-                      />
-                      <button 
-                        onClick={() => {
-                          if (newFieldKey.trim() && !metadata[newFieldKey.trim()]) updateMetadata(newFieldKey.trim(), '');
-                          setNewFieldKey('');
-                          setIsAddingField(false);
-                        }}
-                        className="btn-primary h-7 px-2 py-1 text-xs"
-                      >
-                        Ekle
-                      </button>
-                      <button onClick={() => setIsAddingField(false)} className="btn-ghost h-7 w-7 p-0 flex items-center justify-center text-surface-500 hover:text-surface-300">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-                {Object.keys(metadata).length === 0 ? (
-                  <div className="text-xs text-surface-500 italic p-3 border border-dashed border-surface-700/50 rounded-lg text-center">
-                    Henüz özel alan eklenmemiş.
+              {/* Template Fields */}
+              {template && template.fields && template.fields.length > 0 && (
+                <div className="pt-4 border-t border-surface-700/50 mt-4 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{template.icon || '📄'}</span>
+                    <p className="text-xs font-semibold text-surface-400 uppercase tracking-wide">{template.name} Detayları</p>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    {Object.entries(metadata).map(([k, v]) => (
-                      <div key={k} className="flex gap-2 items-center">
-                        <div className="w-1/3 px-3 py-2 bg-surface-950/30 rounded-lg text-xs font-medium text-surface-400 border border-surface-700/50 truncate" title={k}>
-                          {k}
+                  <div className="grid grid-cols-4 gap-3">
+                    {template.fields.map(field => {
+                      const widthClass = { sm: 'col-span-1', md: 'col-span-2', lg: 'col-span-3', full: 'col-span-4' }[field.width || 'md'] || 'col-span-2';
+                      return (
+                        <div key={field.key} className={widthClass}>
+                          <label className="label">
+                            {field.label}
+                            {field.required && <span className="text-rose-400 ml-0.5">*</span>}
+                          </label>
+                          {field.type === 'select' ? (
+                            <select
+                              value={metadata[field.key] || ''}
+                              onChange={e => updateMetadata(field.key, e.target.value)}
+                              className="input h-8 text-xs w-full"
+                            >
+                              <option value="">Seçin…</option>
+                              {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                            </select>
+                          ) : field.type === 'textarea' ? (
+                            <textarea
+                              value={metadata[field.key] || ''}
+                              onChange={e => updateMetadata(field.key, e.target.value)}
+                              className="input text-xs w-full min-h-[64px] resize-none pt-2"
+                              rows={3}
+                            />
+                          ) : (
+                            <input
+                              type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+                              value={metadata[field.key] || ''}
+                              onChange={e => updateMetadata(field.key, e.target.value)}
+                              className="input h-8 text-xs w-full"
+                              readOnly={field.autoIncrement}
+                              placeholder={field.hint || ''}
+                            />
+                          )}
+                          {field.hint && <p className="text-[10px] text-surface-600 mt-1 leading-tight">{field.hint}</p>}
                         </div>
-                        <input 
-                          className="input flex-1 !py-2" 
-                          value={v as string} 
-                          onChange={e => updateMetadata(k, e.target.value)} 
-                          placeholder={`${k} değeri...`}
-                        />
-                        <button 
-                          onClick={() => removeMetadata(k)}
-                          className="p-2 text-surface-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
-                          title="Sil"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Meta */}
               <div className="card p-3 space-y-1.5">

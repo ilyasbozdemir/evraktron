@@ -28,6 +28,18 @@ function setupDbHandlers(ipcMain, state, setState) {
     if (filters.kurum)      { sql += ' AND kurum LIKE ?';     p.push(`%${filters.kurum}%`); }
     if (filters.tarihStart) { sql += ' AND tarih >= ?';       p.push(filters.tarihStart); }
     if (filters.tarihEnd)   { sql += ' AND tarih <= ?';       p.push(filters.tarihEnd); }
+    
+    // Custom metadata / Template field filters
+    if (filters.metadataFilters) {
+      for (const [key, value] of Object.entries(filters.metadataFilters)) {
+        if (value && value.trim()) {
+          // json_extract(metadata, '$.key') LIKE '%value%'
+          sql += ` AND json_extract(metadata, ?) LIKE ?`;
+          p.push(`$.${key}`, `%${value.trim()}%`);
+        }
+      }
+    }
+
     const ob = ['no','tip','kurum','tarih','durum','created_at'].includes(filters.orderBy) ? filters.orderBy : 'created_at';
     sql += ` ORDER BY ${ob} ${filters.order === 'ASC' ? 'ASC' : 'DESC'}`;
     if (filters.limit) { sql += ' LIMIT ?'; p.push(filters.limit); }

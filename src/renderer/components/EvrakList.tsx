@@ -106,7 +106,6 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
             <ColHeader col="klasor" label="Klasör" />
             <ColHeader col="tip" label="Tip" />
             <ColHeader col="kurum" label="Kurum" />
-            <ColHeader col="raf_no" label="Raf No" />
             <ColHeader col="tarih" label="Tarih" />
             <ColHeader col="durum" label="Durum" />
             <th>Özel Alanlar</th>
@@ -149,7 +148,6 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
                   <div className="text-surface-300">{evrak.kurum || '—'}</div>
                   {evrak.birim && <div className="text-surface-500 text-[10px] uppercase tracking-wider">{evrak.birim}</div>}
                 </td>
-                <td className="text-surface-400 text-xs font-mono">{evrak.raf_no || '—'}</td>
                 <td className="text-surface-400 text-xs font-mono">{formatDate(evrak.tarih)}</td>
                 <td>
                   <span className={DURUM_COLORS[evrak.durum] || 'badge'}>

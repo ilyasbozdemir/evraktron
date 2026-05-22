@@ -73,6 +73,7 @@ export interface EvrakFilters {
   kurum?: string;
   tarihStart?: string;
   tarihEnd?: string;
+  metadataFilters?: Record<string, string>;
   orderBy?: string;
   order?: 'ASC' | 'DESC';
   limit?: number;
@@ -87,6 +88,7 @@ export interface TemplateField {
   required?: boolean;
   default?: string;
   autoIncrement?: boolean;
+  hint?: string;
   options?: string[];
   width?: 'sm' | 'md' | 'lg' | 'full';
 }
