@@ -96,6 +96,13 @@ function createWindow() {
       mainWindow.webContents.send('file:open-request', filePath);
     }
   });
+
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12') {
+      mainWindow.webContents.toggleDevTools();
+      event.preventDefault();
+    }
+  });
 }
 
 // ─── Cleanup on exit ─────────────────────────────────────────────────────────
