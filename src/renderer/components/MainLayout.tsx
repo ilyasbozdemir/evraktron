@@ -183,6 +183,11 @@ export function MainLayout() {
   }, [setLastSaved, setFileSaved, showToast]);
 
   const handleCloseFile = useCallback(async () => {
+    const state = useAppStore.getState();
+    if (state.filePath === '__new__' && !state.isDirty) {
+      closeFile();
+      return;
+    }
     await handleSave();
     closeFile();
   }, [handleSave, closeFile]);
