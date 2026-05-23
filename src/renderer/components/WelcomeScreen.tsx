@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { FileText, FilePlus, FolderOpen, Zap, Shield, Database, Archive } from 'lucide-react';
+import { FileText, FilePlus, FolderOpen, Zap, Shield, Database, Archive, Monitor } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 
 export function WelcomeScreen() {
@@ -124,7 +124,7 @@ export function WelcomeScreen() {
             {[
               { icon: Database, label: 'SQLite + FTS5', desc: 'Hızlı tam metin arama', color: 'text-blue-400', bg: 'bg-blue-500/10 border border-blue-500/20', hover: 'hover:border-blue-500/40' },
               { icon: Shield,   label: 'Dosya Kilidi', desc: 'Eş zamanlı erişim koruması', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border border-emerald-500/20', hover: 'hover:border-emerald-500/40' },
-              { icon: Zap,      label: 'Windows Uyumlu', desc: 'Sağ tık ve Birlikte Aç desteği', color: 'text-amber-400', bg: 'bg-amber-500/10 border border-amber-500/20', hover: 'hover:border-amber-500/40' },
+              { icon: Monitor,  label: 'Çapraz Platform', desc: 'Windows, macOS ve Linux', color: 'text-amber-400', bg: 'bg-amber-500/10 border border-amber-500/20', hover: 'hover:border-amber-500/40' },
             ].map(({ icon: Icon, label, desc, color, bg, hover }) => (
               <div key={label} className={`p-4 rounded-xl bg-surface-800/30 flex flex-col items-center text-center gap-2 transition-all duration-300 hover:-translate-y-1 ${hover}`}>
                 <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mb-1 transition-colors duration-300`}>
