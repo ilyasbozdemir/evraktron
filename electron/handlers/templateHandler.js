@@ -64,8 +64,12 @@ function parseExcelBulkRows(worksheet, template) {
   const fieldKeys = template.fields.map(f => f.key);
 
   return rows.map((row, idx) => {
-    // Şablonun 2. satırındaki bilgilendirme (hint) satırını atla
-    if (Object.values(row).some(v => typeof v === 'string' && v.startsWith('[') && v.endsWith(']'))) return null;
+    // Sadece ilk satırdaki ipucu (hint) satırını atla. Kullanıcı test için aşağı kopyaladıysa kabul et.
+    if (idx === 0) {
+      const stringValues = Object.values(row).filter(v => typeof v === 'string' && v.trim());
+      const isHintRow = stringValues.length > 0 && stringValues.every(v => v.trim().startsWith('[') && v.trim().endsWith(']'));
+      if (isHintRow) return null;
+    }
 
     const meta = { __template_id: template.id };
     for (const key of fieldKeys) {
@@ -338,7 +342,7 @@ export function setupTemplateHandlers(ipcMain, state) {
       `);
       const addHareket = state.db.prepare(`
         INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not")
-        VALUES (?, 'olusturuldu', 'Toplu Import', 'Excel\'den toplu olarak içe aktarıldı')
+        VALUES (?, 'olusturuldu', 'Toplu Import', 'Excel\'\'den toplu olarak içe aktarıldı')
       `);
 
       const bulkInsert = state.db.transaction((rows) => {
