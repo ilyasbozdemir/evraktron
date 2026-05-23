@@ -27,7 +27,7 @@ let isUnsaved = false;
 // ─── File association: argv ───────────────────────────────────────────────────
 function getOpenFilePath() {
   const args = process.argv.slice(isDev ? 2 : 1);
-  const evrakArg = args.find(a => (a.endsWith('.etap') || a.endsWith('.etapp')) && fs.existsSync(a));
+  const evrakArg = args.find(a => (a.endsWith('.etap') || a.endsWith('.etapp') || a.endsWith('.json') || a.endsWith('.xml') || a.endsWith('.geojson')) && fs.existsSync(a));
   return evrakArg || null;
 }
 

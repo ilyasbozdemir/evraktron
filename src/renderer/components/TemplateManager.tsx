@@ -115,7 +115,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
     if (!editing) return;
     const result = await window.evraktron.template.importExcelDefinition();
     if (result.success && result.fields) {
-      setEditing(prev => prev ? { ...prev, fields: result.fields } : prev);
+      setEditing(prev => prev ? { ...prev, fields: result.fields || [] } : prev);
     }
   };
 

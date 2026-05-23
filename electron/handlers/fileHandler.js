@@ -291,7 +291,32 @@ function setupFileHandlers(ipcMain, state, setState) {
   // ── Open by path (file association) ───────────────────────────────────────
   ipcMain.handle('file:open', async (_e, filePath) => {
     if (!filePath || !fs.existsSync(filePath)) return { success: false, error: 'Dosya bulunamadı' };
+    
+    // Check if it's a data file
+    if (filePath.endsWith('.json') || filePath.endsWith('.xml') || filePath.endsWith('.geojson')) {
+      return { success: true, isDataFile: true, filePath };
+    }
+    
     return openEvrakFile(filePath, state, setState);
+  });
+
+  // ── Read/Write Raw Text (For Data Editor) ────────────────────────────────
+  ipcMain.handle('file:read-text', async (_e, filePath) => {
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      return { success: true, content };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle('file:write-text', async (_e, filePath, content) => {
+    try {
+      fs.writeFileSync(filePath, content, 'utf-8');
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   });
 
   // ── Save (repack) ─────────────────────────────────────────────────────────

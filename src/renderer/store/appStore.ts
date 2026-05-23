@@ -26,6 +26,11 @@ interface AppState {
   // Toast notifications
   toast: { id: string; message: string; type: 'success' | 'error' | 'info' } | null;
 
+  // Data Editor Mode
+  isDataMode?: boolean;
+  dataFilePath?: string | null;
+  setDataMode: (mode: boolean, path?: string | null) => void;
+
   // Actions
   setFileOpen: (open: boolean, filePath?: string) => void;
   /** Yeni dosya ilk kez kaydedildiğinde gerçek path ile state güncellenir */
@@ -83,6 +88,7 @@ export const useAppStore = create<AppState>((set) => ({
 
   setLastSaved: (t) => set({ lastSaved: t, isDirty: false }),
   setDirty: (v) => set({ isDirty: v }),
+  setDataMode: (mode, path = null) => set({ isDataMode: mode, dataFilePath: path }),
   setTheme: (t) => {
     const html = document.documentElement;
     if (t === 'dark') {

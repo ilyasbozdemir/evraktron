@@ -4,6 +4,7 @@ import { TitleBar } from './components/TitleBar';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { MainLayout } from './components/MainLayout';
 import { StatusBar } from './components/StatusBar';
+import { DataEditor } from './components/DataEditor';
 import { cn } from './lib/utils';
 
 export default function App() {
@@ -22,10 +23,20 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    // Setup file open request handler (when double clicked .etapp file)
     window.evraktron.file.onOpenRequest(async (filePath) => {
       const result = await window.evraktron.file.open(filePath);
+      
+      // Check if it's a raw data file (JSON, XML, etc.)
+      if (result.success && result.isDataFile) {
+        setFileOpen(true, filePath);
+        // We can pass a flag to store or just use the extension to render an editor
+        useAppStore.setState({ isDataMode: true, dataFilePath: filePath });
+        showToast('Veri dosyası editör modunda açıldı', 'success');
+        return;
+      }
+      
       if (result.success && result.filePath) {
+        useAppStore.setState({ isDataMode: false, dataFilePath: null });
         setFileOpen(true, result.filePath);
         showToast('Dosya başarıyla açıldı', 'success');
       } else if (!result.success && result.error) {
@@ -34,6 +45,8 @@ export default function App() {
     });
   }, [setFileOpen, showToast]);
 
+  const { isDataMode, dataFilePath } = useAppStore();
+
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-surface-900 text-surface-100 select-none">
       {/* Custom Title Bar */}
@@ -41,7 +54,7 @@ export default function App() {
 
       {/* Main View Container */}
       <div className="flex-1 flex overflow-hidden">
-        {isFileOpen ? <MainLayout /> : <WelcomeScreen />}
+        {isFileOpen ? (isDataMode ? <DataEditor filePath={dataFilePath!} /> : <MainLayout />) : <WelcomeScreen />}
       </div>
 
       {/* Custom Status Bar */}

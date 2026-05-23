@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('evraktron', {
     save: () => ipcRenderer.invoke('file:save'),
     saveAs: () => ipcRenderer.invoke('file:save-as'),
     getInfo: () => ipcRenderer.invoke('file:get-info'),
+    readText: (filePath) => ipcRenderer.invoke('file:read-text', filePath),
+    writeText: (filePath, content) => ipcRenderer.invoke('file:write-text', filePath, content),
     onOpenRequest: (cb) => ipcRenderer.on('file:open-request', (_e, fp) => cb(fp)),
   },
 
