@@ -122,7 +122,7 @@ function setupExportHandlers(ipcMain, state, setState) {
         r.kurum ? `${r.kurum}${r.birim ? ` - ${r.birim}` : ''}` : '-', 
         r.tarih || '-', 
         r.durum.toUpperCase(), 
-        (r.aciklama || '').substring(0, 80)
+        (r.aciklama || '')
       ]),
       styles: { font: 'Roboto', fontSize: 9, cellPadding: 3, textColor: [0, 0, 0], lineColor: [200, 200, 200], lineWidth: 0.1 },
       headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },

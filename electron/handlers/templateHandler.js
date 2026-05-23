@@ -85,10 +85,15 @@ function parseExcelBulkRows(worksheet, template) {
       meta[key] = String(val).trim();
     }
 
+    // Eğer satır tamamen boşsa atla (sadece defval: '' olan anahtarlar varsa)
+    const hasAnyData = Object.values(row).some(v => String(v).trim() !== '');
+    if (!hasAnyData) return null;
+
     const matchingNoKey = Object.keys(row).find(k => 
       ['no', 'evrak no', 'dosya no', 'dosya_no', 'sira_no', 'kayit no', 'belge no'].includes(k.toLowerCase().trim())
     );
-    const docNo = matchingNoKey ? row[matchingNoKey] : String(idx + 1);
+    const docNoVal = matchingNoKey ? row[matchingNoKey] : '';
+    const docNo = docNoVal ? docNoVal : String(idx + 1);
     
     // Explicit mappings for static columns (with robust fallbacks)
     const getVal = (possibleNames) => {

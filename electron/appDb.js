@@ -45,8 +45,8 @@ function seedDefaultTemplates(db) {
       { key: 'raf_no',         label: 'Raf / Dolap No',      type: 'text',     required: false, width: 'sm' },
       // Basvuru
       { key: 'ruhsat_sahibi',  label: 'Ruhsat Sahibi',      type: 'text',     required: true, width: 'lg' },
-      { key: 'ruhsat_turu',    label: 'Ruhsat Turu',        type: 'select',   required: true,
-        options: ['Isyeri Acma', 'Yapi Ruhsati', 'Iskan', 'Tadilat', 'Ruhsat Yenileme', 'Diger'], width: 'md' },
+      { key: 'ruhsat_turu',    label: 'Ruhsat Türü',        type: 'select',   required: true,
+        options: ['İşyeri Açma', 'Yapı Ruhsatı', 'İskan', 'Tadilat', 'Ruhsat Yenileme', 'Diğer'], width: 'md' },
       { key: 'cinsi',          label: 'Cinsi',              type: 'text',     required: true,   width: 'md' },
       // Tapu/Konum
       { key: 'parsel_no',      label: 'Parsel No',          type: 'text',     required: false,                           width: 'sm' },
