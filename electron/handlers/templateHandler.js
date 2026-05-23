@@ -82,24 +82,33 @@ function parseExcelBulkRows(worksheet, template) {
       );
       
       const val = matchingKey ? row[matchingKey] : '';
-      meta[key] = String(val).trim();
+      let strVal = String(val).trim();
+      if (strVal.match(/^\d+\.0+$/)) strVal = strVal.split('.')[0];
+      meta[key] = strVal;
     }
 
     // Eğer satır tamamen boşsa atla (sadece defval: '' olan anahtarlar varsa)
     const hasAnyData = Object.values(row).some(v => String(v).trim() !== '');
     if (!hasAnyData) return null;
 
-    const matchingNoKey = Object.keys(row).find(k => 
-      ['no', 'evrak no', 'dosya no', 'dosya_no', 'sira_no', 'kayit no', 'belge no'].includes(k.toLowerCase().trim())
-    );
-    const docNoVal = matchingNoKey ? row[matchingNoKey] : '';
-    const docNo = docNoVal ? docNoVal : String(idx + 1);
-    
     // Explicit mappings for static columns (with robust fallbacks)
     const getVal = (possibleNames) => {
       const match = Object.keys(row).find(k => possibleNames.includes(k.toLowerCase().trim()));
-      return match ? row[match] : '';
+      if (!match) return '';
+      let strVal = String(row[match]).trim();
+      if (strVal.match(/^\d+\.0+$/)) strVal = strVal.split('.')[0];
+      return strVal;
     };
+
+    const rafNoVal = getVal(['raf no', 'raf_no', 'raf / dolap no', 'raf/dolap no']);
+
+    const matchingNoKey = Object.keys(row).find(k => 
+      ['no', 'evrak no', 'dosya no', 'dosya_no', 'sira_no', 'kayit no', 'belge no'].includes(k.toLowerCase().trim())
+    );
+    let docNoVal = matchingNoKey ? String(row[matchingNoKey]).trim() : '';
+    if (docNoVal.match(/^\d+\.0+$/)) docNoVal = docNoVal.split('.')[0];
+    
+    const docNo = docNoVal ? docNoVal : (rafNoVal ? rafNoVal : String(idx + 1));
 
     return {
       no: String(docNo).trim(),

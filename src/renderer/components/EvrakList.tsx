@@ -123,6 +123,23 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
 
   const dynamicCols = Array.from(customCols);
 
+  // Dinamik "No" başlığı belirleme
+  const uniqueTemplates = new Set(sorted.map(e => {
+    try { return JSON.parse(e.metadata || '{}').__template_id; }
+    catch { return null; }
+  }).filter(Boolean));
+
+  let noLabel = 'Evrak No';
+  if (uniqueTemplates.size === 1) {
+    const tId = Array.from(uniqueTemplates)[0];
+    const t = templates.find(tmpl => tmpl.id === tId);
+    if (t) {
+      const noField = t.fields?.find((f: any) => ['dosya_no', 'ruhsat_no', 'evrak_no'].includes(f.key));
+      if (noField) noLabel = noField.label;
+      else if (tId === 'ruhsat') noLabel = 'Ruhsat No';
+    }
+  }
+
   const ColHeader = ({ col, label }: { col: SortKey; label: string }) => (
     <th onClick={() => handleSort(col)} className="cursor-pointer select-none group">
       <div className="flex items-center gap-1.5 hover:text-surface-200 transition-colors">
@@ -175,7 +192,7 @@ export function EvrakList({ onRefresh }: EvrakListProps) {
                 className="w-4 h-4 rounded bg-surface-800 border-surface-600 checked:bg-brand-500 cursor-pointer"
               />
             </th>
-            <ColHeader col="no" label="No" />
+            <ColHeader col="no" label={noLabel} />
             <ColHeader col="klasor" label="Klasör" />
             <ColHeader col="raf_no" label="Raf No" />
             <ColHeader col="tip" label="Tip" />

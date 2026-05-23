@@ -21,8 +21,8 @@ function setupExportHandlers(ipcMain, state, setState) {
     const rows = state.db.prepare('SELECT * FROM evraklar ORDER BY created_at DESC').all();
 
     const data = [
-      ['ID', 'No', 'Tip', 'Kurum', 'Tarih', 'Durum', 'Açıklama', 'Notlar', 'Oluşturulma', 'Güncellenme'],
-      ...rows.map(r => [r.id, r.no, r.tip, r.kurum, r.tarih, r.durum, r.aciklama, r.notlar, r.created_at, r.updated_at]),
+      ['No', 'Tip', 'Kurum', 'Tarih', 'Durum', 'Açıklama', 'Notlar', 'Oluşturulma', 'Güncellenme'],
+      ...rows.map(r => [r.no, r.tip, r.kurum, r.tarih, r.durum, r.aciklama, r.notlar, r.created_at, r.updated_at]),
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(data);
@@ -114,9 +114,8 @@ function setupExportHandlers(ipcMain, state, setState) {
 
     doc.autoTable({
       startY: 32,
-      head: [['ID', 'Evrak No', 'Evrak Tipi', 'Kurum / Birim', 'Tarih', 'Durum', 'Açıklama']],
+      head: [['Evrak No', 'Evrak Tipi', 'Kurum / Birim', 'Tarih', 'Durum', 'Açıklama']],
       body: rows.map(r => [
-        r.id, 
         r.no, 
         r.tip.toUpperCase(), 
         r.kurum ? `${r.kurum}${r.birim ? ` - ${r.birim}` : ''}` : '-', 
