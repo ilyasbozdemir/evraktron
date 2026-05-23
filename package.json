@@ -1,7 +1,7 @@
 {
   "name": "evraktron",
   "version": "1.1.1",
-  "description": "Portable evrak yönetim sistemi - .evrak dosya formatı desteğiyle",
+  "description": "Portable evrak yönetim sistemi - .etap dosya formatı desteğiyle",
   "main": "out/main/main.js",
   "homepage": "./",
   "author": "İlyas Bozdemir",
