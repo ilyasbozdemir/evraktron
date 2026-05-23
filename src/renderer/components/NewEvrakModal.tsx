@@ -160,6 +160,7 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
       const result = await window.evraktron.template.executeBulkExcel(selected.id, excelPreview.filePath);
       if (result.success) {
         setBulkResult(result);
+        onCreated(0); // Trigger UI refresh
       } else {
         useAppStore.getState().showToast(result.error || 'Yükleme sırasında hata oluştu', 'error');
       }

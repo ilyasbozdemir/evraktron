@@ -4,6 +4,7 @@ import fs from 'fs';
 import XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { RobotoRegularBase64 } from './Roboto-Regular.js';
 
 function setupExportHandlers(ipcMain, state, setState) {
   // ── Excel ─────────────────────────────────────────────────────────────────
@@ -62,6 +63,21 @@ function setupExportHandlers(ipcMain, state, setState) {
     return { success: true, filePath };
   });
 
+  // ── JSON ───────────────────────────────────────────────────────────────────
+  ipcMain.handle('export:json', async (_e, filters = {}) => {
+    if (!state.db) return { success: false, error: 'Veritabanı açık değil' };
+    const { filePath, canceled } = await dialog.showSaveDialog({
+      title: 'JSON Olarak Dışa Aktar',
+      defaultPath: `evraklar_${Date.now()}.json`,
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+    });
+    if (canceled || !filePath) return { success: false };
+
+    const rows = state.db.prepare('SELECT * FROM evraklar ORDER BY created_at DESC').all();
+    fs.writeFileSync(filePath, JSON.stringify(rows, null, 2), 'utf-8');
+    return { success: true, filePath };
+  });
+
   // ── PDF ───────────────────────────────────────────────────────────────────
   ipcMain.handle('export:pdf', async (_e, filters = {}) => {
     if (!state.db) return { success: false, error: 'Veritabanı açık değil' };
@@ -78,28 +94,48 @@ function setupExportHandlers(ipcMain, state, setState) {
     const stats = state.db.prepare('SELECT COUNT(*) as c FROM evraklar').get();
 
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    
+    doc.addFileToVFS('Roboto-Regular.ttf', RobotoRegularBase64);
+    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+    doc.setFont('Roboto');
 
-    // Header
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, 297, 25, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('EVRAKTRON - Evrak Listesi Raporu', 14, 16);
+    // Header (Official Protocol Format)
+    doc.setTextColor(0, 0, 0); // Siyah metin
+    doc.setFontSize(14);
+    doc.text('EVRAK KAYIT VE TAKİP RAPORU', 148, 16, { align: 'center' });
+    
     doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Oluşturulma: ${new Date().toLocaleString('tr-TR')}  |  Toplam: ${stats.c} evrak`, 14, 22);
+    doc.text(`Rapor Tarihi: ${new Date().toLocaleString('tr-TR')}`, 14, 24);
+    doc.text(`Toplam Evrak Sayısı: ${stats.c}`, 280, 24, { align: 'right' });
+    
+    // Çizgi
+    doc.setLineWidth(0.5);
+    doc.line(14, 27, 280, 27);
 
     doc.autoTable({
-      startY: 30,
-      head: [['ID', 'No', 'Tip', 'Kurum', 'Tarih', 'Durum', 'Açıklama']],
-      body: rows.map(r => [r.id, r.no, r.tip, r.kurum || '-', r.tarih || '-', r.durum, (r.aciklama || '').substring(0, 60)]),
-      styles: { fontSize: 8, cellPadding: 3 },
-      headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
+      startY: 32,
+      head: [['ID', 'Evrak No', 'Evrak Tipi', 'Kurum / Birim', 'Tarih', 'Durum', 'Açıklama']],
+      body: rows.map(r => [
+        r.id, 
+        r.no, 
+        r.tip.toUpperCase(), 
+        r.kurum ? `${r.kurum}${r.birim ? ` - ${r.birim}` : ''}` : '-', 
+        r.tarih || '-', 
+        r.durum.toUpperCase(), 
+        (r.aciklama || '').substring(0, 80)
+      ]),
+      styles: { font: 'Roboto', fontSize: 9, cellPadding: 3, textColor: [0, 0, 0], lineColor: [200, 200, 200], lineWidth: 0.1 },
+      headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+      bodyStyles: { valign: 'middle' },
+      alternateRowStyles: { fillColor: [252, 252, 252] },
       columnStyles: {
-        0: { cellWidth: 12 }, 1: { cellWidth: 25 }, 2: { cellWidth: 18 },
-        3: { cellWidth: 35 }, 4: { cellWidth: 22 }, 5: { cellWidth: 22 }, 6: { cellWidth: 'auto' },
+        0: { cellWidth: 12, halign: 'center' }, 
+        1: { cellWidth: 30 }, 
+        2: { cellWidth: 22, halign: 'center' },
+        3: { cellWidth: 45 }, 
+        4: { cellWidth: 25, halign: 'center' }, 
+        5: { cellWidth: 25, halign: 'center' }, 
+        6: { cellWidth: 'auto' },
       },
     });
 

@@ -11,7 +11,7 @@ export function ExportModal({ onClose }: ExportModalProps) {
   const { filters, showToast } = useAppStore();
   const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = async (type: 'excel' | 'pdf' | 'csv') => {
+  const handleExport = async (type: 'excel' | 'pdf' | 'csv' | 'json') => {
     setIsExporting(true);
     try {
       let result;
@@ -98,6 +98,20 @@ export function ExportModal({ onClose }: ExportModalProps) {
                 <div>
                   <p className="font-semibold text-surface-200 group-hover:text-brand-400 transition-colors text-sm">Virgülle Ayrılmış Değerler (.csv)</p>
                   <p className="text-xs text-surface-500 mt-0.5">Diğer programlar ile uyumlu basit veri formatı</p>
+                </div>
+              </button>
+
+              <button
+                disabled={isExporting}
+                onClick={() => handleExport('json')}
+                className="group w-full card-hover p-4 flex items-center gap-4 text-left border border-surface-700/40 bg-surface-900/30"
+              >
+                <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:bg-amber-500/20 transition-all duration-200">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="font-semibold text-surface-200 group-hover:text-amber-400 transition-colors text-sm">JSON Veri Formatı (.json)</p>
+                  <p className="text-xs text-surface-500 mt-0.5">Programatik erişim için yapılandırılmış veri</p>
                 </div>
               </button>
             </div>

@@ -184,7 +184,8 @@ export function MainLayout() {
 
   const handleCloseFile = useCallback(async () => {
     const state = useAppStore.getState();
-    if (state.filePath === '__new__' && !state.isDirty) {
+    if (state.filePath === null && !state.isDirty) {
+      useAppStore.getState().showToast('Değişiklik yok, kaydedilmeden kapatıldı', 'info');
       closeFile();
       return;
     }

@@ -76,6 +76,7 @@ contextBridge.exposeInMainWorld('evraktron', {
     toExcel: (filters) => ipcRenderer.invoke('export:excel', filters),
     toPdf: (filters) => ipcRenderer.invoke('export:pdf', filters),
     toCsv: (filters) => ipcRenderer.invoke('export:csv', filters),
+    toJson: (filters) => ipcRenderer.invoke('export:json', filters),
   },
 
   // Shell
