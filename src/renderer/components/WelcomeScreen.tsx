@@ -80,7 +80,7 @@ export function WelcomeScreen() {
           {/* Yeni Proje */}
           <button
             onClick={handleNew}
-            className="relative group p-6 rounded-2xl flex flex-col items-center gap-4 border border-brand-500/20 bg-surface-800/40 hover:bg-surface-800/80 transition-all cursor-pointer overflow-hidden"
+            className="relative group p-6 rounded-2xl flex flex-col items-center gap-4 border border-brand-500/20 bg-slate-500/5 hover:bg-slate-500/10 dark:bg-surface-800/40 dark:hover:bg-surface-800/80 transition-all cursor-pointer overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-brand-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
@@ -88,15 +88,15 @@ export function WelcomeScreen() {
             </div>
             <div className="relative z-10">
               <p className="font-semibold text-lg text-surface-100">Yeni Proje</p>
-              <p className="text-sm text-surface-400 mt-1">Boş .etapp projesi oluştur</p>
+              <p className="text-sm text-surface-400 mt-1">Boş .etap projesi oluştur</p>
             </div>
-            <kbd className="relative z-10 mt-auto text-[11px] font-mono text-surface-500 bg-surface-900/60 px-2 py-1 rounded border border-surface-700/50">Ctrl+N</kbd>
+            <kbd className="relative z-10 mt-auto text-[11px] font-mono text-surface-500 bg-slate-500/10 dark:bg-surface-900/60 px-2 py-1 rounded border border-surface-700/50">Ctrl+N</kbd>
           </button>
 
           {/* Proje Aç */}
           <button
             onClick={handleOpen}
-            className="relative group p-6 rounded-2xl flex flex-col items-center gap-4 border border-violet-500/20 bg-surface-800/40 hover:bg-surface-800/80 transition-all cursor-pointer overflow-hidden"
+            className="relative group p-6 rounded-2xl flex flex-col items-center gap-4 border border-violet-500/20 bg-slate-500/5 hover:bg-slate-500/10 dark:bg-surface-800/40 dark:hover:bg-surface-800/80 transition-all cursor-pointer overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(139,92,246,0.15)]">
@@ -104,9 +104,9 @@ export function WelcomeScreen() {
             </div>
             <div className="relative z-10">
               <p className="font-semibold text-lg text-surface-100">Proje Aç</p>
-              <p className="text-sm text-surface-400 mt-1">Mevcut .etapp projesini aç</p>
+              <p className="text-sm text-surface-400 mt-1">Mevcut .etap projesini aç</p>
             </div>
-            <kbd className="relative z-10 mt-auto text-[11px] font-mono text-surface-500 bg-surface-900/60 px-2 py-1 rounded border border-surface-700/50">Ctrl+O</kbd>
+            <kbd className="relative z-10 mt-auto text-[11px] font-mono text-surface-500 bg-slate-500/10 dark:bg-surface-900/60 px-2 py-1 rounded border border-surface-700/50">Ctrl+O</kbd>
           </button>
         </div>
 
@@ -126,7 +126,7 @@ export function WelcomeScreen() {
               { icon: Shield,   label: 'Dosya Kilidi', desc: 'Eş zamanlı erişim koruması', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border border-emerald-500/20', hover: 'hover:border-emerald-500/40' },
               { icon: Monitor,  label: 'Çapraz Platform', desc: 'Windows, macOS ve Linux', color: 'text-amber-400', bg: 'bg-amber-500/10 border border-amber-500/20', hover: 'hover:border-amber-500/40' },
             ].map(({ icon: Icon, label, desc, color, bg, hover }) => (
-              <div key={label} className={`p-4 rounded-xl bg-surface-800/30 flex flex-col items-center text-center gap-2 transition-all duration-300 hover:-translate-y-1 ${hover}`}>
+              <div key={label} className={`p-4 rounded-xl bg-slate-500/5 dark:bg-surface-800/30 flex flex-col items-center text-center gap-2 transition-all duration-300 hover:-translate-y-1 ${hover}`}>
                 <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mb-1 transition-colors duration-300`}>
                   <Icon className={`w-5 h-5 ${color}`} />
                 </div>
