@@ -55,7 +55,7 @@ export function WelcomeScreen() {
         <div className="mb-8 flex flex-col items-center gap-4">
           <img 
             src="./icon.png" 
-            alt="Evrak Takip Uygulaması Logo" 
+            alt="Evrak Takip Programı Logo" 
             className="w-24 h-24 rounded-3xl object-cover"
             style={{ boxShadow: 'var(--shadow-glow)' }}
           />
@@ -64,7 +64,7 @@ export function WelcomeScreen() {
               className="text-4xl font-bold tracking-tight"
               style={{ color: 'var(--text-primary)' }}
             >
-              Evrak Takip Uygulaması
+              Evrak Takip Programı
             </h1>
             <p className="mt-2 text-lg" style={{ color: 'var(--text-secondary)' }}>
               Portable Evrak Yönetim Sistemi

@@ -2,7 +2,7 @@
 module.exports = {
   appId: 'com.ilyasbozdemir.evraktron',
   npmRebuild: true,
-  productName: 'Evrak Takip Uygulaması',
+  productName: 'Evrak Takip Programı',
   directories: {
     output: 'dist-electron'
   },
@@ -38,14 +38,14 @@ module.exports = {
       {
         ext: 'etap',
         name: 'Evrak Takip Program Dosyası',
-        description: 'Evrak Takip Uygulaması (ETAP) dosyası',
+        description: 'Evrak Takip Programı (ETAP) dosyası',
         icon: 'public/icon.ico',
         role: 'Editor'
       },
       {
         ext: 'etapp',
         name: 'Evrak Takip Program Dosyası',
-        description: 'Evrak Takip Uygulaması (ETAPP) dosyası',
+        description: 'Evrak Takip Programı (ETAPP) dosyası',
         icon: 'public/icon.ico',
         role: 'Editor'
       }
@@ -57,7 +57,7 @@ module.exports = {
     allowToChangeInstallationDirectory: true,
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
-    shortcutName: 'Evrak Takip Uygulaması',
+    shortcutName: 'Evrak Takip Programı',
     include: 'build/installer.nsh'
   },
   portable: {

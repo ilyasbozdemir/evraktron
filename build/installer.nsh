@@ -5,11 +5,11 @@
   
   ; --- Sağ Tık → YENİ menüsü ---
   WriteRegStr HKCR ".etapp\ShellNew" "NullFile" ""
-  WriteRegStr HKCR ".etapp\ShellNew" "ItemName" "Evrak Takip Uygulaması Dosyası"
+  WriteRegStr HKCR ".etapp\ShellNew" "ItemName" "Evrak Takip Programı Dosyası"
   WriteRegStr HKCR ".etapp\ShellNew" "IconPath" '"$INSTDIR\evraktron.exe",0'
 
   ; --- ProgID tanımı ---
-  WriteRegStr HKCR "EvrakTakip.Document" "" "Evrak Takip Uygulaması (ETAPP) dosyası"
+  WriteRegStr HKCR "EvrakTakip.Document" "" "Evrak Takip Programı (ETAPP) dosyası"
   WriteRegStr HKCR "EvrakTakip.Document\DefaultIcon" "" '"$INSTDIR\evraktron.exe",0'
   WriteRegStr HKCR "EvrakTakip.Document\shell\open\command" "" '"$INSTDIR\evraktron.exe" "%1"'
 

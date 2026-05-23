@@ -280,8 +280,8 @@ function setupFileHandlers(ipcMain, state, setState) {
   // ── Open dialog ───────────────────────────────────────────────────────────
   ipcMain.handle('file:open-dialog', async () => {
     const { filePaths, canceled } = await dialog.showOpenDialog({
-      title: 'Evrak Takip Uygulaması Dosyası Aç',
-      filters: [{ name: 'Evrak Takip Uygulaması Dosyası', extensions: ['etap', 'etapp'] }],
+      title: 'Evrak Takip Programı Dosyası Aç',
+      filters: [{ name: 'Evrak Takip Programı Dosyası', extensions: ['etap', 'etapp'] }],
       properties: ['openFile'],
     });
     if (canceled || !filePaths.length) return { success: false };
@@ -329,7 +329,7 @@ function setupFileHandlers(ipcMain, state, setState) {
       const { filePath: savePath, canceled } = await dialog.showSaveDialog({
         title: 'Dosyayı Kaydet',
         defaultPath: 'yeni-dosya.etap',
-        filters: [{ name: 'Evrak Takip Uygulaması Dosyası', extensions: ['etap', 'etapp'] }],
+        filters: [{ name: 'Evrak Takip Programı Dosyası', extensions: ['etap', 'etapp'] }],
       });
       if (canceled || !savePath) return { success: false };
 
@@ -355,7 +355,7 @@ function setupFileHandlers(ipcMain, state, setState) {
     const { filePath: savePath, canceled } = await dialog.showSaveDialog({
       title: 'Farklı Kaydet',
       defaultPath: 'dosya.etap',
-      filters: [{ name: 'Evrak Takip Uygulaması Dosyası', extensions: ['etap', 'etapp'] }],
+      filters: [{ name: 'Evrak Takip Programı Dosyası', extensions: ['etap', 'etapp'] }],
     });
     if (canceled || !savePath) return { success: false };
 
