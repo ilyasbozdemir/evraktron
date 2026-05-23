@@ -43,20 +43,20 @@ html.dark {
 
 /* ── Light ──────────────────────────────────────────────────────────────── */
 html.light {
-  --bg-base:        #f8fafc;   /* slate-50 */
-  --bg-elevated:    #ffffff;
-  --bg-overlay:     #f1f5f9;   /* slate-100 */
-  --bg-hover:       #e2e8f0;   /* slate-200 */
-  --bg-muted:       rgba(241,245,249,0.8);
+  --bg-base:        #f4f4f5;   /* zinc-100 */
+  --bg-elevated:    #ffffff;   /* pure white */
+  --bg-overlay:     #e4e4e7;   /* zinc-200 */
+  --bg-hover:       #fafafa;   /* zinc-50 */
+  --bg-muted:       rgba(255, 255, 255, 0.7);
 
-  --border-default: rgba(203,213,225,0.8);  /* slate-300 */
-  --border-subtle:  rgba(226,232,240,0.9);
-  --border-strong:  rgba(148,163,184,0.5);
+  --border-default: rgba(161, 161, 170, 0.4);  /* zinc-400/40 */
+  --border-subtle:  rgba(228, 228, 231, 0.8);  /* zinc-200/80 */
+  --border-strong:  rgba(113, 113, 122, 0.3);  /* zinc-500/30 */
 
-  --text-primary:   #0f172a;   /* slate-900 */
-  --text-secondary: #334155;   /* slate-700 */
-  --text-muted:     #64748b;   /* slate-500 */
-  --text-disabled:  #94a3b8;   /* slate-400 */
+  --text-primary:   #18181b;   /* zinc-900 */
+  --text-secondary: #3f3f46;   /* zinc-700 */
+  --text-muted:     #71717a;   /* zinc-500 */
+  --text-disabled:  #a1a1aa;   /* zinc-400 */
 
   --brand-bg:       #2563eb;
   --brand-bg-hover: #1d4ed8;
