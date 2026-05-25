@@ -9,7 +9,7 @@ import { TemplateStoreModal } from './TemplateStoreModal';
 interface TemplateField {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'array';
+  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'array' | 'json';
   itemType?: 'object' | 'string' | 'number';
   required?: boolean;
   default?: string;
@@ -478,7 +478,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                 />
                               </div>
                             )}
-                            {field.type === 'array' && (
+                            {(field.type === 'array' || field.type === 'json') && (
                               <div className="col-span-3">
                                 <label className="block text-xs text-surface-400 mb-1">Alt Alanlar (JSON Formatında subFields Dizisi)</label>
                                 <textarea

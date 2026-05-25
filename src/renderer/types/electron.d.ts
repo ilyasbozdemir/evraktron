@@ -84,7 +84,7 @@ export interface EvrakFilters {
 export interface TemplateField {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'array';
+  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'array' | 'json';
   itemType?: 'object' | 'string' | 'number';
   required?: boolean;
   default?: string;

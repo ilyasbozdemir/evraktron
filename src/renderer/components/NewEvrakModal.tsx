@@ -332,7 +332,7 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
                       {field.label}
                       {field.required && <span className="text-rose-400 ml-0.5">*</span>}
                     </label>
-                    {field.type === 'array' ? (
+                    {field.type === 'array' || field.type === 'json' ? (
                       <JsonFieldEditor
                         field={field}
                         value={formData[field.key] || ''}

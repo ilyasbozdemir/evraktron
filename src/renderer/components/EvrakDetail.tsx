@@ -270,7 +270,7 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
                             {field.label}
                             {field.required && <span className="text-rose-400 ml-0.5">*</span>}
                           </label>
-                          {field.type === 'array' ? (
+                          {field.type === 'array' || field.type === 'json' ? (
                             <JsonFieldEditor
                               field={field}
                               value={metadata[field.key] || ''}
