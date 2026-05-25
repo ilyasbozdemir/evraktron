@@ -129,8 +129,19 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
     }
   };
 
-  const handleExportJson = async () => {
-    await window.evraktron.template.exportJson();
+  const BUILTIN_IDS = ['imar_18_madde', 'insaat_ruhsat', 'yazi_takip', 'tebligat_takip', 'fatura_takip', 'kisi_ozluk', 'is_kazasi', 'ihale_takip'];
+
+  const handleExportJson = async (onlyCustom: boolean = false) => {
+    if (onlyCustom) {
+      const customIds = templates.filter(t => !BUILTIN_IDS.includes(t.id!)).map(t => t.id!);
+      if (customIds.length === 0) {
+        showToast('Dışa aktarılacak özel şablon bulunamadı', 'warning');
+        return;
+      }
+      await window.evraktron.template.exportJson(customIds);
+    } else {
+      await window.evraktron.template.exportJson();
+    }
   };
 
   // ── Field helpers ─────────────────────────────────────────────────────────────
@@ -177,9 +188,13 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
               {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
               JSON İmport
             </button>
-            <button onClick={handleExportJson} className="btn-ghost text-xs gap-1.5">
+            <button onClick={() => handleExportJson(true)} className="btn-ghost text-xs gap-1.5" title="Sadece kendi eklediğiniz şablonları dışa aktarır">
               <Download className="w-3.5 h-3.5" />
-              JSON Export
+              Özel Şablonları Aktar
+            </button>
+            <button onClick={() => handleExportJson(false)} className="btn-ghost text-xs gap-1.5" title="Tüm şablonları (hazırlar dahil) dışa aktarır">
+              <Download className="w-3.5 h-3.5" />
+              Tümünü Aktar
             </button>
             <div className="w-px h-5 bg-surface-700" />
             <button onClick={() => setShowStore(true)} className="btn-ghost text-xs gap-1.5 text-violet-400 hover:text-violet-300">
@@ -214,7 +229,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                   key={t.id}
                   onClick={() => setEditing(editing?.id === t.id ? null : JSON.parse(JSON.stringify(t)))}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all',
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all group',
                     editing?.id === t.id
                       ? 'bg-brand-500/15 border border-brand-500/30'
                       : 'hover:bg-surface-800 border border-transparent'
@@ -227,10 +242,18 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 shrink-0">
                     <button
+                      onClick={e => { e.stopPropagation(); window.evraktron.template.exportJson([t.id!]); }}
+                      className="btn-ghost p-1 h-6 w-6 text-brand-400 hover:bg-brand-500/10"
+                      title="Şablonu Dışa Aktar"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </button>
+                    <button
                       onClick={e => { e.stopPropagation(); handleDelete(t.id!); }}
                       className="btn-ghost p-1 h-6 w-6 text-rose-400 hover:bg-rose-500/10"
+                      title="Şablonu Sil"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
