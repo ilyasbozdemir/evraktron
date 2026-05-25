@@ -1,6 +1,6 @@
 {
   "name": "evraktron",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Portable evrak yönetim sistemi - .etap dosya formatı desteğiyle",
   "main": "out/main/main.js",
   "homepage": "./",
