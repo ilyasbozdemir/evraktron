@@ -8,6 +8,7 @@ import { useAppStore } from '../store/appStore';
 import { cn, formatDateTime, formatDate, formatBytes, DURUM_LABELS, TIP_LABELS } from '../lib/utils';
 import { AttachmentsTab } from './AttachmentsTab';
 import { HareketLog } from './HareketLog';
+import { JsonFieldEditor } from './JsonFieldEditor';
 
 interface EvrakDetailProps {
   evrakId: number;
@@ -269,7 +270,13 @@ export function EvrakDetail({ evrakId, onClose, onRefresh }: EvrakDetailProps) {
                             {field.label}
                             {field.required && <span className="text-rose-400 ml-0.5">*</span>}
                           </label>
-                          {field.type === 'select' ? (
+                          {field.type === 'json' ? (
+                            <JsonFieldEditor
+                              field={field}
+                              value={metadata[field.key] || ''}
+                              onChange={(val) => updateMetadata(field.key, val)}
+                            />
+                          ) : field.type === 'select' ? (
                             <select
                               value={metadata[field.key] || ''}
                               onChange={e => updateMetadata(field.key, e.target.value)}

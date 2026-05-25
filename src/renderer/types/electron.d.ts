@@ -84,13 +84,14 @@ export interface EvrakFilters {
 export interface TemplateField {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox';
+  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'json';
   required?: boolean;
   default?: string;
   autoIncrement?: boolean;
   hint?: string;
   options?: string[];
   width?: 'sm' | 'md' | 'lg' | 'full';
+  subFields?: TemplateField[];
 }
 
 export interface TemplateNumbering {

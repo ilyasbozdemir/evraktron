@@ -9,12 +9,14 @@ import { TemplateStoreModal } from './TemplateStoreModal';
 interface TemplateField {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox';
+  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'json';
   required?: boolean;
   default?: string;
   autoIncrement?: boolean;
   options?: string[];
   width?: 'sm' | 'md' | 'lg' | 'full';
+  hint?: string;
+  subFields?: TemplateField[];
 }
 
 interface EvrakTemplate {
@@ -437,6 +439,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                 <option value="select">Seçim</option>
                                 <option value="textarea">Uzun Metin</option>
                                 <option value="checkbox">Onay Kutusu</option>
+                                <option value="json">Dinamik Liste (JSON)</option>
                               </select>
                             </div>
                             <div>
@@ -472,6 +475,25 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                   className="input h-7 text-xs w-full"
                                   placeholder="Seçenek 1, Seçenek 2, Seçenek 3"
                                 />
+                              </div>
+                            )}
+                            {field.type === 'json' && (
+                              <div className="col-span-3">
+                                <label className="block text-xs text-surface-400 mb-1">Alt Alanlar (JSON Formatında subFields Dizisi)</label>
+                                <textarea
+                                  value={field.subFields ? JSON.stringify(field.subFields, null, 2) : '[\n  { "key": "alan1", "label": "Alan 1", "type": "text" }\n]'}
+                                  onChange={e => {
+                                    try {
+                                      const parsed = JSON.parse(e.target.value);
+                                      updateField(idx, { subFields: parsed });
+                                    } catch {
+                                      // ignore invalid JSON while typing
+                                    }
+                                  }}
+                                  className="input text-xs w-full min-h-[96px] font-mono resize-y"
+                                  placeholder='[{"key": "isim", "label": "İsim", "type": "text"}]'
+                                />
+                                <p className="text-[10px] text-surface-500 mt-1">Geçerli bir JSON dizisi girin. Örn: <code className="bg-surface-800 px-1 rounded">[{'{"key":"no","label":"No","type":"text"}'}]</code></p>
                               </div>
                             )}
                           </div>

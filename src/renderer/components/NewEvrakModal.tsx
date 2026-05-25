@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Search, FileText, Upload, Download, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAppStore } from '../store/appStore';
+import { JsonFieldEditor } from './JsonFieldEditor';
 
 import type { EvrakTemplate, TemplateField, EvrakTip, EvrakDurum } from '../types/electron.d';
 
@@ -331,7 +332,13 @@ export function NewEvrakModal({ onClose, onCreated }: NewEvrakModalProps) {
                       {field.label}
                       {field.required && <span className="text-rose-400 ml-0.5">*</span>}
                     </label>
-                    {field.type === 'select' ? (
+                    {field.type === 'json' ? (
+                      <JsonFieldEditor
+                        field={field}
+                        value={formData[field.key] || ''}
+                        onChange={(val) => handleFieldChange(field.key, val)}
+                      />
+                    ) : field.type === 'select' ? (
                       <select
                         value={formData[field.key] || ''}
                         onChange={e => handleFieldChange(field.key, e.target.value)}
