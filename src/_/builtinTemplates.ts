@@ -46,9 +46,35 @@ export const BUILTIN_TEMPLATES: StoreTemplate[] = [
       { key: 'ada_no', label: 'Ada No', type: 'text', required: false, width: 'sm' },
       { key: 'parsel_no', label: 'Parsel No', type: 'text', required: false, width: 'sm' },
       { key: 'alan', label: 'Alan (m²)', type: 'text', required: false, width: 'sm' },
-      { key: 'encumen_no', label: 'Encümen Karar No', type: 'text', required: false, width: 'md' },
+      { 
+        key: 'encumen_kararlari', 
+        label: 'Encümen Kararları', 
+        type: 'array',
+        itemType: 'object',
+        required: false, 
+        width: 'full',
+        hint: 'Birden fazla encümen kararını ve açıklamasını ekleyebilirsiniz',
+        subFields: [
+          { key: 'karar_no', label: 'Karar No', type: 'text', width: 'sm' },
+          { key: 'tarih', label: 'Tarih', type: 'date', width: 'sm' },
+          { key: 'aciklama', label: 'Açıklama', type: 'text', width: 'lg' }
+        ]
+      },
       { key: 'askiya_cikis_tarihi', label: 'Askıya Çıkış Tarihi', type: 'date', required: false, width: 'sm' },
-      { key: 'itiraz_sayisi', label: 'İtiraz Sayısı', type: 'text', required: false, width: 'sm' },
+      { 
+        key: 'itirazlar', 
+        label: 'İtirazlar', 
+        type: 'array',
+        itemType: 'object',
+        required: false, 
+        width: 'full',
+        hint: 'İtiraz eden kişileri ve durumları ekleyebilirsiniz',
+        subFields: [
+          { key: 'itiraz_eden', label: 'İtiraz Eden', type: 'text', width: 'md' },
+          { key: 'tarih', label: 'İtiraz Tarihi', type: 'date', width: 'sm' },
+          { key: 'durum', label: 'Durum / Sonuç', type: 'text', width: 'md' }
+        ]
+      },
       { key: 'tescil_durumu', label: 'Tescil Durumu', type: 'select', required: false, width: 'md', options: ['Hazırlık', 'Encümende', 'Askıda', 'İtirazlı', 'Tescile Gönderildi', 'Tescil Edildi'] },
       { key: 'aciklama', label: 'Açıklama', type: 'textarea', required: false, width: 'full' },
     ],

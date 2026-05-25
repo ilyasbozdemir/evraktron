@@ -479,22 +479,47 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                               </div>
                             )}
                             {(field.type === 'array' || field.type === 'json') && (
-                              <div className="col-span-3">
-                                <label className="block text-xs text-surface-400 mb-1">Alt Alanlar (JSON Formatında subFields Dizisi)</label>
-                                <textarea
-                                  value={field.subFields ? JSON.stringify(field.subFields, null, 2) : '[\n  { "key": "alan1", "label": "Alan 1", "type": "text" }\n]'}
-                                  onChange={e => {
-                                    try {
-                                      const parsed = JSON.parse(e.target.value);
-                                      updateField(idx, { subFields: parsed });
-                                    } catch {
-                                      // ignore invalid JSON while typing
-                                    }
-                                  }}
-                                  className="input text-xs w-full min-h-[96px] font-mono resize-y"
-                                  placeholder='[{"key": "isim", "label": "İsim", "type": "text"}]'
-                                />
-                                <p className="text-[10px] text-surface-500 mt-1">Geçerli bir JSON dizisi girin. Örn: <code className="bg-surface-800 px-1 rounded">[{'{"key":"no","label":"No","type":"text"}'}]</code></p>
+                              <div className="col-span-3 border border-surface-700 rounded-lg p-3 bg-surface-900/50 mt-2">
+                                <div className="flex items-center justify-between mb-2">
+                                  <label className="block text-xs font-medium text-surface-300">Alt Alanlar (Sub-Fields)</label>
+                                  <button
+                                    onClick={() => {
+                                      const sf = field.subFields || [];
+                                      updateField(idx, { subFields: [...sf, { key: '', label: '', type: 'text', width: 'md' }] });
+                                    }}
+                                    className="btn-ghost text-[10px] h-6 px-2 gap-1"
+                                  >
+                                    <Plus className="w-3 h-3" /> Ekle
+                                  </button>
+                                </div>
+                                {!(field.subFields?.length) && <p className="text-[10px] text-surface-500 text-center py-2">Henüz alt alan eklenmedi.</p>}
+                                <div className="space-y-2">
+                                  {(field.subFields || []).map((sf, sidx) => (
+                                    <div key={sidx} className="flex items-center gap-2 bg-surface-800 p-2 rounded border border-surface-700">
+                                      <input type="text" value={sf.key} onChange={e => {
+                                        const newSf = [...(field.subFields||[])]; newSf[sidx] = {...sf, key: e.target.value}; updateField(idx, { subFields: newSf });
+                                      }} className="input h-7 text-[10px] font-mono flex-1" placeholder="key (orn: alan_adi)" />
+                                      
+                                      <input type="text" value={sf.label} onChange={e => {
+                                        const newSf = [...(field.subFields||[])]; newSf[sidx] = {...sf, label: e.target.value}; updateField(idx, { subFields: newSf });
+                                      }} className="input h-7 text-[10px] flex-1" placeholder="Etiket (orn: Alan Adı)" />
+                                      
+                                      <select value={sf.type} onChange={e => {
+                                        const newSf = [...(field.subFields||[])]; newSf[sidx] = {...sf, type: e.target.value as any}; updateField(idx, { subFields: newSf });
+                                      }} className="input h-7 text-[10px] w-28">
+                                        <option value="text">Metin</option>
+                                        <option value="number">Sayı</option>
+                                        <option value="date">Tarih</option>
+                                        <option value="select">Seçim</option>
+                                        <option value="textarea">Uzun Metin</option>
+                                      </select>
+                                      
+                                      <button onClick={() => {
+                                        const newSf = [...(field.subFields||[])]; newSf.splice(sidx, 1); updateField(idx, { subFields: newSf });
+                                      }} className="text-rose-400 hover:text-rose-300 p-1" title="Sil"><Trash2 className="w-3.5 h-3.5" /></button>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                             )}
                           </div>
