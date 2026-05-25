@@ -3,7 +3,8 @@ import * as ScrollArea from '@radix-ui/react-scroll-area';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import {
   LayoutList, Plus, Search, Download, FileText, Settings,
-  BarChart2, FolderOpen, Save, Tag, X, Filter, Zap, Clock
+  BarChart2, FolderOpen, Save, Tag, X, Filter, Zap, Clock,
+  Info, GitBranch, Bug, ExternalLink
 } from 'lucide-react';
 import type { EvrakTemplate } from '../types/electron.d';
 import { useAppStore } from '../store/appStore';
@@ -29,6 +30,7 @@ export function MainLayout() {
   const [showAyarlar, setShowAyarlar] = useState(false);
   const [showNewEvrak, setShowNewEvrak] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   
   // Advanced Search States
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
@@ -283,6 +285,61 @@ export function MainLayout() {
               <ScrollArea.Thumb />
             </ScrollArea.Scrollbar>
           </ScrollArea.Root>
+
+          <div className="p-3 border-t border-surface-700 relative">
+            {showAbout && (
+              <div className="absolute bottom-[calc(100%+8px)] left-3 right-3 bg-surface-900 border border-surface-700 shadow-xl rounded-lg overflow-hidden transition-all z-50 animate-in fade-in slide-in-from-bottom-2">
+                <div className="p-3 border-b border-surface-700 bg-surface-800/50">
+                  <h4 className="text-surface-100 font-medium text-sm">
+                    Evraktron
+                  </h4>
+                  <p className="text-[11px] text-surface-400">Sürüm 1.2.4</p>
+                </div>
+                <div className="p-1.5 flex flex-col gap-0.5 bg-surface-900/50">
+                  <button
+                    onClick={() => window.evraktron.shell.openExternal('https://ilyasbozdemir.dev')}
+                    className="flex items-center gap-2 w-full p-2 text-sm text-surface-400 hover:text-surface-100 hover:bg-surface-800 rounded-md transition-colors"
+                  >
+                    <Info className="w-3.5 h-3.5 text-brand-400" />
+                    <span className="flex-1 text-left text-xs">Geliştirici: İlyas Bozdemir</span>
+                    <ExternalLink className="w-3 h-3 text-surface-500" />
+                  </button>
+                  <button
+                    onClick={() => window.evraktron.shell.openExternal('https://github.com/ilyasbozdemir/evraktron')}
+                    className="flex items-center gap-2 w-full p-2 text-sm text-surface-400 hover:text-surface-100 hover:bg-surface-800 rounded-md transition-colors"
+                  >
+                    <GitBranch className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="flex-1 text-left text-xs">GitHub Reposu</span>
+                    <ExternalLink className="w-3 h-3 text-surface-500" />
+                  </button>
+                  <button
+                    onClick={() => window.evraktron.shell.openExternal('https://github.com/ilyasbozdemir/evraktron/issues')}
+                    className="flex items-center gap-2 w-full p-2 text-sm text-surface-400 hover:text-surface-100 hover:bg-surface-800 rounded-md transition-colors"
+                  >
+                    <Bug className="w-3.5 h-3.5 text-rose-400" />
+                    <span className="flex-1 text-left text-xs">Hata Bildir / Destek</span>
+                    <ExternalLink className="w-3 h-3 text-surface-500" />
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            <button 
+              onClick={() => setShowAbout(p => !p)}
+              className={cn(
+                "flex items-center gap-2 w-full p-2 rounded-lg transition-colors text-xs",
+                showAbout ? "bg-surface-800 text-surface-100" : "text-surface-400 hover:text-surface-200 hover:bg-surface-800/50"
+              )}
+            >
+              <div className="w-6 h-6 rounded-md bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0">
+                <Info className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium text-surface-300">Evraktron v1.2.4</p>
+                <p className="text-[10px] opacity-70">Hakkında & İletişim</p>
+              </div>
+            </button>
+          </div>
         </aside>
 
         {/* ── Main area ────────────────────────────────────── */}
