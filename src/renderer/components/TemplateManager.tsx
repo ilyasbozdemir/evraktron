@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Plus, Pencil, Trash2, Download, Upload, RefreshCw, X,
-  GripVertical, ChevronDown, ChevronUp, Save, Loader2, AlertCircle
+  Plus, Trash2, Download, Upload, X,
+  GripVertical, ChevronDown, ChevronUp, Save, Loader2, AlertCircle, Store
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { TemplateStoreModal } from './TemplateStoreModal';
 
 interface TemplateField {
   key: string;
@@ -67,10 +68,16 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState('');
   const [expandedField, setExpandedField] = useState<number | null>(null);
+  const [showStore, setShowStore] = useState(false);
 
   const load = () => window.evraktron.template.list().then(setTemplates);
 
   useEffect(() => { load(); }, []);
+
+  const handleInstallFromStore = async (storeTemplate: any) => {
+    await window.evraktron.template.save(storeTemplate);
+    await load();
+  };
 
   const handleNew = () => setEditing({ ...EMPTY_TEMPLATE, fields: [] });
   const handleEdit = (t: EvrakTemplate) => setEditing(JSON.parse(JSON.stringify(t)));
@@ -172,6 +179,10 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
               JSON Export
             </button>
             <div className="w-px h-5 bg-surface-700" />
+            <button onClick={() => setShowStore(true)} className="btn-ghost text-xs gap-1.5 text-violet-400 hover:text-violet-300">
+              <Store className="w-3.5 h-3.5" />
+              Mağaza
+            </button>
             <button onClick={handleNew} className="btn-primary text-xs gap-1.5">
               <Plus className="w-3.5 h-3.5" />
               Yeni Şablon
@@ -483,6 +494,15 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
           )}
         </div>
       </div>
+
+      {/* Template Store Modal */}
+      {showStore && (
+        <TemplateStoreModal
+          installedIds={templates.map(t => t.id!).filter(Boolean)}
+          onInstall={handleInstallFromStore}
+          onClose={() => setShowStore(false)}
+        />
+      )}
     </div>
   );
 }
