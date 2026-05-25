@@ -9,7 +9,8 @@ import { TemplateStoreModal } from './TemplateStoreModal';
 interface TemplateField {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'json';
+  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'array';
+  itemType?: 'object' | 'string' | 'number';
   required?: boolean;
   default?: string;
   autoIncrement?: boolean;
@@ -439,7 +440,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                 <option value="select">Seçim</option>
                                 <option value="textarea">Uzun Metin</option>
                                 <option value="checkbox">Onay Kutusu</option>
-                                <option value="json">Dinamik Liste (JSON)</option>
+                                <option value="array">Dinamik Liste (Array)</option>
                               </select>
                             </div>
                             <div>
@@ -477,7 +478,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                 />
                               </div>
                             )}
-                            {field.type === 'json' && (
+                            {field.type === 'array' && (
                               <div className="col-span-3">
                                 <label className="block text-xs text-surface-400 mb-1">Alt Alanlar (JSON Formatında subFields Dizisi)</label>
                                 <textarea
