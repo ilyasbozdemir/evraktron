@@ -27,7 +27,7 @@ export const TEMPLATE_CATEGORIES = [
 export const BUILTIN_TEMPLATES: StoreTemplate[] = [
   {
     id: 'imar_18_madde',
-    name: '18. Madde İmar Uygulaması',
+    name: '18. Madde İmar Uygulaması Takibi',
     description: 'İmar Kanunu 18. madde parselasyon ve düzenleme dosya takip şablonu',
     icon: '📐',
     color: '#10b981',
@@ -37,14 +37,29 @@ export const BUILTIN_TEMPLATES: StoreTemplate[] = [
     defaultDurum: 'hazırlık',
     statusFlow: ['hazırlık', 'encumende', 'askida', 'itirazli', 'tescil', 'tamamlandi'],
     fields: [
+      { key: 'evrak_adi', label: 'Evrak / İşlem Adı', type: 'text', required: true, width: 'lg', hint: 'Örn: 18. Madde İmar Uygulaması - X Mahallesi' },
       { key: 'dosya_no', label: 'Dosya No', type: 'text', required: true, width: 'sm', hint: 'Örn: 2026/18-01' },
-      { key: 'ada_parsel', label: 'Ada / Parsel', type: 'text', required: false, width: 'sm', hint: 'Örn: 200/50' },
       { key: 'ds_no', label: 'DS No', type: 'text', required: false, width: 'sm', hint: 'Düzenleme Sahası No' },
       { key: 'basvuru_sahibi', label: 'Başvuru Sahibi', type: 'text', required: true, width: 'lg' },
-      { key: 'ilce', label: 'İlçe', type: 'text', required: true, width: 'md' },
-      { key: 'mahalle', label: 'Mahalle', type: 'text', required: true, width: 'md' },
-      { key: 'ada_no', label: 'Ada No', type: 'text', required: false, width: 'sm' },
-      { key: 'parsel_no', label: 'Parsel No', type: 'text', required: false, width: 'sm' },
+      { key: 'il', label: 'İl', type: 'select', required: true, options: ['Karaman'], width: 'md' },
+      { key: 'ilce', label: 'İlçe', type: 'select', required: true, options: ['Ermenek'], width: 'md' },
+      { key: 'belde', label: 'Belde', type: 'select', required: false, options: ['Güneyyurt/Aralık', 'Güneyyurt/Cami', 'Güneyyurt/İsmetpaşa', 'Güneyyurt/Habib', 'Güneyyurt/Kışlacık', 'Güneyyurt/Oda', 'Güneyyurt/Pınargözü', 'Güneyyurt/Yenimahalle', 'Orta/Güneyyurt'], width: 'md' },
+      { key: 'mahalle_koy', label: 'Mahalle / Köy', type: 'text', required: true, width: 'md' },
+      {
+        key: 'imar_kayitlari',
+        label: 'Ada / Parsel Kayıtları',
+        type: 'array',
+        itemType: 'object',
+        required: false,
+        width: 'full',
+        hint: 'Her bir ada-parsel ve konum bilgisi ayrı kayıt olarak girilir',
+        subFields: [
+          { key: 'ada', label: 'Ada', type: 'text', width: 'sm' },
+          { key: 'parsel', label: 'Parsel', type: 'text', width: 'sm' },
+          { key: 'mahalle_koy', label: 'Mahalle / Köy', type: 'text', width: 'md' },
+          { key: 'mevki', label: 'Mevki', type: 'text', width: 'md' }
+        ]
+      },
       { key: 'alan', label: 'Alan (m²)', type: 'text', required: false, width: 'sm' },
       { 
         key: 'encumen_kararlari', 
