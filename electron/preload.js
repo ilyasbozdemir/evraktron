@@ -86,5 +86,21 @@ contextBridge.exposeInMainWorld('evraktron', {
     openExternal: (url) => ipcRenderer.invoke('shell:open-external', url),
     showInFolder: (filePath) => ipcRenderer.invoke('shell:show-in-folder', filePath),
   },
+
+  // Auto Updater
+  updater: {
+    check: () => ipcRenderer.invoke('updater:check'),
+    quitAndInstall: () => ipcRenderer.invoke('updater:quit-and-install'),
+    onStatus: (cb) => {
+      const subscription = (_event, data) => cb(data);
+      ipcRenderer.on('updater:status', subscription);
+      return () => {
+        ipcRenderer.removeListener('updater:status', subscription);
+      };
+    },
+  },
+
+  // App version
+  appVersion: () => ipcRenderer.invoke('app:version'),
 });
 

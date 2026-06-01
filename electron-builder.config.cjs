@@ -20,6 +20,11 @@ module.exports = {
     '**/node_modules/file-uri-to-path/**',
     '**/node_modules/prebuild-install/**'
   ],
+  publish: {
+    provider: 'github',
+    owner: 'ilyasbozdemir',
+    repo: 'evraktron'
+  },
   win: {
     icon: 'public/icon.ico',
     executableName: 'evraktron',

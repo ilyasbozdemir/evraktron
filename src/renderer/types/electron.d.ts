@@ -196,6 +196,12 @@ export interface ElectronAPI {
     openExternal: (url: string) => Promise<void>;
     showInFolder: (filePath: string) => Promise<void>;
   };
+  updater: {
+    check: () => Promise<{ success: boolean; error?: string; result?: any }>;
+    quitAndInstall: () => Promise<{ success: boolean; error?: string }>;
+    onStatus: (cb: (data: { status: string; version?: string; error?: string; info?: any }) => void) => () => void;
+  };
+  appVersion: () => Promise<string>;
 }
 
 declare global {

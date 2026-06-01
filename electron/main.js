@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
@@ -6,6 +6,8 @@ import { setupFileHandlers, packEvrakFile } from './handlers/fileHandler';
 import { setupDbHandlers } from './handlers/dbHandler';
 import { setupExportHandlers } from './handlers/exportHandler';
 import { setupTemplateHandlers } from './handlers/templateHandler';
+import { autoUpdater } from 'electron-updater';
+import yaml from 'js-yaml';
 
 // ─── Portable mode: config next to .exe ──────────────────────────────────────
 const isPortable = process.env.PORTABLE_EXECUTABLE_DIR != null;
@@ -135,6 +137,86 @@ async function cleanup() {
   }
 }
 
+// ─── Auto Updater ────────────────────────────────────────────────────────────
+function setupAutoUpdater() {
+  const sendUpdaterStatus = (status, data = {}) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('updater:status', { status, ...data });
+    }
+  };
+
+  if (isDev) {
+    try {
+      const ymlPath = path.join(__dirname, '../../dev-app-update.yml');
+      if (fs.existsSync(ymlPath)) {
+        autoUpdater.forceDevUpdateConfig = true;
+        const config = yaml.load(fs.readFileSync(ymlPath, 'utf8'));
+        console.log('Dev update config loaded:', config);
+        // Spoof the version to test update download flow
+        const devVersion = process.env.DEV_UPDATE_VERSION || '1.0.0';
+        Object.defineProperty(autoUpdater, 'currentVersion', { value: devVersion });
+      }
+    } catch (err) {
+      console.error('Error configuring autoUpdater for development:', err);
+    }
+  }
+
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for updates...');
+    sendUpdaterStatus('checking');
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    console.log(`Update available: ${info.version}`);
+    sendUpdaterStatus('available', { version: info.version, info });
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('Update not available.');
+    sendUpdaterStatus('not-available', { version: info?.version, info });
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('Update downloaded.');
+    sendUpdaterStatus('downloaded', { version: info.version, info });
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('Update error:', err);
+    sendUpdaterStatus('error', { error: err.message });
+  });
+
+  ipcMain.handle('updater:check', async () => {
+    try {
+      const result = await autoUpdater.checkForUpdatesAndNotify();
+      return { success: true, result };
+    } catch (error) {
+      console.error('Manual update check error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('updater:quit-and-install', () => {
+    try {
+      autoUpdater.quitAndInstall();
+      return { success: true };
+    } catch (error) {
+      console.error('Quit and install error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('app:version', () => app.getVersion());
+
+  if (!isDev) {
+    setTimeout(() => {
+      autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+        console.error('Auto update check error:', err);
+      });
+    }, 5000);
+  }
+}
+
 // ─── App lifecycle ────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
   createWindow();
@@ -153,6 +235,7 @@ app.whenReady().then(() => {
   setupDbHandlers(ipcMain, state, setState);
   setupExportHandlers(ipcMain, state, setState);
   setupTemplateHandlers(ipcMain, state);
+  setupAutoUpdater();
 
   // Second instance / file open on Windows
   app.on('second-instance', (_event, argv) => {
