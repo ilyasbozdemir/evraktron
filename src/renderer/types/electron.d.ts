@@ -234,6 +234,7 @@ export interface ElectronAPI {
   updater: {
     check: () => Promise<{ success: boolean; error?: string; result?: any }>;
     quitAndInstall: () => Promise<{ success: boolean; error?: string }>;
+    setSimulatedVersion: (version: string) => Promise<boolean>;
     onStatus: (cb: (data: { status: string; version?: string; error?: string; info?: any }) => void) => () => void;
   };
   appVersion: () => Promise<string>;

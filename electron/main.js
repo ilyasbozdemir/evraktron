@@ -18,8 +18,9 @@ if (isPortable) {
 }
 
 const isDev = process.env.NODE_ENV === 'development';
+let simulatedVersion = null;
 if (isDev) {
-  app.getVersion = () => '1.2.7';
+  app.getVersion = () => simulatedVersion || '1.2.7';
 }
 
 let mainWindow;
@@ -235,6 +236,12 @@ function setupAutoUpdater() {
       console.error('Quit and install error:', error);
       return { success: false, error: error.message };
     }
+  });
+
+  ipcMain.handle('updater:set-simulated-version', (_e, version) => {
+    simulatedVersion = version;
+    console.log(`[Dev Updater] Simulated app version updated to: ${version}`);
+    return true;
   });
 
   ipcMain.handle('app:version', () => app.getVersion());

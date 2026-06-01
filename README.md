@@ -11,7 +11,7 @@ geliştirilmiş, tamamen yerel (offline) çalışan, hızlı ve esnek bir evrak 
 uygulamasıdır.
 
 Tüm evrak kayıtlarınız, ayarlarınız, özel veri alanlarınız ve ekli dosyalarınız
-tek bir `.etapp` (Evrak Takip Programı) dosyası içerisinde şifrelenmiş (SQLite +
+tek bir `etap` (Evrak Takip Programı) dosyası içerisinde şifrelenmiş (SQLite +
 Zip mimarisi) olarak saklanır. Bu sayede projenizi/veritabanınızı bir klasör
 gibi USB bellekte taşıyabilir, istediğiniz bilgisayarda çift tıklayarak anında
 çalıştırabilirsiniz.
@@ -20,8 +20,8 @@ gibi USB bellekte taşıyabilir, istediğiniz bilgisayarda çift tıklayarak an�
 
 - 🔒 **Tamamen Offline:** Verileriniz asla buluta gitmez. Tüm okuma, yazma ve
   arama işlemleri yerel cihazınızda gerçekleşir.
-- 📁 **Tek Dosya Mimarisi (`.etapp`):** Veritabanı ve ek dosyalar (PDF, Word,
-  Excel, vb.) tek bir paket (.etapp) dosyasında tutulur.
+- 📁 **Tek Dosya Mimarisi (`etap`):** Veritabanı ve ek dosyalar (PDF, Word,
+  Excel, vb.) tek bir paket (etap) dosyasında tutulur.
 - ⚡ **Ultra Hızlı Gelişmiş Arama:** SQLite FTS5 (Full-Text Search) mimarisi
   sayesinde, binlerce evrak arasında "Ruhsat 2024", "Ada Parsel" gibi kelime
   bazlı, anlık, çoklu arama yapabilirsiniz.
@@ -87,7 +87,7 @@ olarak yapılır:
 
 - Masaüstünde Sağ Tık -> **Yeni -> Evrak Takip Programı Dosyası** kısayolu
   eklenir.
-- `.etapp` uzantılı dosyalara Evraktron logoları tanımlanır.
+- `.etap` uzantılı dosyalara Evraktron logoları tanımlanır.
 - Dosyalara çift tıklandığında anında Evraktron uygulamasında açılır.
 
 ## 👨‍💻 Geliştirici

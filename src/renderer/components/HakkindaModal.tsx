@@ -11,10 +11,35 @@ export function HakkindaModal() {
   const [updaterError, setUpdaterError] = useState<string>('');
   const [currentVersion, setCurrentVersion] = useState<string>('...');
 
+  // Dev simulation state
+  const [releases, setReleases] = useState<string[]>([]);
+  const [simulatedVer, setSimulatedVer] = useState<string>('1.2.7');
+  const isDev = window.location.hostname === 'localhost' || window.location.port === '5173';
+
   useEffect(() => {
     if (!showHakkinda) return;
 
     window.evraktron.appVersion().then(setCurrentVersion).catch(console.error);
+
+    if (isDev) {
+      fetch('https://api.github.com/repos/ilyasbozdemir/evraktron/releases')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            const tags = data.map((r: any) => r.tag_name.replace('v', ''));
+            setReleases(tags);
+            if (tags.length > 0) {
+              // Try to default to 1.2.7 or the first tag if 1.2.7 isn't found
+              const defaultSimVal = tags.includes('1.2.7') ? '1.2.7' : tags[0];
+              setSimulatedVer(defaultSimVal);
+              window.evraktron.updater.setSimulatedVersion(defaultSimVal).then(() => {
+                window.evraktron.appVersion().then(setCurrentVersion);
+              });
+            }
+          }
+        })
+        .catch(console.error);
+    }
 
     const removeListener = window.evraktron.updater.onStatus((data) => {
       setUpdaterStatus(data.status);
@@ -137,6 +162,37 @@ export function HakkindaModal() {
                 </div>
               )}
             </div>
+
+            {/* Simulated Version Selection (Dev Mode only) */}
+            {isDev && (
+              <div className="p-4 bg-surface-950/20 border border-surface-800 rounded-xl space-y-2">
+                <p className="text-xs font-bold text-surface-200 flex items-center gap-1.5">
+                  <RefreshCw className="w-3.5 h-3.5 text-brand-400" />
+                  Test: Simüle Edilecek Sürüm
+                </p>
+                <p className="text-[10px] text-surface-400 leading-normal">
+                  Güncelleme akışını test etmek için uygulamanın şu anki versiyonunu simüle edin.
+                </p>
+                <select
+                  id="simulated-version-select"
+                  title="Simüle edilecek sürüm seçin"
+                  value={simulatedVer}
+                  onChange={async (e) => {
+                    const val = e.target.value;
+                    setSimulatedVer(val);
+                    await window.evraktron.updater.setSimulatedVersion(val);
+                    const current = await window.evraktron.appVersion();
+                    setCurrentVersion(current);
+                  }}
+                  className="input h-8 text-xs py-0 w-full"
+                >
+                  {releases.map(r => (
+                    <option key={r} value={r}>Sürüm: v{r}</option>
+                  ))}
+                  {releases.length === 0 && <option value="1.2.7">Sürüm: v1.2.7</option>}
+                </select>
+              </div>
+            )}
 
             {/* Links and info list */}
             <div className="space-y-2 text-xs">

@@ -96,6 +96,7 @@ contextBridge.exposeInMainWorld('evraktron', {
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),
     quitAndInstall: () => ipcRenderer.invoke('updater:quit-and-install'),
+    setSimulatedVersion: (version) => ipcRenderer.invoke('updater:set-simulated-version', version),
     onStatus: (cb) => {
       const subscription = (_event, data) => cb(data);
       ipcRenderer.on('updater:status', subscription);
