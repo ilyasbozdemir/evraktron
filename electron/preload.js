@@ -55,6 +55,11 @@ contextBridge.exposeInMainWorld('evraktron', {
 
     // Stats
     getStats: () => ipcRenderer.invoke('db:stats'),
+
+    // Routines
+    getRoutines: () => ipcRenderer.invoke('db:routines:list'),
+    saveRoutine: (routine) => ipcRenderer.invoke('db:routines:save', routine),
+    deleteRoutine: (id) => ipcRenderer.invoke('db:routines:delete', id),
   },
 
   // Templates

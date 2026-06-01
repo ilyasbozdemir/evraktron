@@ -2,6 +2,8 @@ import { shell, dialog } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import { evaluateRoutines } from './routineEvaluator';
+
 
 function getMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -73,16 +75,33 @@ function setupDbHandlers(ipcMain, state, setState) {
     `).run({ no:'', tip:'gelen', kurum:'', birim:'', tarih: new Date().toISOString().split('T')[0],
               durum:'beklemede', aciklama:'', notlar:'', klasor: '', raf_no: '', metadata: '', ...data });
     state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (?, 'olusturuldu', 'Kullanıcı', 'Evrak oluşturuldu')`).run(res.lastInsertRowid);
+    
+    const doc = state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(res.lastInsertRowid);
+    try {
+      evaluateRoutines(state.db, doc, null);
+    } catch (err) {
+      console.error('Error evaluating routines on create:', err);
+    }
+
     return state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(res.lastInsertRowid);
   });
 
   ipcMain.handle('db:evraklar:update', (_e, id, data) => {
     if (!state.db) return null;
+    const prevDoc = state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(id);
     const allowed = ['no','tip','kurum','birim','tarih','durum','aciklama','notlar','klasor','raf_no','metadata'];
     const fields = Object.keys(data).filter(k => allowed.includes(k)).map(k => `${k} = @${k}`).join(', ');
     if (!fields) return null;
     state.db.prepare(`UPDATE evraklar SET ${fields}, updated_at = datetime('now') WHERE id = @id`).run({ ...data, id });
     state.db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (?, 'guncellendi', 'Kullanıcı', 'Evrak güncellendi')`).run(id);
+    
+    const doc = state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(id);
+    try {
+      evaluateRoutines(state.db, doc, prevDoc);
+    } catch (err) {
+      console.error('Error evaluating routines on update:', err);
+    }
+
     return state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(id);
   });
 
@@ -197,6 +216,78 @@ function setupDbHandlers(ipcMain, state, setState) {
     if (!state.db) return false;
     state.db.prepare('INSERT INTO ayarlar (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(key, value);
     return true;
+  });
+
+  // ── ROUTINES ──────────────────────────────────────────────────────────────
+  ipcMain.handle('db:routines:list', (_e) => {
+    if (!state.db) return [];
+    try {
+      const routines = state.db.prepare('SELECT * FROM routines ORDER BY created_at DESC').all();
+      for (const r of routines) {
+        r.rules = state.db.prepare('SELECT * FROM routine_rules WHERE routine_id = ?').all(r.id);
+        const actions = state.db.prepare('SELECT * FROM routine_actions WHERE routine_id = ?').all(r.id);
+        r.actions = actions.map(act => {
+          try {
+            return { ...act, config: JSON.parse(act.config) };
+          } catch (e) {
+            return { ...act, config: {} };
+          }
+        });
+      }
+      return routines;
+    } catch (err) {
+      console.error('Error listing routines:', err);
+      return [];
+    }
+  });
+
+  ipcMain.handle('db:routines:save', (_e, routine) => {
+    if (!state.db) return false;
+    try {
+      const transaction = state.db.transaction((r) => {
+        state.db.prepare(`
+          INSERT INTO routines (id, name, is_active)
+          VALUES (?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET name = excluded.name, is_active = excluded.is_active
+        `).run(r.id, r.name, r.is_active ? 1 : 0);
+
+        state.db.prepare('DELETE FROM routine_rules WHERE routine_id = ?').run(r.id);
+        state.db.prepare('DELETE FROM routine_actions WHERE routine_id = ?').run(r.id);
+
+        const insertRule = state.db.prepare(`
+          INSERT INTO routine_rules (id, routine_id, field_name, operator, value, logic)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        for (const rule of r.rules) {
+          insertRule.run(rule.id, r.id, rule.field_name, rule.operator, rule.value, rule.logic || 'AND');
+        }
+
+        const insertAction = state.db.prepare(`
+          INSERT INTO routine_actions (id, routine_id, action_type, config)
+          VALUES (?, ?, ?, ?)
+        `);
+        for (const action of r.actions) {
+          const configStr = typeof action.config === 'string' ? action.config : JSON.stringify(action.config);
+          insertAction.run(action.id, r.id, action.action_type, configStr);
+        }
+      });
+      transaction(routine);
+      return true;
+    } catch (err) {
+      console.error('Error saving routine:', err);
+      return false;
+    }
+  });
+
+  ipcMain.handle('db:routines:delete', (_e, id) => {
+    if (!state.db) return false;
+    try {
+      state.db.prepare('DELETE FROM routines WHERE id = ?').run(id);
+      return true;
+    } catch (err) {
+      console.error('Error deleting routine:', err);
+      return false;
+    }
   });
 }
 

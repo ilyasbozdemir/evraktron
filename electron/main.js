@@ -18,6 +18,9 @@ if (isPortable) {
 }
 
 const isDev = process.env.NODE_ENV === 'development';
+if (isDev) {
+  app.getVersion = () => '1.2.4';
+}
 
 let mainWindow;
 let currentFilePath = null;
@@ -150,11 +153,30 @@ function setupAutoUpdater() {
       const ymlPath = path.join(__dirname, '../../dev-app-update.yml');
       if (fs.existsSync(ymlPath)) {
         autoUpdater.forceDevUpdateConfig = true;
+        autoUpdater.disableDifferentialDownload = true;
+        
         const config = yaml.load(fs.readFileSync(ymlPath, 'utf8'));
         console.log('Dev update config loaded:', config);
-        // Spoof the version to test update download flow
-        const devVersion = process.env.DEV_UPDATE_VERSION || '1.0.0';
-        Object.defineProperty(autoUpdater, 'currentVersion', { value: devVersion });
+        
+        const isValidVersion = (v) => {
+          return v && /^\d+\.\d+\.\d+/.test(v.replace(/^v/, ''));
+        };
+
+        if (config && config.owner && config.repo) {
+          fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/releases`)
+            .then(res => res.json())
+            .then(releases => {
+              if (Array.isArray(releases) && releases.length > 0) {
+                // Fetch latest release dynamically from GitHub and log it
+                const targetVersion = releases[0].tag_name.replace('v', '');
+                console.log(`[Dev Updater] Latest GitHub release version found: ${targetVersion}`);
+                // Since app.getVersion is spoofed to 1.2.4, autoUpdater will compare 1.2.4 with latest version (e.g. 1.2.7/1.2.8) and trigger update
+              }
+            })
+            .catch(err => {
+              console.error('[Dev Updater] Failed to fetch releases for dev spoofing:', err.message);
+            });
+        }
       }
     } catch (err) {
       console.error('Error configuring autoUpdater for development:', err);
@@ -189,7 +211,16 @@ function setupAutoUpdater() {
   ipcMain.handle('updater:check', async () => {
     try {
       const result = await autoUpdater.checkForUpdatesAndNotify();
-      return { success: true, result };
+      if (result) {
+        return {
+          success: true,
+          updateInfo: {
+            version: result.updateInfo.version,
+            files: result.updateInfo.files.map(f => ({ url: f.url, size: f.size }))
+          }
+        };
+      }
+      return { success: true, noUpdate: true };
     } catch (error) {
       console.error('Manual update check error:', error);
       return { success: false, error: error.message };

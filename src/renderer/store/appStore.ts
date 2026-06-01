@@ -50,6 +50,8 @@ interface AppState {
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   clearToast: () => void;
   closeFile: () => void;
+  showHakkinda: boolean;
+  setShowHakkinda: (v: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -68,6 +70,7 @@ export const useAppStore = create<AppState>((set) => ({
   stats: null,
   toast: null,
   ayarlar: {},
+  showHakkinda: false,
 
   setFileOpen: (open, filePath) => set({
     isFileOpen: open,
@@ -108,6 +111,7 @@ export const useAppStore = create<AppState>((set) => ({
   setSearchQuery: (q) => set({ searchQuery: q }),
   setStats: (s) => set({ stats: s }),
   setAyarlar: (a) => set({ ayarlar: a }),
+  setShowHakkinda: (v) => set({ showHakkinda: v }),
 
   showToast: (message, type = 'info') => {
     const id = Date.now().toString();

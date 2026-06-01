@@ -5,6 +5,7 @@ import { WelcomeScreen } from './components/WelcomeScreen';
 import { MainLayout } from './components/MainLayout';
 import { StatusBar } from './components/StatusBar';
 import { DataEditor } from './components/DataEditor';
+import { HakkindaModal } from './components/HakkindaModal';
 import { cn } from './lib/utils';
 
 export default function App() {
@@ -59,6 +60,9 @@ export default function App() {
 
       {/* Custom Status Bar */}
       <StatusBar />
+
+      {/* About & Updater Modal */}
+      <HakkindaModal />
 
       {/* Elegant Toast alert popup */}
       {toast && (

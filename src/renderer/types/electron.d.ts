@@ -59,6 +59,38 @@ export interface Etiket {
   renk: string;
   oncelik: number;
 }
+export interface RoutineRule {
+  id: string;
+  routine_id: string;
+  field_name: string;
+  operator: 'eq' | 'neq' | 'contains' | 'gt' | 'lt' | 'changed';
+  value: string;
+  logic: 'AND' | 'OR';
+}
+
+export interface RoutineAction {
+  id: string;
+  routine_id: string;
+  action_type: 'set_field' | 'notify' | 'tag' | 'log';
+  config: {
+    field_name?: string;
+    value?: string;
+    title?: string;
+    body?: string;
+    tag?: string;
+    renk?: string;
+    text?: string;
+  };
+}
+
+export interface Routine {
+  id: string;
+  name: string;
+  is_active: number;
+  created_at?: string;
+  rules: RoutineRule[];
+  actions: RoutineAction[];
+}
 
 export interface DbStats {
   total: number;
@@ -172,6 +204,9 @@ export interface ElectronAPI {
     getAyarlar: () => Promise<Record<string, string>>;
     setAyar: (key: string, value: string) => Promise<boolean>;
     getStats: () => Promise<DbStats>;
+    getRoutines: () => Promise<Routine[]>;
+    saveRoutine: (routine: Routine) => Promise<boolean>;
+    deleteRoutine: (id: string) => Promise<boolean>;
   };
   template: {
     list: () => Promise<EvrakTemplate[]>;

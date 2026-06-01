@@ -155,6 +155,29 @@ function ensureSchema(db) {
       value TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS routines (
+      id          TEXT PRIMARY KEY,
+      name        TEXT NOT NULL,
+      is_active   INTEGER DEFAULT 1,
+      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS routine_rules (
+      id           TEXT PRIMARY KEY,
+      routine_id   TEXT NOT NULL REFERENCES routines(id) ON DELETE CASCADE,
+      field_name   TEXT NOT NULL,
+      operator     TEXT NOT NULL,
+      value        TEXT,
+      logic        TEXT DEFAULT 'AND'
+    );
+
+    CREATE TABLE IF NOT EXISTS routine_actions (
+      id          TEXT PRIMARY KEY,
+      routine_id  TEXT NOT NULL REFERENCES routines(id) ON DELETE CASCADE,
+      action_type TEXT NOT NULL,
+      config      TEXT NOT NULL
+    );
+
     CREATE VIRTUAL TABLE IF NOT EXISTS evraklar_fts USING fts5(
       no, aciklama, notlar, kurum, birim, metadata,
       content='evraklar',

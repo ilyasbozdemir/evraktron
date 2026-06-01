@@ -3,7 +3,7 @@ import { FileText, FilePlus, FolderOpen, Zap, Shield, Database, Archive, Monitor
 import { useAppStore } from '../store/appStore';
 
 export function WelcomeScreen() {
-  const { setFileOpen, showToast } = useAppStore();
+  const { setFileOpen, showToast, setShowHakkinda } = useAppStore();
 
   const handleNew = useCallback(async () => {
     const result = await window.evraktron.file.new();
@@ -66,8 +66,14 @@ export function WelcomeScreen() {
             >
               Evrak Takip Programı
             </h1>
-            <p className="mt-2 text-lg" style={{ color: 'var(--text-secondary)' }}>
-              Portable Evrak Yönetim Sistemi
+            <p className="mt-2 text-lg flex items-center justify-center gap-2.5" style={{ color: 'var(--text-secondary)' }}>
+              <span>Portable Evrak Yönetim Sistemi</span>
+              <button 
+                onClick={() => setShowHakkinda(true)}
+                className="text-xs font-semibold text-brand-400 hover:text-brand-300 transition-colors bg-brand-500/10 hover:bg-brand-500/20 px-2 py-0.5 rounded-full cursor-pointer border border-brand-500/20"
+              >
+                Hakkında & Güncelleme
+              </button>
             </p>
             <p className="mt-4 text-sm max-w-md mx-auto" style={{ color: 'var(--text-muted)' }}>
               Evraklarınızı projelere ayırarak gruplayın. Örneğin; "Ruhsatlar" için bir proje, "İhaleler" için ayrı bir proje dosyası oluşturabilirsiniz.
@@ -148,7 +154,7 @@ export function WelcomeScreen() {
             <a 
               href="https://ilyasbozdemir.dev" 
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="text-brand-400 hover:text-brand-300 transition-colors cursor-pointer font-bold"
             >
               ilyasbozdemir.dev
