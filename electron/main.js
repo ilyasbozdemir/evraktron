@@ -19,7 +19,7 @@ if (isPortable) {
 
 const isDev = process.env.NODE_ENV === 'development';
 if (isDev) {
-  app.getVersion = () => '1.2.4';
+  app.getVersion = () => '1.2.7';
 }
 
 let mainWindow;
