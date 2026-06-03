@@ -66,12 +66,20 @@ function openEvrakFile(filePath, state, setState) {
     try {
       const fileBuffer = fs.readFileSync(filePath);
       let zipBuffer = fileBuffer;
+      let isLegacy = false;
       const MAGIC_BYTES = Buffer.from([0x45, 0x54, 0x41, 0x50, 0x01, 0x02, 0x03, 0x04]);
       if (fileBuffer.length >= MAGIC_BYTES.length && fileBuffer.compare(MAGIC_BYTES, 0, MAGIC_BYTES.length, 0, MAGIC_BYTES.length) === 0) {
         zipBuffer = fileBuffer.subarray(MAGIC_BYTES.length);
+      } else {
+        isLegacy = true;
       }
       const zip = new AdmZip(zipBuffer);
       zip.extractAllTo(tempDir, true);
+
+      if (isLegacy) {
+        const finalBuffer = Buffer.concat([MAGIC_BYTES, fileBuffer]);
+        fs.writeFileSync(filePath, finalBuffer);
+      }
     } catch (err) {
       if (state.lockAcquired) releaseLock(filePath);
       return { success: false, error: 'Dosya formatı okunamadı veya bozuk' };
