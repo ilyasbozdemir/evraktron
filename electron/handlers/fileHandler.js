@@ -64,7 +64,13 @@ function openEvrakFile(filePath, state, setState) {
     fs.writeFileSync(path.join(tempDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
   } else {
     try {
-      const zip = new AdmZip(filePath);
+      const fileBuffer = fs.readFileSync(filePath);
+      let zipBuffer = fileBuffer;
+      const MAGIC_BYTES = Buffer.from([0x45, 0x54, 0x41, 0x50, 0x01, 0x02, 0x03, 0x04]);
+      if (fileBuffer.length >= MAGIC_BYTES.length && fileBuffer.compare(MAGIC_BYTES, 0, MAGIC_BYTES.length, 0, MAGIC_BYTES.length) === 0) {
+        zipBuffer = fileBuffer.subarray(MAGIC_BYTES.length);
+      }
+      const zip = new AdmZip(zipBuffer);
       zip.extractAllTo(tempDir, true);
     } catch (err) {
       if (state.lockAcquired) releaseLock(filePath);
@@ -264,7 +270,10 @@ function packEvrakFile(filePath, tempDir, state) {
   // Repack to ZIP
   const zip = new AdmZip();
   zip.addLocalFolder(tempDir);
-  zip.writeZip(filePath);
+  const zipBuffer = zip.toBuffer();
+  const MAGIC_BYTES = Buffer.from([0x45, 0x54, 0x41, 0x50, 0x01, 0x02, 0x03, 0x04]);
+  const finalBuffer = Buffer.concat([MAGIC_BYTES, zipBuffer]);
+  fs.writeFileSync(filePath, finalBuffer);
 }
 
 function setupFileHandlers(ipcMain, state, setState) {
