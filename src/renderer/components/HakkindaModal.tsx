@@ -29,8 +29,18 @@ export function HakkindaModal() {
             const tags = data.map((r: any) => r.tag_name.replace('v', ''));
             setReleases(tags);
             if (tags.length > 0) {
-              // Try to default to 1.2.7 or the first tag if 1.2.7 isn't found
-              const defaultSimVal = tags.includes('1.2.7') ? '1.2.7' : tags[0];
+              // Semver sorting (descending) to find the highest version
+              const sorted = [...tags].sort((a, b) => {
+                const partsA = a.split('.').map(Number);
+                const partsB = b.split('.').map(Number);
+                for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+                  const numA = partsA[i] || 0;
+                  const numB = partsB[i] || 0;
+                  if (numA !== numB) return numB - numA;
+                }
+                return 0;
+              });
+              const defaultSimVal = sorted[0];
               setSimulatedVer(defaultSimVal);
               window.evraktron.updater.setSimulatedVersion(defaultSimVal).then(() => {
                 window.evraktron.appVersion().then(setCurrentVersion);
