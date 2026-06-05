@@ -9,6 +9,7 @@ import type { Routine, RoutineRule, RoutineAction, EvrakTemplate } from '../type
 interface AyarlarModalProps {
   onClose: () => void;
   onRefresh: () => void;
+  initialTab?: 'genel' | 'rutinler';
 }
 
 const STANDARD_FIELDS = [
@@ -35,7 +36,7 @@ const PRESET_COLORS = [
   '#ec4899', // Pink
 ];
 
-export function AyarlarModal({ onClose, onRefresh }: AyarlarModalProps) {
+export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: AyarlarModalProps) {
   const { ayarlar } = useAppStore();
   const [kurumAdi, setKurumAdi] = useState(ayarlar.kurum_adi || '');
   const [birimAdi, setBirimAdi] = useState(ayarlar.varsayilan_birim || '');
@@ -301,7 +302,7 @@ export function AyarlarModal({ onClose, onRefresh }: AyarlarModalProps) {
             </Dialog.Close>
           </div>
 
-          <Tabs.Root defaultValue="genel" className="flex flex-col flex-1 overflow-hidden">
+          <Tabs.Root defaultValue={initialTab} className="flex flex-col flex-1 overflow-hidden">
             <Tabs.List className="flex gap-1 px-5 border-b border-surface-800 shrink-0 bg-surface-950/30">
               <Tabs.Trigger
                 value="genel"

@@ -110,7 +110,9 @@ html, body, #root {
 .bg-surface-800  { background-color: var(--bg-elevated) !important; }
 .bg-surface-950  { background-color: var(--bg-overlay) !important; }
 .bg-surface-700  { background-color: var(--bg-hover) !important; }
+.bg-surface-750  { background-color: var(--bg-hover) !important; }
 
+.text-surface-50  { color: var(--text-primary) !important; }
 .text-surface-100 { color: var(--text-primary) !important; }
 .text-surface-200 { color: var(--text-primary) !important; }
 .text-surface-300 { color: var(--text-secondary) !important; }
@@ -118,10 +120,49 @@ html, body, #root {
 .text-surface-500 { color: var(--text-muted) !important; }
 .text-surface-600 { color: var(--text-muted) !important; }
 
+.border-surface-700     { border-color: var(--border-default) !important; }
+.border-surface-800     { border-color: var(--border-subtle) !important; }
+.border-surface-900     { border-color: var(--border-strong) !important; }
 .border-surface-700\/50 { border-color: var(--border-default) !important; }
 .border-surface-700\/30 { border-color: var(--border-subtle) !important; }
 .border-surface-700\/40 { border-color: var(--border-strong) !important; }
 .border-surface-600\/50 { border-color: var(--border-default) !important; }
+
+/* Theme-aware opacity backgrounds */
+.bg-surface-900\/50 { background-color: rgba(15, 23, 42, 0.5) !important; }
+.bg-surface-950\/30 { background-color: rgba(2, 6, 23, 0.3) !important; }
+.bg-surface-950\/20 { background-color: rgba(2, 6, 23, 0.2) !important; }
+.bg-surface-950\/40 { background-color: rgba(2, 6, 23, 0.4) !important; }
+.bg-surface-950\/50 { background-color: rgba(2, 6, 23, 0.5) !important; }
+.bg-surface-800\/50 { background-color: rgba(30, 41, 59, 0.5) !important; }
+.bg-surface-800\/40 { background-color: rgba(30, 41, 59, 0.4) !important; }
+.bg-surface-800\/30 { background-color: rgba(30, 41, 59, 0.3) !important; }
+.bg-surface-900\/30 { background-color: rgba(15, 23, 42, 0.3) !important; }
+.bg-surface-950\/5  { background-color: rgba(2, 6, 23, 0.05) !important; }
+
+html.light .bg-surface-900\/50 { background-color: rgba(244, 244, 245, 0.6) !important; }
+html.light .bg-surface-950\/30 { background-color: rgba(228, 228, 231, 0.4) !important; }
+html.light .bg-surface-950\/20 { background-color: rgba(228, 228, 231, 0.25) !important; }
+html.light .bg-surface-950\/40 { background-color: rgba(228, 228, 231, 0.5) !important; }
+html.light .bg-surface-950\/50 { background-color: rgba(228, 228, 231, 0.6) !important; }
+html.light .bg-surface-800\/50 { background-color: rgba(255, 255, 255, 0.6) !important; }
+html.light .bg-surface-800\/40 { background-color: rgba(255, 255, 255, 0.45) !important; }
+html.light .bg-surface-800\/30 { background-color: rgba(255, 255, 255, 0.35) !important; }
+html.light .bg-surface-900\/30 { background-color: rgba(244, 244, 245, 0.4) !important; }
+html.light .bg-surface-950\/5  { background-color: rgba(228, 228, 231, 0.08) !important; }
+
+/* Group hover text color overrides due to !important on standard classes */
+.group:hover .group-hover\:text-white { color: #ffffff !important; }
+.group:hover .group-hover\:text-emerald-400 { color: #34d399 !important; }
+.group:hover .group-hover\:text-rose-400 { color: #f87171 !important; }
+.group:hover .group-hover\:text-brand-400 { color: var(--brand-text) !important; }
+.group:hover .group-hover\:text-amber-400 { color: #fbbf24 !important; }
+
+/* In Light Mode, keep template hover text dark and readable, change hover background */
+html.light .group:hover .group-hover\:text-white { color: var(--text-primary) !important; }
+html.light .hover\:bg-surface-800:hover { background-color: var(--bg-overlay) !important; }
+html.light .hover\:bg-surface-700:hover { background-color: var(--bg-hover) !important; }
+html.light .hover\:bg-surface-900:hover { background-color: var(--bg-hover) !important; }
 
 /* ── Glass morphism ──────────────────────────────────────────────────────── */
 @layer components {

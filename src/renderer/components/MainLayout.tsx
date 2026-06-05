@@ -4,7 +4,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import {
   LayoutList, Plus, Search, Download, FileText, Settings,
   BarChart2, FolderOpen, Save, Tag, X, Filter, Zap, Clock,
-  Info, GitBranch, Bug, ExternalLink
+  Info, GitBranch, Bug, ExternalLink, LayoutDashboard, Cpu
 } from 'lucide-react';
 import type { EvrakTemplate } from '../types/electron.d';
 import { useAppStore } from '../store/appStore';
@@ -16,7 +16,7 @@ import { NewEvrakModal } from './NewEvrakModal';
 import { TemplateManager } from './TemplateManager';
 import { cn } from '../lib/utils';
 
-type SideTab = 'evraklar' | 'istatistikler';
+type SideTab = 'dashboard' | 'evraklar';
 
 export function MainLayout() {
   const {
@@ -25,9 +25,10 @@ export function MainLayout() {
     ayarlar, setAyarlar, setShowHakkinda
   } = useAppStore();
 
-  const [sideTab, setSideTab] = useState<SideTab>('evraklar');
+  const [sideTab, setSideTab] = useState<SideTab>('dashboard');
   const [showExport, setShowExport] = useState(false);
   const [showAyarlar, setShowAyarlar] = useState(false);
+  const [ayarlarTab, setAyarlarTab] = useState<'genel' | 'rutinler'>('genel');
   const [showNewEvrak, setShowNewEvrak] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   
@@ -235,8 +236,8 @@ export function MainLayout() {
               </p>
               <nav className="space-y-0.5">
                 {[
+                  { id: 'dashboard', label: 'Genel Bakış', icon: LayoutDashboard },
                   { id: 'evraklar', label: 'Evrak Listesi', icon: LayoutList },
-                  { id: 'istatistikler', label: 'İstatistikler', icon: BarChart2 },
                 ].map(({ id, label, icon: Icon }) => (
                   <button
                     key={id}
@@ -259,7 +260,10 @@ export function MainLayout() {
                 <button onClick={() => setShowTemplates(true)} className="sidebar-item w-full">
                   <Tag className="w-4 h-4" /> Şablonlar
                 </button>
-                <button onClick={() => setShowAyarlar(true)} className="sidebar-item w-full text-brand-500 font-medium">
+                <button onClick={() => { setAyarlarTab('rutinler'); setShowAyarlar(true); }} className="sidebar-item w-full">
+                  <Cpu className="w-4 h-4" /> Otomasyon Rutinleri
+                </button>
+                <button onClick={() => { setAyarlarTab('genel'); setShowAyarlar(true); }} className="sidebar-item w-full text-brand-500 font-medium">
                   <Settings className="w-4 h-4" /> Proje Ayarları
                 </button>
                 <button onClick={handleSave} className="sidebar-item w-full">
@@ -507,7 +511,14 @@ export function MainLayout() {
                   onRefresh={() => { loadEvraklar(searchQuery || undefined); loadStats(); }}
                 />
               )}
-              {sideTab === 'istatistikler' && <StatsPanel />}
+              {sideTab === 'dashboard' && (
+                <StatsPanel
+                  onNewEvrak={handleNewEvrak}
+                  onManageTemplates={() => setShowTemplates(true)}
+                  onOpenRoutines={() => { setAyarlarTab('rutinler'); setShowAyarlar(true); }}
+                  onExport={() => setShowExport(true)}
+                />
+              )}
             </div>
 
             {selectedEvrakId && (
@@ -530,7 +541,13 @@ export function MainLayout() {
       </div>
 
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}
-      {showAyarlar && <AyarlarModal onClose={() => setShowAyarlar(false)} onRefresh={loadAyarlar} />}
+      {showAyarlar && (
+        <AyarlarModal
+          onClose={() => setShowAyarlar(false)}
+          onRefresh={loadAyarlar}
+          initialTab={ayarlarTab}
+        />
+      )}
       {showNewEvrak && (
         <NewEvrakModal
           onClose={() => setShowNewEvrak(false)}
@@ -542,7 +559,14 @@ export function MainLayout() {
   );
 }
 
-function StatsPanel() {
+interface StatsPanelProps {
+  onNewEvrak: () => void;
+  onManageTemplates: () => void;
+  onOpenRoutines: () => void;
+  onExport: () => void;
+}
+
+function StatsPanel({ onNewEvrak, onManageTemplates, onOpenRoutines, onExport }: StatsPanelProps) {
   const { stats, setSelectedEvrakId } = useAppStore();
   const [topSearches, setTopSearches] = useState<{query: string, count: number}[]>([]);
   const [alerts, setAlerts] = useState<any[]>([]);
@@ -552,9 +576,9 @@ function StatsPanel() {
     try {
       const counts = JSON.parse(localStorage.getItem('evraktron_search_counts') || '{}');
       const sorted = Object.entries(counts)
-        .map(([query, count]) => ({ query, count: count as number }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
+      .map(([query, count]) => ({ query, count: count as number }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
       setTopSearches(sorted);
     } catch {}
   };
@@ -604,6 +628,41 @@ function StatsPanel() {
               <p className={cn('text-3xl font-bold mt-1', color)}>{value}</p>
             </div>
           ))}
+        </div>
+
+        {/* Hızlı İşlemler */}
+        <div className="card p-4 space-y-3">
+          <p className="text-sm font-semibold text-surface-200">Hızlı İşlemler</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button
+              onClick={onNewEvrak}
+              className="flex flex-col items-center justify-center p-3 rounded-lg border border-surface-700/50 bg-surface-800/10 hover:bg-brand-500/10 hover:border-brand-500/50 hover:text-brand-400 transition-all text-xs font-semibold gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-5 h-5 text-brand-400" />
+              <span>Yeni Evrak</span>
+            </button>
+            <button
+              onClick={onManageTemplates}
+              className="flex flex-col items-center justify-center p-3 rounded-lg border border-surface-700/50 bg-surface-800/10 hover:bg-amber-500/10 hover:border-amber-500/50 hover:text-amber-400 transition-all text-xs font-semibold gap-1.5 cursor-pointer"
+            >
+              <Tag className="w-5 h-5 text-amber-400" />
+              <span>Şablonlar</span>
+            </button>
+            <button
+              onClick={onOpenRoutines}
+              className="flex flex-col items-center justify-center p-3 rounded-lg border border-surface-700/50 bg-surface-800/10 hover:bg-purple-500/10 hover:border-purple-500/50 hover:text-purple-400 transition-all text-xs font-semibold gap-1.5 cursor-pointer"
+            >
+              <Cpu className="w-5 h-5 text-purple-400" />
+              <span>Otomasyon</span>
+            </button>
+            <button
+              onClick={onExport}
+              className="flex flex-col items-center justify-center p-3 rounded-lg border border-surface-700/50 bg-surface-800/10 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-400 transition-all text-xs font-semibold gap-1.5 cursor-pointer"
+            >
+              <Download className="w-5 h-5 text-emerald-400" />
+              <span>Dışa Aktar</span>
+            </button>
+          </div>
         </div>
 
         {/* Aktif Uyarılar */}
