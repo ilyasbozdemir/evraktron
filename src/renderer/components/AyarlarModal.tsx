@@ -287,8 +287,21 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
     }
   };
 
+  const handleCloseAttempt = () => {
+    const hasUnsavedGeneral = kurumAdi !== (ayarlar.kurum_adi || '') || birimAdi !== (ayarlar.varsayilan_birim || '');
+    const hasUnsavedRoutine = editingRoutine !== null;
+
+    if (hasUnsavedGeneral || hasUnsavedRoutine) {
+      const confirmClose = window.confirm('Kaydedilmemiş değişiklikleriniz var. Yine de kapatmak istiyor musunuz?');
+      if (!confirmClose) {
+        return;
+      }
+    }
+    onClose();
+  };
+
   return (
-    <Dialog.Root open={true} onOpenChange={(open) => !open && onClose()}>
+    <Dialog.Root open={true} onOpenChange={(open) => !open && handleCloseAttempt()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fade-in" />
         <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl bg-surface-900 border border-surface-700/50 shadow-2xl rounded-xl z-50 flex flex-col h-[75vh] max-h-[85vh] animate-scale-in">
