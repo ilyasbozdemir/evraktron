@@ -39,22 +39,72 @@ function evaluateSingleRule(doc, prevDoc, rule) {
     case 'contains':
       if (currentVal === undefined || currentVal === null) return false;
       return String(currentVal).toLowerCase().includes(String(val).toLowerCase());
+    case 'not_contains':
+      if (currentVal === undefined || currentVal === null) return true;
+      return !String(currentVal).toLowerCase().includes(String(val).toLowerCase());
+    case 'starts_with':
+      if (currentVal === undefined || currentVal === null) return false;
+      return String(currentVal).toLowerCase().startsWith(String(val).toLowerCase());
     case 'gt': {
       const numA = Number(currentVal);
       const numB = Number(val);
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return numA > numB;
-      }
+      if (!isNaN(numA) && !isNaN(numB)) return numA > numB;
       return String(currentVal) > String(val);
     }
     case 'lt': {
       const numA = Number(currentVal);
       const numB = Number(val);
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return numA < numB;
-      }
+      if (!isNaN(numA) && !isNaN(numB)) return numA < numB;
       return String(currentVal) < String(val);
     }
+    case 'gte': {
+      const numA = Number(currentVal);
+      const numB = Number(val);
+      if (!isNaN(numA) && !isNaN(numB)) return numA >= numB;
+      return String(currentVal) >= String(val);
+    }
+    case 'lte': {
+      const numA = Number(currentVal);
+      const numB = Number(val);
+      if (!isNaN(numA) && !isNaN(numB)) return numA <= numB;
+      return String(currentVal) <= String(val);
+    }
+    // ── Tarih operatörleri ──────────────────────────────────────────────────
+    case 'date_lt_today_plus': {
+      if (!currentVal) return false;
+      const fieldDate = new Date(currentVal);
+      fieldDate.setHours(0, 0, 0, 0);
+      const threshold = new Date();
+      threshold.setDate(threshold.getDate() + Number(val || 0));
+      threshold.setHours(23, 59, 59, 999);
+      return fieldDate < threshold;
+    }
+    case 'date_gt_today_plus': {
+      if (!currentVal) return false;
+      const fieldDate = new Date(currentVal);
+      fieldDate.setHours(0, 0, 0, 0);
+      const threshold = new Date();
+      threshold.setDate(threshold.getDate() + Number(val || 0));
+      threshold.setHours(0, 0, 0, 0);
+      return fieldDate > threshold;
+    }
+    case 'date_eq_today': {
+      if (!currentVal) return false;
+      const fieldDate = new Date(currentVal);
+      const today = new Date();
+      return fieldDate.toDateString() === today.toDateString();
+    }
+    case 'date_expired': {
+      if (!currentVal) return false;
+      const fieldDate = new Date(currentVal);
+      fieldDate.setHours(23, 59, 59, 999);
+      return fieldDate < new Date();
+    }
+    // ── Genel operatörler ───────────────────────────────────────────────────
+    case 'is_empty':
+      return currentVal === undefined || currentVal === null || String(currentVal).trim() === '';
+    case 'is_not_empty':
+      return currentVal !== undefined && currentVal !== null && String(currentVal).trim() !== '';
     case 'changed': {
       const hasChanged = !compareEq(currentVal, prevVal);
       if (val && String(val).trim() !== '') {
@@ -204,4 +254,146 @@ export function evaluateRoutines(db, doc, prevDoc) {
       executeActions(db, doc, actions);
     }
   }
+}
+
+/**
+ * Şablon alanlarına gömülü rutinleri çalıştırır.
+ * Evrak kayıt/güncelleme sırasında çağrılır.
+ * @param {object} db - SQLite bağlantısı
+ * @param {object} doc - Güncellenen evrak
+ * @param {object|null} prevDoc - Önceki evrak durumu
+ * @param {object} template - Evrakın şablonu (definition JSON)
+ */
+export function evaluateFieldRutinler(db, doc, prevDoc, template) {
+  if (!db || !doc || !template || !Array.isArray(template.fields)) return;
+
+  for (const field of template.fields) {
+    if (!Array.isArray(field.rutinler) || field.rutinler.length === 0) continue;
+
+    const currentVal = getFieldValue(doc, field.key);
+
+    for (const rutin of field.rutinler) {
+      // Koşul değerlendirmesi
+      const ruleObj = { field_name: field.key, operator: rutin.operator, value: rutin.value };
+      const triggered = evaluateSingleRule(doc, prevDoc || {}, ruleObj);
+      if (!triggered) continue;
+
+      // Aksiyon çalıştır
+      switch (rutin.aksiyon) {
+        case 'os_bildir': {
+          const baslik = rutin.bildirimBaslik
+            ? replaceTemplatePlaceholders(rutin.bildirimBaslik, doc)
+            : `Evraktron — ${rutin.name}`;
+          const mesaj = rutin.bildirimMesaj
+            ? replaceTemplatePlaceholders(rutin.bildirimMesaj, doc)
+            : `"${field.label}" koşulu tetiklendi: ${currentVal}`;
+          if (Notification.isSupported()) {
+            new Notification({ title: baslik, body: mesaj }).show();
+          }
+          break;
+        }
+        case 'etiket_ekle': {
+          if (rutin.etiket) {
+            const tag = rutin.etiket;
+            const renk = rutin.etiketRenk || '#f59e0b';
+            const existing = db.prepare('SELECT 1 FROM etiketler WHERE evrak_id = ? AND tag = ?').get(doc.id, tag);
+            if (!existing) {
+              db.prepare('INSERT INTO etiketler (evrak_id, tag, renk) VALUES (?, ?, ?)').run(doc.id, tag, renk);
+              db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (?, 'otomasyon', 'Sistem', ?)`)
+                .run(doc.id, `Alan rutini (${rutin.name}): "${tag}" etiketi eklendi.`);
+            }
+          }
+          break;
+        }
+        case 'alan_guncelle': {
+          if (rutin.hedefAlan) {
+            const updated = setFieldValue(db, doc, rutin.hedefAlan, rutin.hedefDeger || '');
+            if (updated) {
+              db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (?, 'otomasyon', 'Sistem', ?)`)
+                .run(doc.id, `Alan rutini (${rutin.name}): "${rutin.hedefAlan}" alanı güncellendi.`);
+            }
+          }
+          break;
+        }
+        case 'log_ekle': {
+          const logText = `Alan rutini tetiklendi: ${rutin.name} — ${field.label}: ${currentVal}`;
+          db.prepare(`INSERT INTO hareketler (evrak_id, islem_tipi, kullanici, "not") VALUES (?, 'otomasyon', 'Sistem', ?)`)
+            .run(doc.id, logText);
+          break;
+        }
+        case 'dashboard_uyar':
+          // Dashboard tarama (scanFieldRutins) ile ele alınır — burada ek işlem gerekmez
+          break;
+        default:
+          break;
+      }
+    }
+  }
+}
+
+/**
+ * Tüm evrakları tarayıp tetiklenen alan rutinlerini döner.
+ * Dashboard "Aktif Uyarılar" bölümü için kullanılır.
+ */
+export function scanAllFieldRutins(db, templates) {
+  if (!db) return [];
+  const results = [];
+
+  const evraklar = db.prepare('SELECT * FROM evraklar').all();
+
+  for (const evrak of evraklar) {
+    // Evrakın şablonunu bul (metadata içindeki _templateId)
+    let templateId = null;
+    try {
+      const meta = JSON.parse(evrak.metadata || '{}');
+      templateId = meta._templateId;
+    } catch {}
+
+    if (!templateId) continue;
+    const template = templates[templateId];
+    if (!template || !Array.isArray(template.fields)) continue;
+
+    for (const field of template.fields) {
+      if (!Array.isArray(field.rutinler) || field.rutinler.length === 0) continue;
+
+      const currentVal = getFieldValue(evrak, field.key);
+
+      for (const rutin of field.rutinler) {
+        const ruleObj = { field_name: field.key, operator: rutin.operator, value: rutin.value };
+        const triggered = evaluateSingleRule(evrak, {}, ruleObj);
+        if (!triggered) continue;
+
+        // Kalan gün hesapla (tarih alanları için)
+        let kalanGun = undefined;
+        if (rutin.operator.startsWith('date_') && currentVal) {
+          const fieldDate = new Date(currentVal);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          kalanGun = Math.ceil((fieldDate - today) / (1000 * 60 * 60 * 24));
+        }
+
+        results.push({
+          evrak: { id: evrak.id, no: evrak.no, kurum: evrak.kurum, aciklama: evrak.aciklama },
+          fieldKey: field.key,
+          fieldLabel: field.label,
+          rutin,
+          value: currentVal !== undefined && currentVal !== null ? String(currentVal) : '',
+          meta: kalanGun !== undefined ? { kalanGun } : undefined,
+        });
+      }
+    }
+  }
+
+  // Önce kritik, sonra warn, sonra info; aynı seviyede en az kalan güne göre sırala
+  const seviyeSira = { critical: 0, warn: 1, info: 2, undefined: 3 };
+  results.sort((a, b) => {
+    const sa = seviyeSira[a.rutin.seviye] ?? 3;
+    const sb = seviyeSira[b.rutin.seviye] ?? 3;
+    if (sa !== sb) return sa - sb;
+    const ga = a.meta?.kalanGun ?? Infinity;
+    const gb = b.meta?.kalanGun ?? Infinity;
+    return ga - gb;
+  });
+
+  return results;
 }

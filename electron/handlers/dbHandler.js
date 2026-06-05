@@ -2,7 +2,8 @@ import { shell, dialog } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import { evaluateRoutines } from './routineEvaluator';
+import { evaluateRoutines, evaluateFieldRutinler, scanAllFieldRutins } from './routineEvaluator';
+import { getAppDb } from '../appDb';
 
 
 function getMimeType(filePath) {
@@ -79,6 +80,21 @@ function setupDbHandlers(ipcMain, state, setState) {
     const doc = state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(res.lastInsertRowid);
     try {
       evaluateRoutines(state.db, doc, null);
+      // Alan rutinleri: şablonu bul
+      try {
+        const meta = JSON.parse(doc.metadata || '{}');
+        const templateId = meta._templateId;
+        if (templateId) {
+          const appDb = getAppDb();
+          const tmplRow = appDb.prepare('SELECT definition FROM templates WHERE id = ?').get(templateId);
+          if (tmplRow) {
+            const template = JSON.parse(tmplRow.definition);
+            evaluateFieldRutinler(state.db, doc, null, template);
+          }
+        }
+      } catch (ferr) {
+        console.error('Error evaluating field rutins on create:', ferr);
+      }
     } catch (err) {
       console.error('Error evaluating routines on create:', err);
     }
@@ -98,6 +114,21 @@ function setupDbHandlers(ipcMain, state, setState) {
     const doc = state.db.prepare('SELECT * FROM evraklar WHERE id = ?').get(id);
     try {
       evaluateRoutines(state.db, doc, prevDoc);
+      // Alan rutinleri: şablonu bul
+      try {
+        const meta = JSON.parse(doc.metadata || '{}');
+        const templateId = meta._templateId;
+        if (templateId) {
+          const appDb = getAppDb();
+          const tmplRow = appDb.prepare('SELECT definition FROM templates WHERE id = ?').get(templateId);
+          if (tmplRow) {
+            const template = JSON.parse(tmplRow.definition);
+            evaluateFieldRutinler(state.db, doc, prevDoc, template);
+          }
+        }
+      } catch (ferr) {
+        console.error('Error evaluating field rutins on update:', ferr);
+      }
     } catch (err) {
       console.error('Error evaluating routines on update:', err);
     }
@@ -287,6 +318,26 @@ function setupDbHandlers(ipcMain, state, setState) {
     } catch (err) {
       console.error('Error deleting routine:', err);
       return false;
+    }
+  });
+
+  // ── FIELD RUTINS SCAN ──────────────────────────────────────────────────
+  ipcMain.handle('db:field:scan-rutins', () => {
+    if (!state.db) return [];
+    try {
+      const appDb = getAppDb();
+      const tmplRows = appDb.prepare('SELECT id, definition FROM templates').all();
+      // templateId -> parsed definition map
+      const templatesMap = {};
+      for (const row of tmplRows) {
+        try {
+          templatesMap[row.id] = JSON.parse(row.definition);
+        } catch {}
+      }
+      return scanAllFieldRutins(state.db, templatesMap);
+    } catch (err) {
+      console.error('Error scanning field rutins:', err);
+      return [];
     }
   });
 }

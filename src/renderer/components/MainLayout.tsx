@@ -543,8 +543,10 @@ export function MainLayout() {
 }
 
 function StatsPanel() {
-  const { stats } = useAppStore();
+  const { stats, setSelectedEvrakId } = useAppStore();
   const [topSearches, setTopSearches] = useState<{query: string, count: number}[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [loadingAlerts, setLoadingAlerts] = useState(true);
 
   const loadSearchStats = () => {
     try {
@@ -557,11 +559,26 @@ function StatsPanel() {
     } catch {}
   };
 
+  const loadAlerts = useCallback(async () => {
+    setLoadingAlerts(true);
+    try {
+      const res = await window.evraktron.db.scanFieldRutins();
+      setAlerts(res);
+    } catch (e) {
+      console.error('Error scanning field alerts:', e);
+    } finally {
+      setLoadingAlerts(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadSearchStats();
+    loadAlerts();
     window.addEventListener('evraktron_search_stats_updated', loadSearchStats);
-    return () => window.removeEventListener('evraktron_search_stats_updated', loadSearchStats);
-  }, []);
+    return () => {
+      window.removeEventListener('evraktron_search_stats_updated', loadSearchStats);
+    };
+  }, [loadAlerts]);
 
   if (!stats) return <div className="p-6 text-sm" style={{ color: 'var(--text-muted)' }}>Yükleniyor…</div>;
 
@@ -589,6 +606,66 @@ function StatsPanel() {
           ))}
         </div>
 
+        {/* Aktif Uyarılar */}
+        <div className="card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🔔</span>
+              <p className="text-sm font-semibold text-surface-200">Aktif Uyarılar</p>
+            </div>
+            {alerts.length > 0 && (
+              <span className="text-[10px] bg-rose-500/20 text-rose-400 font-medium px-2 py-0.5 rounded-full">
+                {alerts.filter(a => a.rutin?.seviye === 'critical').length} kritik • {alerts.filter(a => a.rutin?.seviye === 'warn').length} uyarı
+              </span>
+            )}
+          </div>
+
+          {loadingAlerts ? (
+            <p className="text-xs text-surface-500 italic">Taranıyor...</p>
+          ) : alerts.length > 0 ? (
+            <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+              {alerts.map((alert, idx) => {
+                const dotColor = alert.rutin?.seviye === 'critical' ? 'bg-rose-500' : alert.rutin?.seviye === 'warn' ? 'bg-amber-500' : 'bg-blue-500';
+                
+                return (
+                  <div key={idx} className="flex items-start justify-between p-2.5 rounded-lg bg-surface-800/40 border border-surface-700/40 hover:border-surface-600 transition-all text-xs">
+                    <div className="space-y-1 min-w-0 flex-1 pr-3">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className={cn("w-2 h-2 rounded-full shrink-0", dotColor)} />
+                        <span className="font-semibold text-surface-200 truncate">{alert.evrak.kurum || 'Kurum Belirtilmemiş'}</span>
+                        <span className="font-mono text-surface-500 shrink-0">#{alert.evrak.no}</span>
+                      </div>
+                      <div className="text-[10px] text-surface-400 pl-3.5">
+                        <span className="font-medium text-surface-300">{alert.fieldLabel}:</span> {alert.value}
+                        <span className="mx-1.5 text-surface-600">•</span>
+                        <span className="text-surface-400">{alert.rutin?.name || 'Rutin'}</span>
+                        {alert.meta?.kalanGun !== undefined && (
+                          <>
+                            <span className="mx-1.5 text-surface-600">•</span>
+                            <span className={cn("font-medium", alert.meta.kalanGun <= 0 ? "text-rose-400" : alert.meta.kalanGun <= 7 ? "text-amber-400" : "text-surface-400")}>
+                              {alert.meta.kalanGun < 0 ? `${Math.abs(alert.meta.kalanGun)} gün geçti` : alert.meta.kalanGun === 0 ? 'Bugün son gün' : `${alert.meta.kalanGun} gün kaldı`}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedEvrakId(alert.evrak.id);
+                      }}
+                      className="btn-ghost text-[10px] px-2 h-6 hover:bg-brand-500/10 text-brand-400 whitespace-nowrap"
+                    >
+                      Aç →
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-xs text-surface-500 italic">Tetiklenmiş aktif uyarı bulunmuyor.</p>
+          )}
+        </div>
+
         {/* Durum chart */}
         <div className="card p-4 space-y-3">
           <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Duruma Göre</p>
@@ -600,8 +677,8 @@ function StatsPanel() {
               </div>
               <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-hover)' }}>
                 <div
-                  className={cn('h-full rounded-full', durumRenkler[durum] || 'bg-surface-500')}
-                  style={{ width: `${stats.total ? (count / stats.total) * 100 : 0}%` }}
+                   className={cn('h-full rounded-full', durumRenkler[durum] || 'bg-surface-500')}
+                   style={{ width: `${stats.total ? (count / stats.total) * 100 : 0}%` }}
                 />
               </div>
             </div>

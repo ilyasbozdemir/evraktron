@@ -60,6 +60,9 @@ contextBridge.exposeInMainWorld('evraktron', {
     getRoutines: () => ipcRenderer.invoke('db:routines:list'),
     saveRoutine: (routine) => ipcRenderer.invoke('db:routines:save', routine),
     deleteRoutine: (id) => ipcRenderer.invoke('db:routines:delete', id),
+
+    // Field rutin scan (dashboard uyarıları için)
+    scanFieldRutins: () => ipcRenderer.invoke('db:field:scan-rutins'),
   },
 
   // Templates

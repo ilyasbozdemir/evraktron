@@ -1,10 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import {
   Plus, Trash2, Download, Upload, X,
-  GripVertical, ChevronDown, ChevronUp, Save, Loader2, AlertCircle, Store
+  GripVertical, ChevronDown, ChevronUp, Save, Loader2, AlertCircle, Store,
+  Bell, Zap
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TemplateStoreModal } from './TemplateStoreModal';
+
+// ── Tipler ──────────────────────────────────────────────────────────────────
+
+type FieldRutinOperator =
+  | 'eq' | 'neq' | 'contains' | 'not_contains' | 'starts_with'
+  | 'gt' | 'lt' | 'gte' | 'lte'
+  | 'date_lt_today_plus' | 'date_gt_today_plus' | 'date_eq_today' | 'date_expired'
+  | 'changed' | 'is_empty' | 'is_not_empty';
+
+type FieldRutinAksiyon =
+  | 'dashboard_uyar' | 'os_bildir' | 'etiket_ekle' | 'alan_guncelle' | 'log_ekle';
+
+interface FieldRutin {
+  name: string;
+  operator: FieldRutinOperator;
+  value?: string | number;
+  aksiyon: FieldRutinAksiyon;
+  seviye?: 'info' | 'warn' | 'critical';
+  etiket?: string;
+  etiketRenk?: string;
+  hedefAlan?: string;
+  hedefDeger?: string;
+  bildirimBaslik?: string;
+  bildirimMesaj?: string;
+}
 
 interface TemplateField {
   key: string;
@@ -18,6 +44,7 @@ interface TemplateField {
   width?: 'sm' | 'md' | 'lg' | 'full';
   hint?: string;
   subFields?: TemplateField[];
+  rutinler?: FieldRutin[];
 }
 
 interface EvrakTemplate {
@@ -63,6 +90,95 @@ const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'
 interface TemplateManagerProps {
   onClose: () => void;
 }
+
+// ── Rutin Yardımcıları ───────────────────────────────────────────────────────
+
+// Alan tipine göre uygun operatörler
+const OPERATORS_BY_TYPE: Record<string, { value: FieldRutinOperator; label: string }[]> = {
+  text: [
+    { value: 'eq', label: 'eşittir' },
+    { value: 'neq', label: 'eşit değil' },
+    { value: 'contains', label: 'içeriyorsa' },
+    { value: 'not_contains', label: 'içermiyorsa' },
+    { value: 'starts_with', label: 'ile başlıyorsa' },
+    { value: 'is_empty', label: 'boşsa' },
+    { value: 'is_not_empty', label: 'doluysa' },
+    { value: 'changed', label: 'değişti' },
+  ],
+  textarea: [
+    { value: 'contains', label: 'içeriyorsa' },
+    { value: 'not_contains', label: 'içermiyorsa' },
+    { value: 'is_empty', label: 'boşsa' },
+    { value: 'is_not_empty', label: 'doluysa' },
+    { value: 'changed', label: 'değişti' },
+  ],
+  number: [
+    { value: 'eq', label: 'eşittir' },
+    { value: 'neq', label: 'eşit değil' },
+    { value: 'gt', label: 'büyükse >' },
+    { value: 'gte', label: 'büyük veya eşit ≥' },
+    { value: 'lt', label: 'küçükse <' },
+    { value: 'lte', label: 'küçük veya eşit ≤' },
+    { value: 'is_empty', label: 'boşsa' },
+    { value: 'is_not_empty', label: 'doluysa' },
+    { value: 'changed', label: 'değişti' },
+  ],
+  date: [
+    { value: 'date_lt_today_plus', label: 'son gün < bugün + N gün' },
+    { value: 'date_gt_today_plus', label: 'tarih > bugün + N gün' },
+    { value: 'date_eq_today', label: 'bugün' },
+    { value: 'date_expired', label: 'geçmiş (süresi dolmuş)' },
+    { value: 'is_empty', label: 'boşsa' },
+    { value: 'is_not_empty', label: 'doluysa' },
+    { value: 'changed', label: 'değişti' },
+  ],
+  select: [
+    { value: 'eq', label: 'eşittir' },
+    { value: 'neq', label: 'eşit değil' },
+    { value: 'changed', label: 'değişti' },
+    { value: 'is_empty', label: 'boşsa' },
+    { value: 'is_not_empty', label: 'doluysa' },
+  ],
+  checkbox: [
+    { value: 'eq', label: 'eşittir (true/false)' },
+    { value: 'changed', label: 'değişti' },
+  ],
+};
+const DEFAULT_OPERATORS = OPERATORS_BY_TYPE.text;
+
+const AKSIYONLAR: { value: FieldRutinAksiyon; label: string; icon: string }[] = [
+  { value: 'dashboard_uyar', label: 'Dashboard Uyarısı', icon: '🟡' },
+  { value: 'os_bildir', label: 'Bildirim Gönder (OS)', icon: '🔔' },
+  { value: 'etiket_ekle', label: 'Etiket Ekle', icon: '🏷️' },
+  { value: 'alan_guncelle', label: 'Alan Güncelle', icon: '✏️' },
+  { value: 'log_ekle', label: 'Log Yaz', icon: '📝' },
+];
+
+const SEVIYELER: { value: 'info' | 'warn' | 'critical'; label: string; color: string }[] = [
+  { value: 'info', label: 'Bilgi', color: '#3b82f6' },
+  { value: 'warn', label: 'Uyarı', color: '#f59e0b' },
+  { value: 'critical', label: 'Kritik', color: '#ef4444' },
+];
+
+const EMPTY_RUTIN: FieldRutin = {
+  name: '',
+  operator: 'contains',
+  value: '',
+  aksiyon: 'dashboard_uyar',
+  seviye: 'warn',
+};
+
+function needsValue(op: FieldRutinOperator): boolean {
+  return !['date_eq_today', 'date_expired', 'changed', 'is_empty', 'is_not_empty'].includes(op);
+}
+
+function valuePlaceholder(op: FieldRutinOperator): string {
+  if (op === 'date_lt_today_plus' || op === 'date_gt_today_plus') return 'Gün sayısı (orn: 30)';
+  if (op === 'gt' || op === 'lt' || op === 'gte' || op === 'lte') return 'Sayı değeri';
+  return 'Değer';
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 
 export function TemplateManager({ onClose }: TemplateManagerProps) {
   const [templates, setTemplates] = useState<EvrakTemplate[]>([]);
@@ -178,7 +294,6 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-surface-900 border border-surface-700 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-surface-700 shrink-0">
@@ -545,6 +660,194 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                 </div>
                               </div>
                             )}
+
+                            {/* ── Rutinler / Kurallar ────────────────────────────────────── */}
+                            {['text','textarea','number','date','select','checkbox'].includes(field.type) && (
+                              <div className="col-span-3 mt-2">
+                                <div className="border border-amber-500/20 rounded-xl overflow-hidden bg-amber-500/5">
+                                  <div className="flex items-center justify-between px-3 py-2 border-b border-amber-500/15">
+                                    <div className="flex items-center gap-2">
+                                      <Zap className="w-3.5 h-3.5 text-amber-400" />
+                                      <span className="text-xs font-semibold text-amber-300">Kurallar / Rutinler</span>
+                                      {(field.rutinler?.length || 0) > 0 && (
+                                        <span className="text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">{field.rutinler!.length}</span>
+                                      )}
+                                    </div>
+                                    <button
+                                      onClick={() => {
+                                        const ops = OPERATORS_BY_TYPE[field.type] || DEFAULT_OPERATORS;
+                                        const defOp = ops[0]?.value ?? 'contains';
+                                        const r: FieldRutin = { ...EMPTY_RUTIN, operator: defOp };
+                                        updateField(idx, { rutinler: [...(field.rutinler || []), r] });
+                                      }}
+                                      className="btn-ghost text-[10px] h-6 px-2 gap-1 text-amber-400 hover:text-amber-300"
+                                    >
+                                      <Plus className="w-3 h-3" /> Kural Ekle
+                                    </button>
+                                  </div>
+
+                                  {(!field.rutinler || field.rutinler.length === 0) && (
+                                    <p className="text-[10px] text-surface-500 text-center py-3 italic">
+                                      Henüz kural yok. "Kural Ekle" ile başlayın.
+                                    </p>
+                                  )}
+
+                                  <div className="divide-y divide-amber-500/10">
+                                    {(field.rutinler || []).map((rutin, ridx) => {
+                                      const ops = OPERATORS_BY_TYPE[field.type] || DEFAULT_OPERATORS;
+                                      const seviyeColor = { critical: 'text-rose-400', warn: 'text-amber-400', info: 'text-blue-400' }[rutin.seviye || 'warn'];
+                                      return (
+                                        <div key={ridx} className="p-3 space-y-2">
+                                          {/* Satır 1: Ad + Seviye + Sil */}
+                                          <div className="flex items-center gap-2">
+                                            <Bell className="w-3 h-3 text-amber-400 shrink-0" />
+                                            <input
+                                              type="text"
+                                              value={rutin.name}
+                                              onChange={e => {
+                                                const newR = [...(field.rutinler || [])];
+                                                newR[ridx] = { ...rutin, name: e.target.value };
+                                                updateField(idx, { rutinler: newR });
+                                              }}
+                                              className="input h-6 text-[10px] flex-1 bg-surface-900"
+                                              placeholder="Kural adı (orn: 30 Gün Uyarısı)"
+                                            />
+                                            <select
+                                              value={rutin.seviye || 'warn'}
+                                              onChange={e => {
+                                                const newR = [...(field.rutinler || [])];
+                                                newR[ridx] = { ...rutin, seviye: e.target.value as any };
+                                                updateField(idx, { rutinler: newR });
+                                              }}
+                                              className={`input h-6 text-[10px] w-24 ${seviyeColor}`}
+                                            >
+                                              {SEVIYELER.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                                            </select>
+                                            <button
+                                              onClick={() => {
+                                                const newR = [...(field.rutinler || [])];
+                                                newR.splice(ridx, 1);
+                                                updateField(idx, { rutinler: newR });
+                                              }}
+                                              className="text-rose-400 hover:text-rose-300 p-0.5" title="Kuralı Sil"
+                                            >
+                                              <X className="w-3 h-3" />
+                                            </button>
+                                          </div>
+
+                                          {/* Satır 2: Koşul */}
+                                          <div className="flex items-center gap-2 pl-5">
+                                            <span className="text-[10px] text-surface-500 w-12 shrink-0">Koşul:</span>
+                                            <select
+                                              value={rutin.operator}
+                                              onChange={e => {
+                                                const newR = [...(field.rutinler || [])];
+                                                newR[ridx] = { ...rutin, operator: e.target.value as FieldRutinOperator, value: '' };
+                                                updateField(idx, { rutinler: newR });
+                                              }}
+                                              className="input h-6 text-[10px] flex-1"
+                                            >
+                                              {ops.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                            </select>
+                                            {needsValue(rutin.operator) && (
+                                              <input
+                                                type={['gt','lt','gte','lte','date_lt_today_plus','date_gt_today_plus'].includes(rutin.operator) ? 'number' : 'text'}
+                                                value={rutin.value ?? ''}
+                                                onChange={e => {
+                                                  const newR = [...(field.rutinler || [])];
+                                                  newR[ridx] = { ...rutin, value: e.target.value };
+                                                  updateField(idx, { rutinler: newR });
+                                                }}
+                                                className="input h-6 text-[10px] w-28"
+                                                placeholder={valuePlaceholder(rutin.operator)}
+                                              />
+                                            )}
+                                          </div>
+
+                                          {/* Satır 3: Aksiyon */}
+                                          <div className="flex items-center gap-2 pl-5">
+                                            <span className="text-[10px] text-surface-500 w-12 shrink-0">Aksiyon:</span>
+                                            <select
+                                              value={rutin.aksiyon}
+                                              onChange={e => {
+                                                const newR = [...(field.rutinler || [])];
+                                                newR[ridx] = { ...rutin, aksiyon: e.target.value as FieldRutinAksiyon };
+                                                updateField(idx, { rutinler: newR });
+                                              }}
+                                              className="input h-6 text-[10px] flex-1"
+                                            >
+                                              {AKSIYONLAR.map(a => (
+                                                <option key={a.value} value={a.value}>{a.icon} {a.label}</option>
+                                              ))}
+                                            </select>
+                                          </div>
+
+                                          {/* Aksiyon parametreleri */}
+                                          {rutin.aksiyon === 'etiket_ekle' && (
+                                            <div className="flex items-center gap-2 pl-5">
+                                              <span className="text-[10px] text-surface-500 w-12 shrink-0">Etiket:</span>
+                                              <input
+                                                type="text"
+                                                value={rutin.etiket || ''}
+                                                onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,etiket:e.target.value}; updateField(idx,{rutinler:newR}); }}
+                                                className="input h-6 text-[10px] flex-1"
+                                                placeholder="🚨 Acil"
+                                              />
+                                              <input
+                                                type="color"
+                                                value={rutin.etiketRenk || '#f59e0b'}
+                                                onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,etiketRenk:e.target.value}; updateField(idx,{rutinler:newR}); }}
+                                                className="h-6 w-8 rounded border border-surface-600 bg-transparent cursor-pointer"
+                                                title="Etiket Rengi"
+                                              />
+                                            </div>
+                                          )}
+                                          {rutin.aksiyon === 'alan_guncelle' && (
+                                            <div className="flex items-center gap-2 pl-5">
+                                              <span className="text-[10px] text-surface-500 w-12 shrink-0">Alan:</span>
+                                              <input
+                                                type="text"
+                                                value={rutin.hedefAlan || ''}
+                                                onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,hedefAlan:e.target.value}; updateField(idx,{rutinler:newR}); }}
+                                                className="input h-6 text-[10px] w-28 font-mono"
+                                                placeholder="alan_key"
+                                              />
+                                              <span className="text-[10px] text-surface-500">=</span>
+                                              <input
+                                                type="text"
+                                                value={rutin.hedefDeger || ''}
+                                                onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,hedefDeger:e.target.value}; updateField(idx,{rutinler:newR}); }}
+                                                className="input h-6 text-[10px] flex-1"
+                                                placeholder="Yeni değer"
+                                              />
+                                            </div>
+                                          )}
+                                          {rutin.aksiyon === 'os_bildir' && (
+                                            <div className="flex flex-col gap-1 pl-5">
+                                              <input
+                                                type="text"
+                                                value={rutin.bildirimBaslik || ''}
+                                                onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,bildirimBaslik:e.target.value}; updateField(idx,{rutinler:newR}); }}
+                                                className="input h-6 text-[10px] w-full"
+                                                placeholder="Bildirim başlığı (boş bırakılırsa otomatik)"
+                                              />
+                                              <input
+                                                type="text"
+                                                value={rutin.bildirimMesaj || ''}
+                                                onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,bildirimMesaj:e.target.value}; updateField(idx,{rutinler:newR}); }}
+                                                className="input h-6 text-[10px] w-full"
+                                                placeholder="Bildirim mesajı — {{alan_key}} kullanabilirsiniz"
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
                           </div>
                         )}
                       </div>
@@ -564,7 +867,6 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
             </div>
           )}
         </div>
-      </div>
 
       {/* Template Store Modal */}
       {showStore && (

@@ -113,6 +113,57 @@ export interface EvrakFilters {
 
 // ── Template types ─────────────────────────────────────────────────────────────
 
+// Operatörler — alan tipine göre uygun olanlar UI'da filtrelenir
+export type FieldRutinOperator =
+  | 'eq'             // eşittir
+  | 'neq'            // eşit değil
+  | 'contains'       // içeriyorsa
+  | 'not_contains'   // içermiyorsa
+  | 'starts_with'    // ile başlıyorsa
+  | 'gt'             // büyükse
+  | 'lt'             // küçükse
+  | 'gte'            // büyük veya eşit
+  | 'lte'            // küçük veya eşit
+  | 'date_lt_today_plus'   // son gün < bugün+N (örn: 30 gün kaldı)
+  | 'date_gt_today_plus'   // tarih > bugün+N
+  | 'date_eq_today'        // bugün
+  | 'date_expired'         // geçmiş tarih
+  | 'changed'        // değişti
+  | 'is_empty'       // boş
+  | 'is_not_empty';  // dolu
+
+export type FieldRutinAksiyon =
+  | 'dashboard_uyar'  // İstatistikler panelinde uyarı göster
+  | 'os_bildir'       // Windows/macOS OS bildirimi
+  | 'etiket_ekle'     // Evraqa etiket ekle
+  | 'alan_guncelle'   // Başka bir alanı güncelle
+  | 'log_ekle';       // Hareket loguna yaz
+
+export interface FieldRutin {
+  name: string;               // "30 Gün Öncesi Uyarısı"
+  operator: FieldRutinOperator;
+  value?: string | number;    // Koşul değeri (sayı, metin, gün sayısı)
+  aksiyon: FieldRutinAksiyon;
+  seviye?: 'info' | 'warn' | 'critical'; // Dashboard rengi
+  // Aksiyon parametreleri
+  etiket?: string;            // etiket_ekle için
+  etiketRenk?: string;
+  hedefAlan?: string;         // alan_guncelle için
+  hedefDeger?: string;
+  bildirimBaslik?: string;    // os_bildir için
+  bildirimMesaj?: string;
+}
+
+// Scan sonucu — hangi evrakın hangi alanının rutini tetiklenmiş
+export interface FieldRutinScanResult {
+  evrak: { id: number; no: string; kurum: string; aciklama: string };
+  fieldKey: string;
+  fieldLabel: string;
+  rutin: FieldRutin;
+  value: string;
+  meta?: { kalanGun?: number }; // Tarih alanları için ek bilgi
+}
+
 export interface TemplateField {
   key: string;
   label: string;
@@ -125,6 +176,7 @@ export interface TemplateField {
   options?: string[];
   width?: 'sm' | 'md' | 'lg' | 'full';
   subFields?: TemplateField[];
+  rutinler?: FieldRutin[];     // Alan bazlı kurallar / rutinler
 }
 
 export interface TemplateNumbering {
@@ -207,6 +259,7 @@ export interface ElectronAPI {
     getRoutines: () => Promise<Routine[]>;
     saveRoutine: (routine: Routine) => Promise<boolean>;
     deleteRoutine: (id: string) => Promise<boolean>;
+    scanFieldRutins: () => Promise<FieldRutinScanResult[]>;
   };
   template: {
     list: () => Promise<EvrakTemplate[]>;
