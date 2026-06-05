@@ -712,7 +712,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                                 newR[ridx] = { ...rutin, name: e.target.value };
                                                 updateField(idx, { rutinler: newR });
                                               }}
-                                              className="input h-6 text-[10px] flex-1 bg-surface-900"
+                                              className="input h-6 py-0.5 text-[10px] flex-1 bg-surface-900"
                                               placeholder="Kural adı (orn: 30 Gün Uyarısı)"
                                             />
                                             <select
@@ -722,7 +722,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                                 newR[ridx] = { ...rutin, seviye: e.target.value as any };
                                                 updateField(idx, { rutinler: newR });
                                               }}
-                                              className={`input h-6 text-[10px] w-24 ${seviyeColor}`}
+                                              className={`input h-6 py-0.5 text-[10px] w-24 ${seviyeColor}`}
                                             >
                                               {SEVIYELER.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                                             </select>
@@ -748,7 +748,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                                 newR[ridx] = { ...rutin, operator: e.target.value as FieldRutinOperator, value: '' };
                                                 updateField(idx, { rutinler: newR });
                                               }}
-                                              className="input h-6 text-[10px] flex-1"
+                                              className="input h-6 py-0.5 text-[10px] flex-1"
                                             >
                                               {ops.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                                             </select>
@@ -761,7 +761,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                                   newR[ridx] = { ...rutin, value: e.target.value };
                                                   updateField(idx, { rutinler: newR });
                                                 }}
-                                                className="input h-6 text-[10px] w-28"
+                                                className="input h-6 py-0.5 text-[10px] w-28"
                                                 placeholder={valuePlaceholder(rutin.operator)}
                                               />
                                             )}
@@ -777,7 +777,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                                 newR[ridx] = { ...rutin, aksiyon: e.target.value as FieldRutinAksiyon };
                                                 updateField(idx, { rutinler: newR });
                                               }}
-                                              className="input h-6 text-[10px] flex-1"
+                                              className="input h-6 py-0.5 text-[10px] flex-1"
                                             >
                                               {AKSIYONLAR.map(a => (
                                                 <option key={a.value} value={a.value}>{a.icon} {a.label}</option>
@@ -793,7 +793,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                                 type="text"
                                                 value={rutin.etiket || ''}
                                                 onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,etiket:e.target.value}; updateField(idx,{rutinler:newR}); }}
-                                                className="input h-6 text-[10px] flex-1"
+                                                className="input h-6 py-0.5 text-[10px] flex-1"
                                                 placeholder="🚨 Acil"
                                               />
                                               <input
@@ -812,7 +812,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                                 type="text"
                                                 value={rutin.hedefAlan || ''}
                                                 onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,hedefAlan:e.target.value}; updateField(idx,{rutinler:newR}); }}
-                                                className="input h-6 text-[10px] w-28 font-mono"
+                                                className="input h-6 py-0.5 text-[10px] w-28 font-mono"
                                                 placeholder="alan_key"
                                               />
                                               <span className="text-[10px] text-surface-500">=</span>
@@ -820,7 +820,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                                 type="text"
                                                 value={rutin.hedefDeger || ''}
                                                 onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,hedefDeger:e.target.value}; updateField(idx,{rutinler:newR}); }}
-                                                className="input h-6 text-[10px] flex-1"
+                                                className="input h-6 py-0.5 text-[10px] flex-1"
                                                 placeholder="Yeni değer"
                                               />
                                             </div>
@@ -831,14 +831,14 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
                                                 type="text"
                                                 value={rutin.bildirimBaslik || ''}
                                                 onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,bildirimBaslik:e.target.value}; updateField(idx,{rutinler:newR}); }}
-                                                className="input h-6 text-[10px] w-full"
+                                                className="input h-6 py-0.5 text-[10px] w-full"
                                                 placeholder="Bildirim başlığı (boş bırakılırsa otomatik)"
                                               />
                                               <input
                                                 type="text"
                                                 value={rutin.bildirimMesaj || ''}
                                                 onChange={e => { const newR=[...(field.rutinler||[])]; newR[ridx]={...rutin,bildirimMesaj:e.target.value}; updateField(idx,{rutinler:newR}); }}
-                                                className="input h-6 text-[10px] w-full"
+                                                className="input h-6 py-0.5 text-[10px] w-full"
                                                 placeholder="Bildirim mesajı — {{alan_key}} kullanabilirsiniz"
                                               />
                                             </div>

@@ -41,6 +41,7 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
   const [kurumAdi, setKurumAdi] = useState(ayarlar.kurum_adi || '');
   const [birimAdi, setBirimAdi] = useState(ayarlar.varsayilan_birim || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<'genel' | 'rutinler'>(initialTab);
 
   // Routines state
   const [routines, setRoutines] = useState<Routine[]>([]);
@@ -294,15 +295,24 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
           
           <div className="flex items-center justify-between px-5 py-4 border-b border-surface-800 shrink-0">
             <Dialog.Title className="text-base font-semibold text-surface-50 flex items-center gap-2">
-              <Settings className="w-5 h-5 text-brand-400" />
-              Proje (Dosya) Ayarları
+              {activeTab === 'genel' ? (
+                <>
+                  <Settings className="w-5 h-5 text-brand-400" />
+                  Proje (Dosya) Ayarları
+                </>
+              ) : (
+                <>
+                  <Cpu className="w-5 h-5 text-purple-400" />
+                  Otomasyon Rutinleri
+                </>
+              )}
             </Dialog.Title>
             <Dialog.Close className="p-1.5 text-surface-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-lg transition-colors">
               <X className="w-5 h-5" />
             </Dialog.Close>
           </div>
 
-          <Tabs.Root defaultValue={initialTab} className="flex flex-col flex-1 overflow-hidden">
+          <Tabs.Root value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex flex-col flex-1 overflow-hidden">
             <Tabs.List className="flex gap-1 px-5 border-b border-surface-800 shrink-0 bg-surface-950/30">
               <Tabs.Trigger
                 value="genel"
@@ -395,29 +405,40 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                       </div>
 
                       <div className="space-y-2">
+                        {editingRoutine.rules.length > 0 && (
+                          <div className="grid grid-cols-[80px_1fr_120px_1fr_36px] gap-2 px-2.5 text-[10px] font-bold text-surface-500 uppercase tracking-wider">
+                            <div>Koşul</div>
+                            <div>Evrak Alanı</div>
+                            <div>Operatör</div>
+                            <div>Değer</div>
+                            <div className="text-center">Sil</div>
+                          </div>
+                        )}
                         {editingRoutine.rules.map((rule, idx) => (
                           <div
                             key={rule.id}
-                            className="flex items-center gap-2 bg-surface-950/20 p-2.5 rounded-lg border border-surface-800/40"
+                            className="grid grid-cols-[80px_1fr_120px_1fr_36px] items-center gap-2 bg-surface-950/20 p-2.5 rounded-lg border border-surface-800/40"
                           >
                             {idx > 0 ? (
                               <select
                                 value={rule.logic}
                                 onChange={e => updateRule(rule.id, { logic: e.target.value as 'AND' | 'OR' })}
-                                className="input h-8 text-xs py-0 w-24 shrink-0 bg-surface-800 border-surface-700/50"
+                                className="input h-8 py-1 text-xs w-full bg-surface-800 border-surface-700/50 text-brand-400 font-bold"
                               >
-                                <option value="AND">VE (AND)</option>
-                                <option value="OR">VEYA (OR)</option>
+                                <option value="AND">VE</option>
+                                <option value="OR">VEYA</option>
                               </select>
                             ) : (
-                              <span className="text-xs text-surface-500 font-medium px-2 py-1 shrink-0">Eğer</span>
+                              <div className="h-8 flex items-center px-2">
+                                <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">Eğer</span>
+                              </div>
                             )}
 
                             {/* Field */}
                             <select
                               value={rule.field_name}
                               onChange={e => updateRule(rule.id, { field_name: e.target.value })}
-                              className="input h-8 text-xs py-0 flex-1 min-w-[120px]"
+                              className="input h-8 py-1 text-xs w-full"
                             >
                               {allFields.map(f => (
                                 <option key={f.key} value={f.key}>{f.label}</option>
@@ -428,7 +449,7 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                             <select
                               value={rule.operator}
                               onChange={e => updateRule(rule.id, { operator: e.target.value as any })}
-                              className="input h-8 text-xs py-0 w-32 shrink-0"
+                              className="input h-8 py-1 text-xs w-full"
                             >
                               <option value="eq">Eşittir</option>
                               <option value="neq">Eşit Değildir</option>
@@ -438,18 +459,18 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                               <option value="changed">Değiştiğinde</option>
                             </select>
 
-                            {/* Value (Only show if operator is not 'changed' without value) */}
+                            {/* Value */}
                             <input
-                              className="input h-8 text-xs flex-1 min-w-[100px]"
+                              className="input h-8 py-1 text-xs w-full"
                               value={rule.value}
                               onChange={e => updateRule(rule.id, { value: e.target.value })}
-                              placeholder={rule.operator === 'changed' ? 'Değiştiğinde (isteğe bağlı yeni değer)' : 'Değer...'}
+                              placeholder={rule.operator === 'changed' ? 'Tüm değerler' : 'Değer...'}
                             />
 
                             <button
                               onClick={() => removeRule(rule.id)}
                               disabled={editingRoutine.rules.length <= 1}
-                              className="p-1.5 text-surface-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                              className="w-full flex justify-center p-1.5 text-surface-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors disabled:opacity-30 disabled:pointer-events-none"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -490,7 +511,7 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                                     if (type === 'log') defaultConfig = { text: 'Otomasyon çalıştı.' };
                                     updateAction(action.id, { action_type: type, config: defaultConfig });
                                   }}
-                                  className="input h-7 text-xs py-0 w-44"
+                                  className="input h-7 py-0.5 text-xs w-44"
                                 >
                                   <option value="set_field">Alanı Güncelle</option>
                                   <option value="notify">Bildirim Göster</option>
@@ -516,7 +537,7 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                                     <select
                                       value={action.config.field_name || 'durum'}
                                       onChange={e => updateActionConfig(action.id, 'field_name', e.target.value)}
-                                      className="input h-8 text-xs py-0 mt-1"
+                                      className="input h-8 py-1 text-xs mt-1"
                                     >
                                       {allFields.map(f => (
                                         <option key={f.key} value={f.key}>{f.label}</option>
@@ -526,7 +547,7 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                                   <div>
                                     <label className="text-[10px] text-surface-400 uppercase font-semibold">Yeni Değer</label>
                                     <input
-                                      className="input h-8 text-xs mt-1"
+                                      className="input h-8 py-1 text-xs mt-1"
                                       value={action.config.value || ''}
                                       onChange={e => updateActionConfig(action.id, 'value', e.target.value)}
                                       placeholder="Yeni değer yazın..."
@@ -540,7 +561,7 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                                   <div className="col-span-2">
                                     <label className="text-[10px] text-surface-400 uppercase font-semibold">Bildirim Başlığı</label>
                                     <input
-                                      className="input h-8 text-xs mt-1"
+                                      className="input h-8 py-1 text-xs mt-1"
                                       value={action.config.title || ''}
                                       onChange={e => updateActionConfig(action.id, 'title', e.target.value)}
                                       placeholder="Evraktron Uyarısı"
@@ -549,7 +570,7 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                                   <div className="col-span-2">
                                     <label className="text-[10px] text-surface-400 uppercase font-semibold">Bildirim İçeriği</label>
                                     <input
-                                      className="input h-8 text-xs mt-1"
+                                      className="input h-8 py-1 text-xs mt-1"
                                       value={action.config.body || ''}
                                       onChange={e => updateActionConfig(action.id, 'body', e.target.value)}
                                       placeholder="Örn: {{no}} nolu evrakın durumu {{durum}} yapıldı."
@@ -566,7 +587,7 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                                   <div>
                                     <label className="text-[10px] text-surface-400 uppercase font-semibold">Etiket Metni</label>
                                     <input
-                                      className="input h-8 text-xs mt-1"
+                                      className="input h-8 py-1 text-xs mt-1"
                                       value={action.config.tag || ''}
                                       onChange={e => updateActionConfig(action.id, 'tag', e.target.value)}
                                       placeholder="Örn: Acil"
@@ -602,7 +623,7 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                                 <div className="col-span-2">
                                   <label className="text-[10px] text-surface-400 uppercase font-semibold">Geçmiş Notu (Hareket Log)</label>
                                   <input
-                                    className="input h-8 text-xs mt-1"
+                                    className="input h-8 py-1 text-xs mt-1"
                                     value={action.config.text || ''}
                                     onChange={e => updateActionConfig(action.id, 'text', e.target.value)}
                                     placeholder="Örn: Evrak durumu onaylandı olarak güncellendi."
@@ -642,76 +663,83 @@ export function AyarlarModal({ onClose, onRefresh, initialTab = 'genel' }: Ayarl
                     </button>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                    {routines.map((routine) => (
-                      <div
-                        key={routine.id}
-                        className="bg-surface-950/20 border border-surface-800 rounded-xl p-4 space-y-3 hover:border-surface-700/50 transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-surface-200 text-sm">{routine.name}</h4>
-                            {routine.is_active ? (
-                              <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">Aktif</span>
-                            ) : (
-                              <span className="text-[10px] font-semibold text-surface-400 bg-surface-700/10 border border-surface-700/20 px-2 py-0.5 rounded-full">Devre Dışı</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3">
-                            {/* Toggle Switch */}
-                            <button
-                              onClick={() => handleToggleRoutine(routine)}
-                              className={cn(
-                                "w-9 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none flex items-center",
-                                routine.is_active ? "bg-emerald-500 justify-end" : "bg-surface-750 justify-start"
-                              )}
-                              title={routine.is_active ? "Devre Dışı Bırak" : "Etkinleştir"}
-                            >
-                              <span className="w-4 h-4 rounded-full bg-white shadow-sm" />
-                            </button>
-
-                            <button
-                              onClick={() => setEditingRoutine(routine)}
-                              className="btn-ghost h-7 text-xs px-2.5 hover:text-brand-400"
-                            >
-                              Düzenle
-                            </button>
-                            <button
-                              onClick={() => handleDeleteRoutine(routine.id)}
-                              className="p-1 text-surface-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Visual summary of rules & actions */}
-                        <div className="text-xs space-y-1.5 pl-3 border-l border-surface-800">
-                          <div>
-                            <span className="text-surface-500 font-semibold uppercase text-[10px] mr-1.5">Koşullar:</span>
-                            <span className="text-surface-300 font-medium">
-                              {routine.rules.map((r, i) => (
-                                <span key={r.id}>
-                                  {i > 0 && <span className="text-brand-400 font-bold mx-1.5">{r.logic}</span>}
-                                  {getRuleSummary(r)}
-                                </span>
-                              ))}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-surface-500 font-semibold uppercase text-[10px] mr-1.5">Aksiyonlar:</span>
-                            <span className="text-surface-300 font-medium">
-                              {routine.actions.map((act, i) => (
-                                <span key={act.id}>
-                                  {i > 0 && <span className="text-surface-500 mx-1.5">ve</span>}
-                                  {getActionSummary(act)}
-                                </span>
-                              ))}
-                            </span>
-                          </div>
-                        </div>
+                  <div className="flex-1 overflow-y-auto p-4">
+                    {routines.length > 0 && (
+                      <div className="border border-surface-800 rounded-xl overflow-hidden bg-surface-950/10">
+                        <table className="w-full border-collapse text-left text-xs">
+                          <thead>
+                            <tr className="border-b border-surface-800 bg-surface-950/40 text-surface-400 font-semibold uppercase tracking-wider text-[10px]">
+                              <th className="p-3 w-1/4">Rutin Adı</th>
+                              <th className="p-3 w-1/3">Koşullar (Eğer)</th>
+                              <th className="p-3 w-1/3">Aksiyonlar (Yap)</th>
+                              <th className="p-3 w-24 text-center">Durum</th>
+                              <th className="p-3 w-24 text-right">İşlemler</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-surface-800">
+                            {routines.map((routine) => (
+                              <tr key={routine.id} className="hover:bg-surface-800/20 transition-colors">
+                                <td className="p-3 font-semibold text-surface-200 align-top">
+                                  {routine.name}
+                                </td>
+                                <td className="p-3 text-surface-300 align-top space-y-1">
+                                  {routine.rules.map((r, i) => (
+                                    <div key={r.id} className="flex items-center gap-1 flex-wrap">
+                                      {i > 0 && <span className="text-brand-400 font-bold text-[10px] mr-1">{r.logic}</span>}
+                                      <span>{getRuleSummary(r)}</span>
+                                    </div>
+                                  ))}
+                                </td>
+                                <td className="p-3 text-surface-300 align-top space-y-1">
+                                  {routine.actions.map((act, i) => (
+                                    <div key={act.id} className="flex items-center gap-1 flex-wrap">
+                                      {i > 0 && <span className="text-surface-500 font-medium text-[10px] mr-1">ve</span>}
+                                      <span>{getActionSummary(act)}</span>
+                                    </div>
+                                  ))}
+                                </td>
+                                <td className="p-3 align-top">
+                                  <div className="flex flex-col items-center gap-1.5">
+                                    {routine.is_active ? (
+                                      <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">Aktif</span>
+                                    ) : (
+                                      <span className="text-[9px] font-bold text-surface-400 bg-surface-700/10 border border-surface-700/20 px-2 py-0.5 rounded-full">Devre Dışı</span>
+                                    )}
+                                    <button
+                                      onClick={() => handleToggleRoutine(routine)}
+                                      className={cn(
+                                        "w-8 h-4 rounded-full p-0.5 transition-colors duration-200 focus:outline-none flex items-center",
+                                        routine.is_active ? "bg-emerald-500 justify-end" : "bg-surface-750 justify-start"
+                                      )}
+                                      title={routine.is_active ? "Devre Dışı Bırak" : "Etkinleştir"}
+                                    >
+                                      <span className="w-3 h-3 rounded-full bg-white shadow-sm" />
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="p-3 align-top">
+                                  <div className="flex items-center justify-end gap-1">
+                                    <button
+                                      onClick={() => setEditingRoutine(routine)}
+                                      className="btn-ghost h-7 text-xs px-2 hover:text-brand-400"
+                                    >
+                                      Düzenle
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteRoutine(routine.id)}
+                                      className="p-1.5 text-surface-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                                      title="Sil"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    ))}
+                    )}
 
                     {routines.length === 0 && (
                       <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-surface-800 rounded-xl space-y-3 bg-surface-950/5">
