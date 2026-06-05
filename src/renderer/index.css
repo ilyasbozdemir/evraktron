@@ -12,62 +12,62 @@
 /* ── Dark (default) ─────────────────────────────────────────────────────── */
 :root,
 html.dark {
-  --bg-base:        #0f172a;   /* surface-900 */
-  --bg-elevated:    #1e293b;   /* surface-800 */
-  --bg-overlay:     #020617;   /* surface-950 */
-  --bg-hover:       #334155;   /* surface-700 */
-  --bg-muted:       rgba(30,41,59,0.6);
+  --bg-base:        #0b0f19;   /* Rich deep dark slate */
+  --bg-elevated:    #151b2c;   /* Elevated card background */
+  --bg-overlay:     #030712;   /* Pure obsidian dark background */
+  --bg-hover:       #1e293b;   /* Hover background */
+  --bg-muted:       rgba(21, 27, 44, 0.65);
 
-  --border-default: rgba(51,65,85,0.5);    /* surface-700/50 */
-  --border-subtle:  rgba(51,65,85,0.3);
-  --border-strong:  rgba(71,85,105,0.4);
+  --border-default: rgba(148, 163, 184, 0.15); /* Crisper border */
+  --border-subtle:  rgba(148, 163, 184, 0.08);
+  --border-strong:  rgba(148, 163, 184, 0.25);
 
-  --text-primary:   #f1f5f9;   /* surface-100 */
-  --text-secondary: #94a3b8;   /* surface-400 */
-  --text-muted:     #475569;   /* surface-600 */
-  --text-disabled:  #334155;   /* surface-700 */
+  --text-primary:   #f8fafc;   /* Slate-50 */
+  --text-secondary: #cbd5e1;   /* Slate-300 */
+  --text-muted:     #64748b;   /* Slate-500 */
+  --text-disabled:  #475569;   /* Slate-600 */
 
-  --brand-bg:       #2563eb;
-  --brand-bg-hover: #3b82f6;
-  --brand-bg-subtle:rgba(37,99,235,0.15);
-  --brand-border:   rgba(59,130,246,0.3);
+  --brand-bg:       #3b82f6;
+  --brand-bg-hover: #60a5fa;
+  --brand-bg-subtle:rgba(59, 130, 246, 0.12);
+  --brand-border:   rgba(59, 130, 246, 0.25);
   --brand-text:     #60a5fa;
 
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2);
-  --shadow-glass: 0 4px 24px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
-  --shadow-glow:  0 0 20px rgba(59,130,246,0.4);
-  --shadow-glow-sm: 0 0 10px rgba(59,130,246,0.25);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-glow:  0 0 20px rgba(59, 130, 246, 0.2);
+  --shadow-glow-sm: 0 0 10px rgba(59, 130, 246, 0.15);
 
   color-scheme: dark;
 }
 
 /* ── Light ──────────────────────────────────────────────────────────────── */
 html.light {
-  --bg-base:        #f4f4f5;   /* zinc-100 */
-  --bg-elevated:    #ffffff;   /* pure white */
-  --bg-overlay:     #e4e4e7;   /* zinc-200 */
-  --bg-hover:       #fafafa;   /* zinc-50 */
-  --bg-muted:       rgba(255, 255, 255, 0.7);
+  --bg-base:        #f8fafc;   /* Clean Slate-50 background */
+  --bg-elevated:    #ffffff;   /* Pure white cards */
+  --bg-overlay:     #f1f5f9;   /* Sidebar / overlay slate-100 */
+  --bg-hover:       #e2e8f0;   /* Accent slate-200 */
+  --bg-muted:       rgba(255, 255, 255, 0.8);
 
-  --border-default: rgba(161, 161, 170, 0.4);  /* zinc-400/40 */
-  --border-subtle:  rgba(228, 228, 231, 0.8);  /* zinc-200/80 */
-  --border-strong:  rgba(113, 113, 122, 0.3);  /* zinc-500/30 */
+  --border-default: rgba(148, 163, 184, 0.3); /* Sharper Slate-300 borders */
+  --border-subtle:  rgba(226, 232, 240, 0.7); /* Subtle slate-200 borders */
+  --border-strong:  rgba(148, 163, 184, 0.5); /* Strong border */
 
-  --text-primary:   #18181b;   /* zinc-900 */
-  --text-secondary: #3f3f46;   /* zinc-700 */
-  --text-muted:     #71717a;   /* zinc-500 */
-  --text-disabled:  #a1a1aa;   /* zinc-400 */
+  --text-primary:   #0f172a;   /* Slate-900 */
+  --text-secondary: #334155;   /* Slate-700 */
+  --text-muted:     #64748b;   /* Slate-500 */
+  --text-disabled:  #94a3b8;   /* Slate-400 */
 
   --brand-bg:       #2563eb;
   --brand-bg-hover: #1d4ed8;
-  --brand-bg-subtle:rgba(37,99,235,0.08);
-  --brand-border:   rgba(37,99,235,0.25);
+  --brand-bg-subtle:rgba(37, 99, 235, 0.08);
+  --brand-border:   rgba(37, 99, 235, 0.2);
   --brand-text:     #2563eb;
 
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-  --shadow-glass: 0 4px 24px 0 rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
-  --shadow-glow:  0 0 20px rgba(37,99,235,0.2);
-  --shadow-glow-sm: 0 0 10px rgba(37,99,235,0.12);
+  --shadow-card: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-glass: 0 8px 32px 0 rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --shadow-glow:  0 0 20px rgba(37, 99, 235, 0.15);
+  --shadow-glow-sm: 0 0 10px rgba(37, 99, 235, 0.08);
 
   color-scheme: light;
 }

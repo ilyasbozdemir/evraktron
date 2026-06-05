@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TemplateStoreModal } from './TemplateStoreModal';
+import { useAppStore } from '../store/appStore';
 
 // ── Tipler ──────────────────────────────────────────────────────────────────
 
@@ -181,6 +182,7 @@ function valuePlaceholder(op: FieldRutinOperator): string {
 // ────────────────────────────────────────────────────────────────────────────
 
 export function TemplateManager({ onClose }: TemplateManagerProps) {
+  const { showToast } = useAppStore();
   const [templates, setTemplates] = useState<EvrakTemplate[]>([]);
   const [editing, setEditing] = useState<EvrakTemplate | null>(null);
   const [saving, setSaving] = useState(false);
@@ -251,7 +253,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
     if (onlyCustom) {
       const customIds = templates.filter(t => !BUILTIN_IDS.includes(t.id!)).map(t => t.id!);
       if (customIds.length === 0) {
-        showToast('Dışa aktarılacak özel şablon bulunamadı', 'warning');
+        showToast('Dışa aktarılacak özel şablon bulunamadı', 'error');
         return;
       }
       await window.evraktron.template.exportJson(customIds);
@@ -294,6 +296,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="bg-surface-900 border border-surface-700/60 shadow-2xl rounded-2xl w-full max-w-5xl h-[85vh] max-h-[90vh] flex flex-col overflow-hidden animate-scale-in focus:outline-none">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-surface-700 shrink-0">
@@ -867,6 +870,7 @@ export function TemplateManager({ onClose }: TemplateManagerProps) {
             </div>
           )}
         </div>
+      </div>
 
       {/* Template Store Modal */}
       {showStore && (
