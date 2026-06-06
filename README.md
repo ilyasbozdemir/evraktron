@@ -4,9 +4,9 @@
   <p><b>Modern, Offline ve Şablon Tabanlı Taşınabilir Evrak Yönetim Sistemi</b></p>
 
 <p align="center">
-    <a href="https://github.com/ilyas-bozdemir/evraktron/actions"><img src="https://img.shields.io/github/actions/workflow/status/ilyas-bozdemir/evraktron/release.yml?style=flat-square&logo=github&label=Build%20Status" alt="Build Status"></a>
-    <a href="https://github.com/ilyas-bozdemir/evraktron/releases/latest"><img src="https://img.shields.io/github/v/release/ilyas-bozdemir/evraktron?style=flat-square&logo=github&label=Latest%20Release" alt="Latest Release"></a>
-    <a href="https://github.com/ilyas-bozdemir/evraktron/releases"><img src="https://img.shields.io/github/downloads/ilyas-bozdemir/evraktron/total?style=flat-square&logo=github&color=blue" alt="Downloads"></a>
+    <a href="https://github.com/ilyasbozdemir/evraktron/actions"><img src="https://img.shields.io/github/actions/workflow/status/ilyasbozdemir/evraktron/release.yml?style=flat-square&logo=github&label=Build%20Status" alt="Build Status"></a>
+    <a href="https://github.com/ilyasbozdemir/evraktron/releases/latest"><img src="https://img.shields.io/github/v/release/ilyasbozdemir/evraktron?style=flat-square&logo=github&label=Latest%20Release" alt="Latest Release"></a>
+    <a href="https://github.com/ilyasbozdemir/evraktron/releases"><img src="https://img.shields.io/github/downloads/ilyasbozdemir/evraktron/total?style=flat-square&logo=github&color=blue" alt="Downloads"></a>
   </p>
 </div>
 
@@ -60,7 +60,7 @@ Projeyi yerel ortamınıza çekmek ve geliştirmeye başlamak için:
 
 ```bash
 # 1. Depoyu klonlayın
-git clone https://github.com/ilyas-bozdemir/evraktron.git
+git clone https://github.com/ilyasbozdemir/evraktron.git
 cd evraktron
 
 # 2. Bağımlılıkları yükleyin (pnpm önerilir)
