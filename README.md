@@ -2,6 +2,12 @@
   <img src="public/icon.png" alt="Evraktron Logo" width="120" />
   <h1>Evraktron</h1>
   <p><b>Modern, Offline ve Şablon Tabanlı Taşınabilir Evrak Yönetim Sistemi</b></p>
+
+<p align="center">
+    <a href="https://github.com/ilyas-bozdemir/evraktron/actions"><img src="https://img.shields.io/github/actions/workflow/status/ilyas-bozdemir/evraktron/release.yml?style=flat-square&logo=github&label=Build%20Status" alt="Build Status"></a>
+    <a href="https://github.com/ilyas-bozdemir/evraktron/releases/latest"><img src="https://img.shields.io/github/v/release/ilyas-bozdemir/evraktron?style=flat-square&logo=github&label=Latest%20Release" alt="Latest Release"></a>
+    <a href="https://github.com/ilyas-bozdemir/evraktron/releases"><img src="https://img.shields.io/github/downloads/ilyas-bozdemir/evraktron/total?style=flat-square&logo=github&color=blue" alt="Downloads"></a>
+  </p>
 </div>
 
 ---
